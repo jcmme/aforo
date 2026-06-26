@@ -8,30 +8,48 @@ import {
 } from 'react';
 
 import { supabase } from '@/lib/supabase';
-import type { Profile, UserRole } from '@/types';
+import { DEMO_USUARIO } from '@/data/mock';
+import type { Rol, Usuario } from '@/types';
 
-interface AuthState {
-  profile: Profile | null;
-  loading: boolean;
-  /** `true` si la app corre sin Supabase (auth simulada en memoria). */
-  demo: boolean;
+export interface DatosRegistro {
+  nombre: string;
+  username: string;
+  email: string;
+  telefono: string;
+  password: string;
 }
 
-interface AuthContextValue extends AuthState {
-  signIn: (email: string, password: string) => Promise<void>;
-  signUp: (
-    email: string,
-    password: string,
-    nombre: string,
-    rol: UserRole,
-  ) => Promise<void>;
-  signOut: () => Promise<void>;
+interface AuthContextValue {
+  usuario: Usuario | null;
+  /** Rol activo para la navegación por rol. Toda cuenta nace cliente. */
+  rolActivo: Rol;
+  loading: boolean;
+  /** `true` cuando la app corre sin Supabase (sesión simulada). */
+  demo: boolean;
+  iniciarSesion: (email: string, password: string) => Promise<void>;
+  registrar: (datos: DatosRegistro) => Promise<void>;
+  cerrarSesion: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
+/** Mapea una fila de `usuarios` al modelo de dominio. */
+function filaAUsuario(r: Record<string, any>): Usuario {
+  return {
+    id: r.id,
+    nombre: r.nombre,
+    username: r.username,
+    email: r.email,
+    telefono: r.telefono,
+    emailVerificado: r.email_verificado ?? false,
+    telefonoVerificado: r.telefono_verificado ?? false,
+    creadoEn: r.creado_en,
+  };
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [profile, setProfile] = useState<Profile | null>(null);
+  const [usuario, setUsuario] = useState<Usuario | null>(null);
+  const [rolActivo, setRolActivo] = useState<Rol>('cliente');
   const [loading, setLoading] = useState(true);
   const demo = supabase === null;
 
@@ -40,93 +58,84 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setLoading(false);
       return;
     }
-    // Carga la sesión inicial y escucha cambios de auth.
     supabase.auth.getSession().then(({ data }) => {
-      if (data.session?.user) void loadProfile(data.session.user.id);
+      if (data.session?.user) void cargarPerfil(data.session.user.id);
       else setLoading(false);
     });
     const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
-      if (session?.user) void loadProfile(session.user.id);
-      else setProfile(null);
+      if (session?.user) void cargarPerfil(session.user.id);
+      else {
+        setUsuario(null);
+        setRolActivo('cliente');
+      }
     });
     return () => sub.subscription.unsubscribe();
   }, []);
 
-  async function loadProfile(userId: string) {
+  async function cargarPerfil(userId: string) {
     if (!supabase) return;
     const { data } = await supabase
-      .from('profiles')
+      .from('usuarios')
       .select('*')
       .eq('id', userId)
       .maybeSingle();
-    if (data) {
-      setProfile({
-        id: data.id,
-        email: data.email,
-        nombre: data.nombre,
-        rol: data.rol,
-        corporativoId: data.corporativo_id,
-      });
-    }
+    if (data) setUsuario(filaAUsuario(data));
+    // El rol activo por defecto es cliente; las membresías de personal se
+    // resuelven en las secciones de personal (2-4).
+    setRolActivo('cliente');
     setLoading(false);
   }
 
-  async function signIn(email: string, password: string) {
+  async function iniciarSesion(email: string, password: string) {
     if (!supabase) {
-      // Modo demo: acepta cualquier credencial como cliente.
-      setProfile({
-        id: 'demo-user',
-        email,
-        nombre: 'Invitado',
-        rol: 'cliente',
-        corporativoId: null,
-      });
+      setUsuario({ ...DEMO_USUARIO, email });
+      setRolActivo('cliente');
       return;
     }
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) throw error;
+  }
+
+  async function registrar(datos: DatosRegistro) {
+    if (!supabase) {
+      setUsuario({
+        ...DEMO_USUARIO,
+        nombre: datos.nombre,
+        username: datos.username,
+        email: datos.email,
+        telefono: datos.telefono,
+        emailVerificado: false,
+      });
+      setRolActivo('cliente');
+      return;
+    }
+    const { data, error } = await supabase.auth.signUp({
+      email: datos.email,
+      password: datos.password,
     });
     if (error) throw error;
-  }
-
-  async function signUp(
-    email: string,
-    password: string,
-    nombre: string,
-    rol: UserRole,
-  ) {
-    if (!supabase) {
-      setProfile({
-        id: 'demo-user',
-        email,
-        nombre,
-        rol,
-        corporativoId: rol === 'venue_staff' ? 'c1' : null,
-      });
-      return;
-    }
-    const { data, error } = await supabase.auth.signUp({ email, password });
-    if (error) throw error;
     if (data.user) {
-      // Crea el perfil asociado. `corporativo_id` se asigna luego en onboarding.
-      await supabase.from('profiles').insert({
+      // Toda cuenta nace como cliente. Verificación de correo vía Supabase Auth;
+      // la de teléfono se completa en un paso aparte (proveedor SMS).
+      await supabase.from('usuarios').insert({
         id: data.user.id,
-        email,
-        nombre,
-        rol,
+        nombre: datos.nombre,
+        username: datos.username,
+        email: datos.email,
+        telefono: datos.telefono,
       });
     }
   }
 
-  async function signOut() {
+  async function cerrarSesion() {
     if (supabase) await supabase.auth.signOut();
-    setProfile(null);
+    setUsuario(null);
+    setRolActivo('cliente');
   }
 
   const value = useMemo<AuthContextValue>(
-    () => ({ profile, loading, demo, signIn, signUp, signOut }),
-    [profile, loading, demo],
+    () => ({ usuario, rolActivo, loading, demo, iniciarSesion, registrar, cerrarSesion }),
+    [usuario, rolActivo, loading, demo],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

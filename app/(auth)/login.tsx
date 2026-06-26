@@ -1,122 +1,83 @@
 import { Link, useRouter } from 'expo-router';
 import { useState } from 'react';
-import {
-  ActivityIndicator,
-  Pressable,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-} from 'react-native';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
+import { Boton, Campo, Pantalla } from '@/components/ui';
 import { useAuth } from '@/context/AuthContext';
-import { colors, radius, spacing } from '@/theme';
+import { colors, font, spacing } from '@/theme';
 
 export default function LoginScreen() {
   const router = useRouter();
-  const { signIn, demo } = useAuth();
+  const { iniciarSesion, demo } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [cargando, setCargando] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  async function onSubmit() {
+  async function entrar() {
     setError(null);
-    setLoading(true);
+    setCargando(true);
     try {
-      await signIn(email.trim(), password);
-      router.back();
+      await iniciarSesion(email.trim(), password);
+      router.replace('/(cliente)');
     } catch (e) {
       setError(e instanceof Error ? e.message : 'No se pudo iniciar sesión.');
     } finally {
-      setLoading(false);
+      setCargando(false);
     }
   }
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Bienvenido de nuevo</Text>
-      <Text style={styles.subtitle}>
-        Entra para guardar tus lugares y, si eres venue, gestionar tu aforo.
-      </Text>
+    <Pantalla>
+      <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+        <View style={styles.brand}>
+          <Text style={font.kicker}>Vida nocturna</Text>
+          <Text style={styles.logo}>AFORO</Text>
+          <Text style={font.muted}>Reserva, comparte tu acceso y entra sin filas.</Text>
+        </View>
 
-      {demo && (
-        <Text style={styles.demo}>
-          Modo demo: cualquier correo y contraseña funcionan.
-        </Text>
-      )}
+        {demo ? (
+          <Text style={styles.demo}>Modo demo: cualquier correo y contraseña funcionan.</Text>
+        ) : null}
 
-      <TextInput
-        value={email}
-        onChangeText={setEmail}
-        placeholder="Correo"
-        placeholderTextColor={colors.textMuted}
-        autoCapitalize="none"
-        keyboardType="email-address"
-        style={styles.input}
-      />
-      <TextInput
-        value={password}
-        onChangeText={setPassword}
-        placeholder="Contraseña"
-        placeholderTextColor={colors.textMuted}
-        secureTextEntry
-        style={styles.input}
-      />
+        <View style={styles.form}>
+          <Campo
+            etiqueta="Correo"
+            value={email}
+            onChangeText={setEmail}
+            placeholder="tu@correo.com"
+            autoCapitalize="none"
+            keyboardType="email-address"
+          />
+          <Campo
+            etiqueta="Contraseña"
+            value={password}
+            onChangeText={setPassword}
+            placeholder="••••••••"
+            secureTextEntry
+          />
+          {error ? <Text style={styles.error}>{error}</Text> : null}
+          <Boton titulo="Entrar" onPress={entrar} cargando={cargando} />
+        </View>
 
-      {error && <Text style={styles.error}>{error}</Text>}
-
-      <Pressable
-        style={[styles.button, loading && styles.buttonDisabled]}
-        onPress={onSubmit}
-        disabled={loading}
-      >
-        {loading ? (
-          <ActivityIndicator color="#fff" />
-        ) : (
-          <Text style={styles.buttonText}>Entrar</Text>
-        )}
-      </Pressable>
-
-      <Link href="/(auth)/register" style={styles.link}>
-        ¿No tienes cuenta? Crear una
-      </Link>
-    </View>
+        <View style={styles.footer}>
+          <Text style={font.muted}>¿No tienes cuenta?</Text>
+          <Link href="/(auth)/registro" style={styles.link}>
+            Crear cuenta
+          </Link>
+        </View>
+      </ScrollView>
+    </Pantalla>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.bg,
-    padding: spacing.xl,
-    gap: spacing.md,
-  },
-  title: { color: colors.text, fontSize: 24, fontWeight: '800' },
-  subtitle: { color: colors.textMuted, fontSize: 14, marginBottom: spacing.sm },
+  content: { padding: spacing.xl, gap: spacing.xl, flexGrow: 1, justifyContent: 'center' },
+  brand: { gap: spacing.xs, alignItems: 'flex-start' },
+  logo: { fontSize: 44, fontWeight: '900', color: colors.text, letterSpacing: 2 },
   demo: { color: colors.primary, fontSize: 13 },
-  input: {
-    backgroundColor: colors.surface,
-    borderRadius: radius.md,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.md,
-    color: colors.text,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  error: { color: colors.lleno, fontSize: 13 },
-  button: {
-    backgroundColor: colors.primary,
-    borderRadius: radius.md,
-    paddingVertical: spacing.md,
-    alignItems: 'center',
-    marginTop: spacing.sm,
-  },
-  buttonDisabled: { opacity: 0.6 },
-  buttonText: { color: '#fff', fontWeight: '800', fontSize: 16 },
-  link: {
-    color: colors.textMuted,
-    textAlign: 'center',
-    marginTop: spacing.md,
-  },
+  form: { gap: spacing.md },
+  error: { color: colors.danger, fontSize: 13 },
+  footer: { flexDirection: 'row', gap: spacing.sm, justifyContent: 'center', alignItems: 'center' },
+  link: { color: colors.primary, fontWeight: '800' },
 });

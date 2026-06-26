@@ -1,85 +1,84 @@
-# AFORO 🌃
+# AFORO
 
-App de vida nocturna para México. AFORO ayuda a los clientes a decidir **a dónde
-ir esta noche** mostrando los lugares cercanos y su **nivel de aforo en vivo**
-(vacío / moderado / lleno), y permite a cada **venue** mantener su información y
-ocupación al día.
+Plataforma multi-tenant de gestión de reservas para la industria del
+entretenimiento nocturno (antros) en México. Desarrollada por MABI.
 
-Es el MVP de una plataforma multi-tenant más grande (operación → inteligencia →
-monetización), cuyo diferenciador es el motor de detección de reservas fantasma.
-Ver [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) para el panorama completo.
+La fuente de verdad del producto es [`CLAUDE.md`](CLAUDE.md). La arquitectura
+está en [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) y el modelo de datos en
+[`docs/DATA_MODEL.md`](docs/DATA_MODEL.md).
 
-## ✨ MVP
+## Stack
 
-1. **Lista** de lugares cercanos con su nivel de ocupación.
-2. **Ficha** de cada lugar: fotos, dirección, horario, cover, tipo de música.
-3. **Buscar y filtrar** por zona, música y nivel de aforo.
-4. **Panel del venue** para actualizar su aforo y datos.
-5. **Auth básica** (registro/login) para clientes y venues.
+- **App:** Expo (React Native) + TypeScript + Expo Router. Una sola app con
+  navegación por rol; en esta etapa, la experiencia del **cliente** (estética de
+  vida nocturna, modo oscuro, QR protagonista).
+- **Backend:** Supabase — PostgreSQL + API REST (PostgREST) + Auth + Storage +
+  Row-Level Security, con **Edge Functions** (TypeScript) para la lógica de
+  confianza (firmar/validar QR, matriz de permisos, reglas de negocio).
 
-## 🧱 Stack
+## Principios (de CLAUDE.md, aplican siempre)
 
-- **Expo (React Native) + TypeScript** — un código para iOS y Android.
-- **Expo Router** — navegación basada en archivos.
-- **Supabase** — Postgres + Auth + Storage + Realtime, con **Row-Level Security**
-  para el aislamiento multi-tenant y **PostGIS** para lugares cercanos.
+- Multi-tenant con **aislamiento estricto** por corporativo, desde la base de datos.
+- **Denegación por defecto**; permisos validados en el servidor (RLS + Edge Functions).
+- **Configuración sin código**: reglas de negocio en tablas, no quemadas en el código.
+- Seguridad base: contraseñas hasheadas (bcrypt), verificación de correo/teléfono,
+  sesiones revocables, **QR firmado** y validado en servidor, HTTPS, cifrado en reposo.
 
-## 🚀 Cómo correrlo
+## Cómo correrlo
 
-Requisitos: Node 18+ y la app **Expo Go** en tu teléfono (o un emulador).
+Requisitos: Node 18+ y la app **Expo Go** (o un emulador).
 
 ```bash
 npm install
-npm start          # abre Expo Dev Tools; escanea el QR con Expo Go
-# o directamente:
+npm start          # escanea el QR con Expo Go
+# o:
 npm run ios        # simulador iOS (requiere macOS)
 npm run android    # emulador Android
-npm run web        # navegador
 ```
 
 > **Arranca sin configurar nada.** Sin credenciales de Supabase, la app corre en
-> **modo demo** con datos de ejemplo (antros de la CDMX). Ideal para verla correr
-> de inmediato.
+> **modo demo** con datos de ejemplo (antros de Puebla): puedes registrarte,
+> explorar, reservar y ver tus QR. Ideal para revisarla de inmediato.
 
-## 🔌 Conectar Supabase (datos reales)
+## Conectar Supabase (datos reales)
 
 1. Crea un proyecto en [supabase.com](https://supabase.com).
-2. En el **SQL Editor**, ejecuta `supabase/migrations/0001_init.sql` y luego
-   `supabase/seed.sql`.
-3. Copia las credenciales:
-
+2. En el **SQL Editor**, ejecuta en orden:
+   `supabase/migrations/0001_schema.sql`, `0002_rls.sql`, `0003_config_seed.sql`
+   y luego `supabase/seed.sql`.
+3. Despliega las Edge Functions y su secreto:
    ```bash
-   cp .env.example .env
+   supabase functions deploy crear-reserva cancelar-reserva reclamar-qr
+   supabase secrets set AFORO_QR_SECRET="$(openssl rand -hex 32)"
    ```
+4. Copia las credenciales del proyecto:
+   ```bash
+   cp .env.example .env   # rellena EXPO_PUBLIC_SUPABASE_URL y _ANON_KEY
+   ```
+5. Reinicia: `npm start -- --clear`. La app detecta las variables y deja el modo demo.
 
-   Rellena `EXPO_PUBLIC_SUPABASE_URL` y `EXPO_PUBLIC_SUPABASE_ANON_KEY`
-   (Project Settings → API).
-4. Reinicia el servidor: `npm start -- --clear`.
-
-La app detecta las variables y cambia de modo demo a Supabase real sin tocar código.
-
-## 📁 Estructura
+## Estructura
 
 ```
-app/        Pantallas (Expo Router)
-src/        Componentes, capa de datos, auth, tipos, tema
-supabase/   Migración SQL + seed
-docs/       Arquitectura
+app/        Pantallas (Expo Router): (auth)/ y (cliente)/ + detalles
+src/        components, context, data, lib, permissions, theme, types
+supabase/   migrations/ (esquema 4 módulos + RLS + config) · functions/ · seed.sql
+docs/       ARCHITECTURE.md · DATA_MODEL.md
 ```
 
-## 🗺️ Roadmap inmediato
+## Registro de módulos (plan de 4 secciones, CLAUDE.md §8)
 
-- [ ] Vista de **mapa** (`react-native-maps` + dev build).
-- [ ] **Aforo en vivo** vía Supabase Realtime.
-- [ ] Reservas + QR + control de acceso.
-- [ ] Motor de detección de fantasmas, métricas e hitos.
+| # | Módulo | Estado |
+|---|--------|--------|
+| 1 | Fundación + App del Cliente | **Hecho** — auth, explorar antros, eventos, crear reserva (acceso/mesa), QR distribuible, mis reservas, cancelación, base del reclamo de RP. Esquema y RLS de los 4 módulos. |
+| 2 | Operación en piso | Pendiente (tablas creadas) |
+| 3 | Red social + perfil del staff + motor de fantasmas | Pendiente (tablas creadas) |
+| 4 | Paneles de gestión + Súper Admin | Pendiente (tablas creadas) |
 
-## 📝 Scripts
+## Scripts
 
-| Comando            | Qué hace                          |
-|--------------------|-----------------------------------|
-| `npm start`        | Inicia el servidor de desarrollo. |
-| `npm run ios`      | Abre en simulador iOS.            |
-| `npm run android`  | Abre en emulador Android.         |
-| `npm run web`      | Abre en navegador.                |
-| `npm run typecheck`| Revisa tipos con TypeScript.      |
+| Comando | Qué hace |
+|---|---|
+| `npm start` | Servidor de desarrollo de Expo. |
+| `npm run ios` / `android` / `web` | Abre en cada plataforma. |
+| `npm run typecheck` | Revisa tipos con TypeScript. |

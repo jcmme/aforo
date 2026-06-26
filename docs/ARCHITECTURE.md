@@ -1,105 +1,82 @@
-# Arquitectura — AFORO MVP
+# Arquitectura — AFORO
 
 ## Visión
 
-AFORO es una plataforma **multi-tenant** de vida nocturna en México. Varios
-**corporativos**, cada uno con sus **antros (venues)**, su personal y sus
-métricas, aislados sobre una misma infraestructura. La plataforma tiene tres
-capas:
+AFORO es una plataforma **multi-tenant** de reservas para antros (CLAUDE.md §1).
+Varios **corporativos**, cada uno con sus antros, personal y métricas, aislados
+sobre una misma infraestructura. Tres capas: Operación, Inteligencia,
+Monetización. Diferenciador: **detección de reservas fantasma**.
 
-1. **Operación** — reservas + QR + control de acceso.
-2. **Inteligencia** — detección de reservas fantasma + métricas + hitos del staff.
-3. **Monetización** — suscripción SaaS + difusión pagada + promociones.
+Se construye en **4 secciones** (CLAUDE.md §8). La base de datos contempla las
+cuatro desde el inicio; cada sección añade lógica encima sin rehacer la base.
 
-El diferenciador es el **motor de detección de fantasmas** (clientes que reservan
-y no llegan), sobre el que se apoya el sistema de métricas e hitos.
+## Stack y por qué
 
-> Este repositorio contiene el **MVP** (primera versión), enfocado en
-> descubrimiento de lugares y aforo en vivo. Las capas de inteligencia y
-> monetización se construyen encima del mismo modelo de datos.
+| Capa | Tecnología | Razón |
+|------|------------|-------|
+| App | Expo + TypeScript + Expo Router | Un código iOS/Android; build/deploy con EAS; navegación por rol en una sola app. |
+| API + datos | Supabase (PostgreSQL + PostgREST + Auth + Storage) | API REST sobre Postgres sin servidor propio que operar; **RLS** para aislamiento multi-tenant. |
+| Lógica de confianza | Supabase **Edge Functions** (TypeScript) | Firma/validación de QR, matriz de permisos y reglas de negocio en el servidor. |
 
-## Alcance del MVP
+El esquema de Postgres es el activo durable. Si un módulo futuro necesita un
+backend dedicado, se añade sobre la misma base sin rehacer datos.
 
-1. Lista de lugares cercanos con nivel de ocupación (vacío / moderado / lleno).
-2. Ficha de cada lugar: fotos, dirección, horario, cover, tipo de música.
-3. Búsqueda y filtros por zona, música y nivel de aforo.
-4. Vista para que un venue actualice su aforo y datos.
-5. Auth básica (registro/login) para clientes y para venues.
+## Cómo se cumplen los principios no negociables
 
-## Stack
-
-| Capa      | Tecnología                                   | Por qué |
-|-----------|----------------------------------------------|---------|
-| Móvil     | **Expo (React Native) + TypeScript**         | Un código para iOS y Android; build/deploy con EAS; OTA updates. |
-| Ruteo     | **Expo Router**                              | Navegación basada en archivos, deep links y rutas tipadas. |
-| Backend   | **Supabase** (Postgres + Auth + Storage + Realtime) | Backend gestionado, sin servidor propio que mantener. |
-| Geo       | **PostGIS**                                  | Consulta de lugares cercanos (`nearby_venues`). |
-| Multi-tenant | **Row-Level Security (RLS)**              | Aislamiento por corporativo a nivel de base de datos. |
-
-**Por qué Supabase y no un backend propio:** para un MVP, Supabase entrega auth,
-API REST/RPC (PostGREST), realtime, storage y RLS sin operar infraestructura.
-El "motor de fantasmas", métricas e hitos viven a futuro como funciones SQL y
-Edge Functions sobre la misma base, sin reescribir la app.
+- **Aislamiento multi-tenant** (CLAUDE.md §2): toda tabla de negocio lleva
+  `corporativo_id`; **RLS activado en todas** las tablas (sin policy = sin
+  acceso). Helpers `auth_corporativos()`, `es_super_admin()`, `tiene_permiso()`.
+- **Denegación por defecto**: la matriz vive en la tabla `permisos` (solo filas
+  permitidas existen). Las escrituras sensibles pasan por Edge Functions que
+  validan permiso + tenant con la `service_role` antes de tocar datos.
+- **Configuración sin código**: `config_parametros` (precedencia
+  antro > corporativo > global) y `feature_flags` por corporativo. Umbrales,
+  cupos, ventanas, textos y montos viven ahí.
+- **Seguridad** (CLAUDE.md §3): contraseñas bcrypt (Supabase Auth); verificación
+  de correo (Auth) y teléfono (campos listos, requiere proveedor SMS); sesiones
+  revocables; QR firmado con HMAC (`AFORO_QR_SECRET`, solo servidor) y validado
+  en servidor; HTTPS y cifrado en reposo (Supabase); `pgcrypto` disponible;
+  bitácora en `auditoria`.
 
 ## Flujo de datos
 
 ```
-┌─────────────────────────────┐         ┌──────────────────────────────┐
-│      App Expo (RN)          │         │           Supabase           │
-│                             │  HTTPS  │                              │
-│  app/  (pantallas)          │ ──────► │  PostgREST  (tabla venues)   │
-│  src/data/venues.ts ────────┼─────────┤  RPC nearby_venues (PostGIS) │
-│  src/context/AuthContext ───┼─────────┤  Auth (email/password)       │
-│  src/lib/supabase.ts        │         │  RLS por corporativo         │
-└─────────────────────────────┘         └──────────────────────────────┘
-            │
+┌─────────────────────────────┐   HTTPS    ┌──────────────────────────────────┐
+│        App Expo (RN)        │ ─────────► │             Supabase             │
+│  app/  (pantallas por rol)  │            │  PostgREST + RLS (lecturas)      │
+│  src/data/* ────────────────┼─ lecturas ─┤  Edge Functions (escrituras):    │
+│  src/lib/supabase.ts        │ ─ acciones ┤   crear-reserva / cancelar /     │
+│  src/context/AuthContext    │            │   reclamar-qr  (service_role)    │
+└─────────────────────────────┘            │  Auth (bcrypt, JWT, verificación)│
+            │                              └──────────────────────────────────┘
             └── Sin credenciales → MODO DEMO (src/data/mock.ts)
 ```
 
-La **capa de datos** (`src/data/venues.ts`) abstrae el origen: si hay
-credenciales de Supabase usa la base real; si no, sirve datos locales
-(`src/data/mock.ts`). Así la app corre desde el primer `npx expo start` sin
-configurar nada, y al pegar las variables de entorno pasa a datos reales sin
-cambios de código.
+La **capa de datos** (`src/data/`) abstrae el origen: con credenciales usa
+Supabase; sin ellas, datos locales. La app navega completa en modo demo.
 
-## Modelo de datos (MVP)
+## Sección 1 — qué se implementó
 
-- **corporativos** — el tenant.
-- **profiles** — extiende `auth.users`; `rol` ∈ {cliente, venue_staff};
-  `corporativo_id` para el staff.
-- **venues** — antro: geo (PostGIS), fotos, horario, cover, tipos de música,
-  nivel de aforo + timestamp de actualización.
+- **Identidad/tenancy:** `corporativos`, `antros`, `usuarios`, `membresias`.
+- **Reservas:** `eventos`, `reservas`, `qr_codes`, `enlaces_reclamo`.
+- **Config/seguridad:** `permisos` (matriz §5), `config_parametros`,
+  `feature_flags`, `auditoria`.
+- **App del cliente:** registro/login/verificación, explorar antros, catálogo de
+  eventos, crear reserva (acceso/mesa), QR protagonista distribuible, mis
+  reservas, cancelación, reclamo de QR (deep link).
+- **Edge Functions:** `crear-reserva`, `cancelar-reserva`, `reclamar-qr` + shared
+  (`qr`, `auth`, `config`, `cors`).
 
-RLS: los venues son de **lectura pública** (los clientes descubren sin login);
-el **venue_staff** sólo puede crear/editar venues de **su** corporativo.
+## Esquema-only (módulos 2-4)
 
-Ver `supabase/migrations/0001_init.sql`.
+Las tablas de operación en piso, inteligencia/red social y gestión/monetización
+ya existen (ver `docs/DATA_MODEL.md`), con RLS en denegación por defecto. Su
+lógica llega en las secciones 2-4.
 
-## Estructura del proyecto
+## Siguientes pasos
 
-```
-app/                  Pantallas (Expo Router, file-based routing)
-  _layout.tsx         Stack raíz + AuthProvider
-  index.tsx           Lista + búsqueda + filtros  (MVP 1 y 3)
-  venue/[id].tsx      Ficha del lugar             (MVP 2)
-  (auth)/login.tsx    Login                       (MVP 5)
-  (auth)/register.tsx Registro cliente/venue      (MVP 5)
-  admin/index.tsx     Panel del venue: aforo       (MVP 4)
-src/
-  components/         VenueCard, OccupancyBadge, FilterChips
-  context/            AuthContext (sesión)
-  data/               Capa de datos + datos demo
-  lib/                Cliente Supabase + config de entorno
-  types/              Modelo de dominio
-  theme.ts            Tokens visuales (tema nocturno + semáforo de aforo)
-supabase/             Migración SQL + seed
-```
-
-## Siguientes pasos (post-MVP)
-
-- **Vista de mapa** con `react-native-maps` (requiere dev build y API key de
-  Google Maps en Android). El listado ya ordena por cercanía con la ubicación.
-- **Realtime** del aforo vía Supabase Realtime (suscripción a `venues`).
-- **Reservas + QR + control de acceso** (capa de operación).
-- **Motor de detección de fantasmas**, métricas e hitos (capa de inteligencia).
-- **Suscripción SaaS + difusión + promociones** (capa de monetización).
+- **Sección 2** (operación en piso): escaneo de puerta verde/amarillo/rojo,
+  acceso manual con motivos, contador, mesas, escaneo de mesa. Requiere
+  `expo-camera` y la cola offline de escaneos.
+- Verificación de teléfono con proveedor SMS (Twilio).
+- Notificaciones push (CLAUDE.md §7).

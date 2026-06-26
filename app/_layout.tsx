@@ -15,26 +15,21 @@ export default function RootLayout() {
             headerStyle: { backgroundColor: colors.bg },
             headerTintColor: colors.text,
             headerTitleStyle: { fontWeight: '800' },
+            headerShadowVisible: false,
             contentStyle: { backgroundColor: colors.bg },
           }}
         >
-          <Stack.Screen name="index" options={{ title: 'AFORO' }} />
+          <Stack.Screen name="index" options={{ headerShown: false }} />
+          <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+          <Stack.Screen name="(cliente)" options={{ headerShown: false }} />
+          <Stack.Screen name="antro/[id]" options={{ title: '' }} />
+          <Stack.Screen name="evento/[id]" options={{ title: '' }} />
+          <Stack.Screen name="reservar/[eventoId]" options={{ title: 'Reservar' }} />
           <Stack.Screen
-            name="venue/[id]"
-            options={{ title: '', headerTransparent: true }}
+            name="reserva/[id]"
+            options={{ title: 'Tu reserva', headerBackVisible: false }}
           />
-          <Stack.Screen
-            name="admin/index"
-            options={{ title: 'Mi lugar' }}
-          />
-          <Stack.Screen
-            name="(auth)/login"
-            options={{ title: 'Entrar', presentation: 'modal' }}
-          />
-          <Stack.Screen
-            name="(auth)/register"
-            options={{ title: 'Crear cuenta', presentation: 'modal' }}
-          />
+          <Stack.Screen name="reclamar/[token]" options={{ title: 'Reclamar acceso' }} />
         </Stack>
       </AuthProvider>
     </SafeAreaProvider>
