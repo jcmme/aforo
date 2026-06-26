@@ -1,0 +1,51 @@
+{
+  "expo": {
+    "name": "AFORO",
+    "slug": "aforo",
+    "version": "0.1.0",
+    "scheme": "aforo",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0B0B12"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.aforo.app",
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "AFORO usa tu ubicación para mostrarte los lugares más cercanos y su nivel de aforo."
+      }
+    },
+    "android": {
+      "package": "com.aforo.app",
+      "adaptiveIcon": {
+        "backgroundColor": "#0B0B12",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "permissions": ["ACCESS_FINE_LOCATION", "ACCESS_COARSE_LOCATION"],
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro"
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "AFORO usa tu ubicación para mostrarte los lugares más cercanos y su nivel de aforo."
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}
