@@ -1,3 +1,4 @@
+import { LinearGradient } from 'expo-linear-gradient';
 import type { ReactNode } from 'react';
 import {
   ActivityIndicator,
@@ -11,7 +12,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { colors, radius, spacing } from '@/theme';
+import { colors, gradients, radius, spacing } from '@/theme';
 
 /** Contenedor de pantalla con fondo oscuro y safe area. */
 export function Pantalla({
@@ -45,6 +46,38 @@ export function Boton({
   deshabilitado?: boolean;
 }) {
   const inactivo = cargando || deshabilitado;
+  const spinnerColor =
+    variante === 'primario' ? '#04141A' : variante === 'secundario' ? colors.text : '#fff';
+  const contenido = cargando ? (
+    <ActivityIndicator color={spinnerColor} />
+  ) : (
+    <Text
+      style={[
+        styles.botonTexto,
+        variante === 'primario' && styles.botonTextoPrimario,
+        variante === 'secundario' && styles.botonTextoSecundario,
+      ]}
+    >
+      {titulo}
+    </Text>
+  );
+
+  // Primario: degradado cian (vistoso). Secundario/peligro: relleno sólido.
+  if (variante === 'primario') {
+    return (
+      <Pressable onPress={onPress} disabled={inactivo} style={inactivo && styles.botonInactivo}>
+        <LinearGradient
+          colors={gradients.primary}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={styles.boton}
+        >
+          {contenido}
+        </LinearGradient>
+      </Pressable>
+    );
+  }
+
   return (
     <Pressable
       onPress={onPress}
@@ -56,15 +89,7 @@ export function Boton({
         inactivo && styles.botonInactivo,
       ]}
     >
-      {cargando ? (
-        <ActivityIndicator color={variante === 'secundario' ? colors.text : '#fff'} />
-      ) : (
-        <Text
-          style={[styles.botonTexto, variante === 'secundario' && styles.botonTextoSecundario]}
-        >
-          {titulo}
-        </Text>
-      )}
+      {contenido}
     </Pressable>
   );
 }
@@ -102,7 +127,8 @@ const styles = StyleSheet.create({
   },
   botonPeligro: { backgroundColor: colors.danger },
   botonInactivo: { opacity: 0.5 },
-  botonTexto: { color: '#fff', fontWeight: '800', fontSize: 16 },
+  botonTexto: { color: '#fff', fontWeight: '800', fontSize: 16, letterSpacing: 0.3 },
+  botonTextoPrimario: { color: '#04141A' },
   botonTextoSecundario: { color: colors.text },
   campoWrap: { gap: spacing.xs },
   campoEtiqueta: {

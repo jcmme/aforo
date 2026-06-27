@@ -1,10 +1,11 @@
 import * as Clipboard from 'expo-clipboard';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import QRCode from 'react-native-qrcode-svg';
 
 import { enlaceReclamo } from '@/lib/qr';
-import { colors, radius, spacing } from '@/theme';
+import { colors, gradients, radius, spacing } from '@/theme';
 import type { QRInvitado } from '@/types';
 
 const ESTADO_LABEL: Record<QRInvitado['estado'], { texto: string; color: string }> = {
@@ -40,14 +41,21 @@ export function QRInvitadoView({
       <Text style={styles.indice}>
         Invitado {indice} de {total}
       </Text>
-      <View style={styles.qrBox}>
-        <QRCode
-          value={qr.token}
-          size={220}
-          color={colors.qrFg}
-          backgroundColor={colors.qrBg}
-        />
-      </View>
+      <LinearGradient
+        colors={gradients.primary}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={styles.qrFrame}
+      >
+        <View style={styles.qrBox}>
+          <QRCode
+            value={qr.token}
+            size={220}
+            color={colors.qrFg}
+            backgroundColor={colors.qrBg}
+          />
+        </View>
+      </LinearGradient>
       <View style={[styles.estado, { borderColor: estado.color }]}>
         <View style={[styles.dot, { backgroundColor: estado.color }]} />
         <Text style={[styles.estadoTexto, { color: estado.color }]}>{estado.texto}</Text>
@@ -77,6 +85,10 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     textTransform: 'uppercase',
     letterSpacing: 1,
+  },
+  qrFrame: {
+    padding: 4,
+    borderRadius: radius.lg + 4,
   },
   qrBox: {
     padding: spacing.lg,
