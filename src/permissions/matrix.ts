@@ -9,8 +9,10 @@ import type { Accion, Rol } from '@/types';
  * Capitán agrupa operativo y social. Gerente agrupa individual y general.
  */
 const MATRIZ: Record<Accion, Rol[]> = {
-  crear_reserva: ['cliente', 'capitan', 'gerente', 'super_admin'],
-  compartir_qr: ['capitan'],
+  // El RP crea reservas y comparte QR (CLAUDE.md §4), aunque la tabla §5 no lo
+  // liste como columna; se reconcilia aquí.
+  crear_reserva: ['cliente', 'rp', 'capitan', 'gerente', 'super_admin'],
+  compartir_qr: ['capitan', 'rp'],
   cancelar_reserva_propia: ['cliente'],
   escanear_puerta: ['cadenero', 'hostess'],
   marcar_llego: ['cadenero', 'hostess'],

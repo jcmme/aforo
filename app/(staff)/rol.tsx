@@ -8,7 +8,10 @@ import type { Rol } from '@/types';
 const ROLES: { rol: Rol; titulo: string; detalle: string }[] = [
   { rol: 'cadenero', titulo: 'Cadenero', detalle: 'Puerta: escanear QR y contador. Vista mínima.' },
   { rol: 'hostess', titulo: 'Hostess', detalle: 'Escaneo de puerta y asignación/movimiento de mesa.' },
-  { rol: 'capitan', titulo: 'Capitán', detalle: 'Escaneo de mesa, acuse de promo y consumo mínimo.' },
+  { rol: 'capitan', titulo: 'Capitán', detalle: 'Escaneo de mesa, promo, desempeño de RPs y red social.' },
+  { rol: 'cajero', titulo: 'Cajero', detalle: 'Captura de consumo y consulta de C. Mínimos.' },
+  { rol: 'rp', titulo: 'RP', detalle: 'Crear reservas, perfil, insignias, ranking y red social.' },
+  { rol: 'gerente', titulo: 'Gerente', detalle: 'Detección de fantasmas, desempeño de RPs y red social.' },
   { rol: 'cliente', titulo: 'Cliente', detalle: 'Volver a la app del cliente.' },
 ];
 

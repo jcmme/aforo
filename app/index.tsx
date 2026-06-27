@@ -5,11 +5,18 @@ import { useAuth } from '@/context/AuthContext';
 import { colors } from '@/theme';
 import type { Rol } from '@/types';
 
-/** Ruta de inicio según el rol activo (navegación por rol). */
+/**
+ * Ruta de inicio según el rol activo. El cadenero va directo a su vista mínima
+ * de dos botones; el resto del personal entra a su tablero de tarjetas.
+ */
 const HOME_POR_ROL: Partial<Record<Rol, string>> = {
   cadenero: '/(staff)/cadenero',
-  hostess: '/(staff)/hostess',
-  capitan: '/(staff)/capitan',
+  hostess: '/(staff)/inicio',
+  capitan: '/(staff)/inicio',
+  cajero: '/(staff)/inicio',
+  rp: '/(staff)/inicio',
+  gerente: '/(staff)/inicio',
+  gerente_general: '/(staff)/inicio',
 };
 
 /**

@@ -72,7 +72,7 @@ docs/       ARCHITECTURE.md · DATA_MODEL.md
 |---|--------|--------|
 | 1 | Fundación + App del Cliente | **Hecho** — auth, explorar antros, eventos, crear reserva (acceso/mesa), QR distribuible, mis reservas, cancelación, base del reclamo de RP. Esquema y RLS de los 4 módulos. |
 | 2 | Operación en piso | **Hecho** — cadenero (2 botones), escaneo de puerta verde/amarillo/rojo + acceso manual (6 motivos), contador de penetración, hostess (asignar/mover mesa con historial), capitán (escaneo de mesa, acuse de promo, consumo mínimo). Navegación por rol + selector demo. |
-| 3 | Red social + perfil del staff + motor de fantasmas | Pendiente (tablas creadas) |
+| 3 | Red social + perfil del staff + motor de fantasmas | **Hecho** — menú de tarjetas por rol; vista del cajero (captura de consumo + C. Mínimos); feed, ranking semanal e insignias; perfil del RP; motor de detección de fantasmas (huella, score, alertas, acciones graduadas). |
 | 4 | Paneles de gestión + Súper Admin | Pendiente (tablas creadas) |
 
 ## Scripts

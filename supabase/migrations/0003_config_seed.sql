@@ -8,11 +8,11 @@
 -- "Gerente" = individual+general. Dueño/socios: visibilidad de consulta.
 -- ---------------------------------------------------------------------------
 insert into permisos (rol, accion) values
-  ('cliente','crear_reserva'),
+  ('cliente','crear_reserva'), ('rp','crear_reserva'),
   ('capitan','crear_reserva'), ('gerente','crear_reserva'),
   ('gerente_general','crear_reserva'), ('super_admin','crear_reserva'),
 
-  ('capitan','compartir_qr'),
+  ('capitan','compartir_qr'), ('rp','compartir_qr'),
 
   ('cliente','cancelar_reserva_propia'),
 

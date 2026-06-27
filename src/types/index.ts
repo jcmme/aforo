@@ -235,3 +235,82 @@ export interface EscaneoEnCola {
   antroId: string;
   creadoEn: string;
 }
+
+// ---------------------------------------------------------------------------
+// Inteligencia, red social y staff (CLAUDE.md §6 — Sección 3)
+// ---------------------------------------------------------------------------
+
+/** Tarjeta del menú de un rol (tablero tipo launcher). */
+export interface ItemMenu {
+  clave: string;
+  titulo: string;
+  subtitulo: string;
+  ruta: string;
+  /** Acción de la matriz de permisos que habilita la tarjeta (si aplica). */
+  accion?: Accion;
+}
+
+/** Reserva de mesa con su consumo mínimo (ventana "C. Mínimos" del cajero). */
+export interface ConsumoMinimoItem {
+  reservaId: string;
+  reservaNombre: string;
+  mesaTexto: string | null;
+  consumoMinimo: number;
+  consumoReal: number | null;
+}
+
+/** Métricas de un RP (basadas en datos reales de puerta y consumo). */
+export interface MetricasRP {
+  rpId: string;
+  nombre: string;
+  creadas: number;
+  completas: number;
+  noShows: number;
+  /** Tasa de asistencia (llegaron / total con QR distribuido). */
+  showRate: number;
+  personas: number;
+  consumoSemana: number;
+}
+
+/** Una posición del ranking semanal de consumo. */
+export interface EntradaRanking {
+  rpId: string;
+  nombre: string;
+  consumo: number;
+  posicion: number;
+  /** Semanas consecutivas en el top 3 (condecoración por racha). */
+  racha: number;
+}
+
+/** Insignia con su estado (desbloqueada o no) para un RP. */
+export interface InsigniaEstado {
+  clave: string;
+  nombre: string;
+  descripcion: string;
+  desbloqueada: boolean;
+}
+
+/** Tipo de acción graduada del motor de fantasmas. */
+export type AccionFantasma = 'alerta' | 'limite' | 'bloqueo';
+
+/** Cliente marcado por el motor de detección de fantasmas. */
+export interface ClienteFantasma {
+  identidad: string;
+  nombres: string[];
+  telefono: string;
+  reservas: number;
+  noShows: number;
+  showRate: number;
+  score: number;
+  alertas: string[];
+  accion: AccionFantasma;
+}
+
+/** Evento del feed de la red social del staff. */
+export interface FeedItem {
+  id: string;
+  tipo: 'insignia' | 'ranking' | 'racha';
+  texto: string;
+  rpNombre: string;
+  cuando: string;
+}
