@@ -17,6 +17,7 @@ const HOME_POR_ROL: Partial<Record<Rol, string>> = {
   rp: '/(staff)/inicio',
   gerente: '/(staff)/inicio',
   gerente_general: '/(staff)/inicio',
+  super_admin: '/(staff)/inicio',
 };
 
 /**

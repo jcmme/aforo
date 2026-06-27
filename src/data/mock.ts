@@ -295,3 +295,141 @@ export const DEMO_PARAMS = {
   scoreUmbralFantasma: 60,
   scorePorNoShow: 20,
 };
+
+// ---------------------------------------------------------------------------
+// Sección 4 — datos para los paneles de gestión (gerente y Súper Admin).
+// Todo consolida datos ya registrados (bitácora, consumo, alertas, contador).
+// ---------------------------------------------------------------------------
+
+export interface MetricasAntroSeed {
+  antroId: string;
+  corporativoId: string;
+  reservas: number;
+  llegadas: number;
+  noShows: number;
+  canceladas: number;
+  conReserva: number; // entradas con QR
+  sinReserva: number; // contador del cadenero
+  cupo: number;
+  diaMayorAfluencia: string;
+}
+
+/** Agregados por antro (lo que la bitácora consolida). antro-1 alineado al hist. */
+export const DEMO_METRICAS_ANTRO: MetricasAntroSeed[] = [
+  { antroId: 'antro-1', corporativoId: 'corp-1', reservas: 10, llegadas: 22, noShows: 4, canceladas: 2, conReserva: 22, sinReserva: 140, cupo: 300, diaMayorAfluencia: 'Sábado' },
+  { antroId: 'antro-2', corporativoId: 'corp-1', reservas: 8, llegadas: 30, noShows: 2, canceladas: 1, conReserva: 30, sinReserva: 90, cupo: 150, diaMayorAfluencia: 'Viernes' },
+  { antroId: 'antro-3', corporativoId: 'corp-2', reservas: 15, llegadas: 60, noShows: 5, canceladas: 3, conReserva: 60, sinReserva: 200, cupo: 400, diaMayorAfluencia: 'Sábado' },
+];
+
+export interface IncidenciaSeed {
+  id: string;
+  antroId: string;
+  corporativoId: string;
+  tipo: string;
+  resumen: string;
+  responsable: string;
+  cuando: string;
+}
+
+/** Panel Cadena: anomalías registradas en la bitácora. */
+export const DEMO_INCIDENCIAS: IncidenciaSeed[] = [
+  { id: 'inc-1', antroId: 'antro-1', corporativoId: 'corp-1', tipo: 'override_amarillo', resumen: 'Override de amarillo — reserva Los Martínez', responsable: 'Hostess Vale', cuando: '2026-06-26T23:40:00Z' },
+  { id: 'inc-2', antroId: 'antro-1', corporativoId: 'corp-1', tipo: 'acceso_manual_otro', resumen: 'Acceso manual "Otro": invitado de la casa', responsable: 'Cadenero Beto', cuando: '2026-06-26T23:05:00Z' },
+  { id: 'inc-3', antroId: 'antro-1', corporativoId: 'corp-1', tipo: 'alerta_fantasma', resumen: 'Alerta de fantasma — Juan/J. Pérez (score 40)', responsable: 'Sistema', cuando: '2026-06-27T03:00:00Z' },
+  { id: 'inc-4', antroId: 'antro-2', corporativoId: 'corp-1', tipo: 'consumo_minimo_no_cumplido', resumen: 'Mesa no cumplió consumo mínimo: se invitó a retirarse', responsable: 'Capitán Edgar', cuando: '2026-06-26T01:20:00Z' },
+];
+
+export interface AuditoriaSeed {
+  id: string;
+  accion: string;
+  entidad: string | null;
+  actor: string;
+  corporativoId: string;
+  cuando: string;
+}
+
+/** Bitácora global (Súper Admin). */
+export const DEMO_AUDITORIA: AuditoriaSeed[] = [
+  { id: 'a1', accion: 'crear_reserva', entidad: 'reservas', actor: 'Ana Torres', corporativoId: 'corp-1', cuando: '2026-06-26T22:10:00Z' },
+  { id: 'a2', accion: 'capturar_consumo', entidad: 'reservas', actor: 'Cajero Sol', corporativoId: 'corp-1', cuando: '2026-06-27T02:30:00Z' },
+  { id: 'a3', accion: 'override_amarillo', entidad: 'accesos_puerta', actor: 'Hostess Vale', corporativoId: 'corp-1', cuando: '2026-06-26T23:40:00Z' },
+  { id: 'a4', accion: 'generar_invitacion', entidad: 'invitaciones', actor: 'Gerente Hugo', corporativoId: 'corp-2', cuando: '2026-06-25T18:00:00Z' },
+];
+
+/** Promociones (exclusivas del Súper Admin). */
+export interface PromocionSeed {
+  id: string;
+  nombre: string;
+  antroId: string;
+  inicio: string | null;
+  fin: string | null;
+  pausada: boolean;
+  pagada: boolean;
+  monto: number | null;
+}
+export const DEMO_PROMOCIONES: PromocionSeed[] = [
+  { id: 'promo-1', nombre: 'Botella de cortesía al llegar', antroId: 'antro-1', inicio: '2026-06-01', fin: '2026-07-31', pausada: false, pagada: true, monto: 12000 },
+  { id: 'promo-2', nombre: '2x1 en barra hasta la 1am', antroId: 'antro-3', inicio: '2026-06-15', fin: null, pausada: false, pagada: false, monto: null },
+];
+
+export const DEMO_PLANES = ['Básico', 'Pro', 'Premium'];
+
+/** Feature flags por corporativo (editable por Súper Admin). */
+export const DEMO_FEATURE_FLAGS: Record<string, { clave: string; habilitado: boolean }[]> = {
+  'corp-1': [
+    { clave: 'modulo_operacion', habilitado: true },
+    { clave: 'modulo_inteligencia', habilitado: true },
+    { clave: 'modulo_gestion', habilitado: true },
+  ],
+  'corp-2': [
+    { clave: 'modulo_operacion', habilitado: true },
+    { clave: 'modulo_inteligencia', habilitado: false },
+    { clave: 'modulo_gestion', habilitado: true },
+  ],
+};
+
+/** Estado activo/suspendido por corporativo (impago). */
+export const DEMO_CORP_ESTADO: Record<string, { activo: boolean; plan: string }> = {
+  'corp-1': { activo: true, plan: 'Pro' },
+  'corp-2': { activo: true, plan: 'Básico' },
+};
+
+/** Interruptores de notificaciones configurables (apagados por defecto). */
+export const DEMO_NOTIF_SWITCHES = {
+  posible_fantasma: false,
+  cupo_alcanzado: false,
+};
+
+/**
+ * Parámetros editables sin código (panel de Súper Admin). Espejo en memoria de
+ * config_parametros; al editarlos aquí cambia el comportamiento (demo).
+ */
+export const DEMO_CONFIG_EDITABLE: { clave: string; valor: string; descripcion: string }[] = [
+  { clave: 'motivos_acceso_manual', valor: '6 motivos', descripcion: 'Motivos de acceso manual en puerta' },
+  { clave: 'score_umbral_fantasma', valor: '60', descripcion: 'Umbral del score para marcar fantasma' },
+  { clave: 'ranking_periodo', valor: 'semanal', descripcion: 'Periodo del ranking de consumo' },
+  { clave: 'invitacion_caducidad_horas', valor: '72', descripcion: 'Caducidad de invitaciones (horas)' },
+  { clave: 'invitacion_intentos_max', valor: '3', descripcion: 'Intentos de código antes de bloquear' },
+  { clave: 'cupo_maximo_default', valor: '300', descripcion: 'Cupo máximo por evento (por defecto)' },
+  { clave: 'al_llenar', valor: 'lista_espera', descripcion: 'Al llenarse: cerrar o lista de espera' },
+  { clave: 'ventana_cancelacion_default', valor: '18:00', descripcion: 'Hora límite de cancelación' },
+  { clave: 'consumo_minimo_mesa_default', valor: '5000', descripcion: 'Consumo mínimo por mesa (MXN)' },
+  { clave: 'consumo_minimo_masivo', valor: 'false', descripcion: 'Flexibilizar mínimo en eventos masivos' },
+  { clave: 'hito_constancia_reservas', valor: '15', descripcion: 'Insignia Constancia (reservas/noche)' },
+  { clave: 'hito_maquina_ventas', valor: '250000', descripcion: 'Insignia Máquina de ventas (MXN/noche)' },
+];
+
+/** Invitaciones generadas en la sesión (en memoria). */
+export interface InvitacionSeed {
+  id: string;
+  codigo: string;
+  rol: string;
+  antroId: string | null;
+  corporativoId: string;
+  usosMax: number;
+  usos: number;
+  caducaEn: string;
+  revocada: boolean;
+  creadaEn: string;
+}
+export const DEMO_INVITACIONES: InvitacionSeed[] = [];

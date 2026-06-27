@@ -11,7 +11,8 @@ const ROLES: { rol: Rol; titulo: string; detalle: string }[] = [
   { rol: 'capitan', titulo: 'Capitán', detalle: 'Escaneo de mesa, promo, desempeño de RPs y red social.' },
   { rol: 'cajero', titulo: 'Cajero', detalle: 'Captura de consumo y consulta de C. Mínimos.' },
   { rol: 'rp', titulo: 'RP', detalle: 'Crear reservas, perfil, insignias, ranking y red social.' },
-  { rol: 'gerente', titulo: 'Gerente', detalle: 'Detección de fantasmas, desempeño de RPs y red social.' },
+  { rol: 'gerente', titulo: 'Gerente', detalle: 'Métricas, panel Cadena, datos extraíbles, invitaciones.' },
+  { rol: 'super_admin', titulo: 'Súper Admin', detalle: 'Parámetros, promociones, corporativos, planes, salud.' },
   { rol: 'cliente', titulo: 'Cliente', detalle: 'Volver a la app del cliente.' },
 ];
 

@@ -4,11 +4,12 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { Boton, Campo } from '@/components/ui';
 import { useAuth } from '@/context/AuthContext';
+import { reclamarInvitacion } from '@/data/invitaciones';
 import { colors, font, radius, spacing } from '@/theme';
 
 export default function PerfilScreen() {
   const router = useRouter();
-  const { usuario, cerrarSesion, demo } = useAuth();
+  const { usuario, cerrarSesion, demo, cambiarRolDemo } = useAuth();
   const [mostrarCodigo, setMostrarCodigo] = useState(false);
   const [codigo, setCodigo] = useState('');
   const [mensaje, setMensaje] = useState<string | null>(null);
@@ -18,10 +19,17 @@ export default function PerfilScreen() {
     router.replace('/(auth)/login');
   }
 
-  function canjearCodigo() {
-    // El canje real de invitaciones (asignación de rol/antro) llega en la
-    // Sección 4. Aquí queda el campo discreto previsto en CLAUDE.md §6.
-    setMensaje('El canje de invitaciones se habilita en una próxima versión.');
+  async function canjearCodigo() {
+    // Conecta el campo discreto del perfil (CLAUDE.md §6) con el reclamo real:
+    // genera una invitación en la vista de Personal → Invitaciones y cánjeala aquí.
+    setMensaje(null);
+    const r = await reclamarInvitacion(codigo);
+    if (r.ok && r.rol) {
+      cambiarRolDemo(r.rol);
+      router.replace('/');
+    } else {
+      setMensaje(r.error ?? 'Código inválido.');
+    }
   }
 
   return (

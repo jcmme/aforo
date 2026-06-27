@@ -37,6 +37,16 @@ export default function StaffLayout() {
       <Stack.Screen name="ranking" options={{ title: 'Ranking semanal' }} />
       <Stack.Screen name="perfil-rp" options={{ title: 'Mi perfil' }} />
       <Stack.Screen name="fantasmas" options={{ title: 'Detección de fantasmas' }} />
+      <Stack.Screen name="metricas" options={{ title: 'Métricas' }} />
+      <Stack.Screen name="cadena" options={{ title: 'Panel Cadena' }} />
+      <Stack.Screen name="datos" options={{ title: 'Datos extraíbles' }} />
+      <Stack.Screen name="invitaciones" options={{ title: 'Invitaciones' }} />
+      <Stack.Screen name="sa-parametros" options={{ title: 'Parámetros' }} />
+      <Stack.Screen name="sa-promociones" options={{ title: 'Promociones' }} />
+      <Stack.Screen name="sa-corporativos" options={{ title: 'Corporativos' }} />
+      <Stack.Screen name="sa-planes" options={{ title: 'Planes y cobro' }} />
+      <Stack.Screen name="sa-salud" options={{ title: 'Salud del producto' }} />
+      <Stack.Screen name="sa-auditoria" options={{ title: 'Auditoría' }} />
       <Stack.Screen name="rol" options={{ title: 'Cambiar rol', presentation: 'modal' }} />
     </Stack>
   );

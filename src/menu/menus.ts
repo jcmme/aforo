@@ -12,6 +12,7 @@ const MENUS: Partial<Record<Rol, ItemMenu[]>> = {
   capitan: [
     { clave: 'mesa', titulo: 'Escanear mesa', subtitulo: 'Reserva · promo · consumo', ruta: '/(staff)/capitan', accion: 'escanear_mesa' },
     { clave: 'desempeno', titulo: 'Desempeño de RPs', subtitulo: 'Ranking semanal', ruta: '/(staff)/ranking', accion: 'ver_desempeno_rps' },
+    { clave: 'invitaciones', titulo: 'Invitaciones', subtitulo: 'Invitar RPs', ruta: '/(staff)/invitaciones', accion: 'gestionar_invitaciones' },
     { clave: 'feed', titulo: 'Red social', subtitulo: 'Logros del staff', ruta: '/(staff)/feed' },
   ],
   cajero: [
@@ -25,9 +26,23 @@ const MENUS: Partial<Record<Rol, ItemMenu[]>> = {
     { clave: 'ranking', titulo: 'Ranking', subtitulo: 'Posición semanal', ruta: '/(staff)/ranking' },
   ],
   gerente: [
-    { clave: 'fantasmas', titulo: 'Detección de fantasmas', subtitulo: 'Scores y alertas', ruta: '/(staff)/fantasmas', accion: 'panel_cadena' },
+    { clave: 'metricas', titulo: 'Métricas', subtitulo: 'Afluencia, penetración, RPs', ruta: '/(staff)/metricas', accion: 'ver_metricas_antro' },
+    { clave: 'cadena', titulo: 'Panel Cadena', subtitulo: 'Incidencias', ruta: '/(staff)/cadena', accion: 'panel_cadena' },
+    { clave: 'fantasmas', titulo: 'Fantasmas', subtitulo: 'Scores y alertas', ruta: '/(staff)/fantasmas', accion: 'panel_cadena' },
+    { clave: 'datos', titulo: 'Datos extraíbles', subtitulo: '7 reportes', ruta: '/(staff)/datos', accion: 'exportar_datos' },
+    { clave: 'invitaciones', titulo: 'Invitaciones', subtitulo: 'Alta de personal', ruta: '/(staff)/invitaciones', accion: 'gestionar_invitaciones' },
     { clave: 'desempeno', titulo: 'Desempeño de RPs', subtitulo: 'Ranking semanal', ruta: '/(staff)/ranking', accion: 'ver_desempeno_rps' },
     { clave: 'feed', titulo: 'Red social', subtitulo: 'Logros del staff', ruta: '/(staff)/feed' },
+  ],
+  super_admin: [
+    { clave: 'parametros', titulo: 'Parámetros', subtitulo: 'Editar sin código', ruta: '/(staff)/sa-parametros', accion: 'feature_flags_planes' },
+    { clave: 'promociones', titulo: 'Promociones', subtitulo: 'Crear y asignar', ruta: '/(staff)/sa-promociones', accion: 'cargar_promociones' },
+    { clave: 'corporativos', titulo: 'Corporativos', subtitulo: 'Alta, flags, suspender', ruta: '/(staff)/sa-corporativos', accion: 'alta_corporativos' },
+    { clave: 'planes', titulo: 'Planes y cobro', subtitulo: 'Tier de suscripción', ruta: '/(staff)/sa-planes', accion: 'feature_flags_planes' },
+    { clave: 'salud', titulo: 'Salud del producto', subtitulo: 'Adopción por corporativo', ruta: '/(staff)/sa-salud', accion: 'feature_flags_planes' },
+    { clave: 'auditoria', titulo: 'Auditoría', subtitulo: 'Bitácora global', ruta: '/(staff)/sa-auditoria', accion: 'feature_flags_planes' },
+    { clave: 'datos', titulo: 'Datos extraíbles', subtitulo: '7 reportes (toda la plataforma)', ruta: '/(staff)/datos', accion: 'exportar_datos' },
+    { clave: 'fantasmas', titulo: 'Fantasmas', subtitulo: 'Scores y alertas', ruta: '/(staff)/fantasmas', accion: 'panel_cadena' },
   ],
 };
 

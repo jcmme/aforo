@@ -314,3 +314,106 @@ export interface FeedItem {
   rpNombre: string;
   cuando: string;
 }
+
+// ---------------------------------------------------------------------------
+// Paneles de gestión (CLAUDE.md §6 — Sección 4). Estos paneles LEEN y
+// CONSOLIDAN datos ya registrados; no crean fuentes nuevas.
+// ---------------------------------------------------------------------------
+
+/** Métricas consolidadas de un antro (o del corporativo). */
+export interface MetricasAntro {
+  antroId: string;
+  nombre: string;
+  reservas: number;
+  llegadas: number;
+  noShows: number;
+  canceladas: number;
+  ocupacionPct: number;
+  diaMayorAfluencia: string | null;
+  porRP: { nombre: string; reservas: number; completas: number }[];
+  /** Penetración: entradas con reserva (QR) vs sin reserva (contador). */
+  conReserva: number;
+  sinReserva: number;
+  adopcionPct: number;
+}
+
+/** Entrada del panel Cadena (anomalía de la bitácora). */
+export interface IncidenciaItem {
+  id: string;
+  tipo: string;
+  resumen: string;
+  responsable: string;
+  antro: string;
+  cuando: string;
+}
+
+/** Definición de un reporte exportable. */
+export interface ReporteDef {
+  clave: string;
+  titulo: string;
+  descripcion: string;
+}
+
+export type FormatoReporte = 'excel' | 'pdf' | 'ambos';
+
+/** Invitación de personal (código no adivinable, de un solo uso o con tope). */
+export interface Invitacion {
+  id: string;
+  codigo: string;
+  rol: Rol;
+  antroId: string | null;
+  corporativoId: string;
+  usosMax: number;
+  usos: number;
+  caducaEn: string;
+  revocada: boolean;
+  creadaEn: string;
+}
+
+/** Parámetro de configuración editable (panel de Súper Admin). */
+export interface ParametroConfig {
+  clave: string;
+  valor: string;
+  descripcion: string;
+}
+
+/** Promoción (exclusiva del Súper Admin). */
+export interface PromocionItem {
+  id: string;
+  nombre: string;
+  antroNombre: string;
+  inicio: string | null;
+  fin: string | null;
+  pausada: boolean;
+  pagada: boolean;
+  monto: number | null;
+}
+
+/** Corporativo con su estado para el panel de Súper Admin. */
+export interface CorporativoAdmin {
+  id: string;
+  nombre: string;
+  plan: string | null;
+  activo: boolean;
+  antros: number;
+  featureFlags: { clave: string; habilitado: boolean }[];
+}
+
+/** Salud/adopción de un corporativo (tablero transversal). */
+export interface SaludCorporativo {
+  corporativoId: string;
+  nombre: string;
+  reservas: number;
+  adopcionPct: number;
+  activo: boolean;
+}
+
+/** Entrada de la bitácora global de auditoría. */
+export interface AuditoriaItem {
+  id: string;
+  accion: string;
+  entidad: string | null;
+  actor: string;
+  corporativo: string;
+  cuando: string;
+}
