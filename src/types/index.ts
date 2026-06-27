@@ -182,3 +182,56 @@ export interface NuevaReserva {
   numInvitados: number;
   rpId?: string | null;
 }
+
+// ---------------------------------------------------------------------------
+// Operación en piso (CLAUDE.md §6 — Sección 2)
+// ---------------------------------------------------------------------------
+
+/** Semáforo de validación de puerta. */
+export type Semaforo = 'verde' | 'amarillo' | 'rojo';
+
+/** Resultado de validar un QR en la puerta. */
+export interface ResultadoPuerta {
+  semaforo: Semaforo;
+  motivo?: string;
+  reservaId?: string;
+  qrId?: string;
+  reservaNombre?: string;
+  rpNombre?: string | null;
+  /** px de la reserva (invitados esperados). */
+  pxEsperados?: number;
+  /** QR distribuidos (los que la puerta espera). */
+  distribuidos?: number;
+  /** QR ya usados para entrar (adentro). */
+  adentro?: number;
+  /** Distribuidos que aún no entran. */
+  faltan?: number;
+}
+
+/** Movimiento de mesa (eslabón del historial encadenado). */
+export interface MovimientoMesa {
+  id: string;
+  reservaId: string;
+  mesaAnterior: string | null;
+  mesaNueva: string;
+  responsableId: string | null;
+  creadoEn: string;
+}
+
+/** Datos que devuelve el escaneo de mesa del capitán. */
+export interface EscaneoMesa {
+  reservaId: string;
+  reservaNombre: string;
+  rpNombre: string | null;
+  mesaActual: string | null;
+  consumoMinimo: number | null;
+  promo: string | null;
+}
+
+/** Escaneo encolado localmente (cola offline de puerta). */
+export interface EscaneoEnCola {
+  id: string;
+  token: string;
+  antroId: string;
+  creadoEn: string;
+}

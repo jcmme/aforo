@@ -29,6 +29,8 @@ interface AuthContextValue {
   iniciarSesion: (email: string, password: string) => Promise<void>;
   registrar: (datos: DatosRegistro) => Promise<void>;
   cerrarSesion: () => Promise<void>;
+  /** Cambia el rol activo SOLO en modo demo (para recorrer las vistas). */
+  cambiarRolDemo: (rol: Rol) => void;
 }
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
@@ -133,8 +135,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setRolActivo('cliente');
   }
 
+  function cambiarRolDemo(rol: Rol) {
+    // Solo demo: en producción el rol proviene de las membresías del usuario.
+    if (demo) setRolActivo(rol);
+  }
+
   const value = useMemo<AuthContextValue>(
-    () => ({ usuario, rolActivo, loading, demo, iniciarSesion, registrar, cerrarSesion }),
+    () => ({ usuario, rolActivo, loading, demo, iniciarSesion, registrar, cerrarSesion, cambiarRolDemo }),
     [usuario, rolActivo, loading, demo],
   );
 

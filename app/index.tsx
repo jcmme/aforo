@@ -3,14 +3,21 @@ import { ActivityIndicator, View } from 'react-native';
 
 import { useAuth } from '@/context/AuthContext';
 import { colors } from '@/theme';
+import type { Rol } from '@/types';
+
+/** Ruta de inicio según el rol activo (navegación por rol). */
+const HOME_POR_ROL: Partial<Record<Rol, string>> = {
+  cadenero: '/(staff)/cadenero',
+  hostess: '/(staff)/hostess',
+  capitan: '/(staff)/capitan',
+};
 
 /**
- * Punto de entrada: enruta según la sesión. Toda cuenta nace cliente, así que
- * por ahora la app autenticada va al grupo (cliente). La navegación por rol se
- * ampliará con las vistas de personal en las secciones 2-4.
+ * Punto de entrada: enruta según sesión y rol. Toda cuenta nace cliente; el
+ * personal entra por invitación (en demo, con el selector de rol).
  */
 export default function Index() {
-  const { usuario, loading } = useAuth();
+  const { usuario, rolActivo, loading } = useAuth();
 
   if (loading) {
     return (
@@ -20,5 +27,8 @@ export default function Index() {
     );
   }
 
-  return <Redirect href={usuario ? '/(cliente)' : '/(auth)/login'} />;
+  if (!usuario) return <Redirect href="/(auth)/login" />;
+
+  const destinoStaff = HOME_POR_ROL[rolActivo];
+  return <Redirect href={(destinoStaff ?? '/(cliente)') as never} />;
 }

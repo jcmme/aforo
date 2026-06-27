@@ -68,7 +68,16 @@ export default function PerfilScreen() {
         </View>
       ) : null}
 
-      {demo ? <Text style={styles.demo}>Sesión demo activa.</Text> : null}
+      {demo ? (
+        <>
+          <Text style={styles.demo}>Sesión demo activa.</Text>
+          <Boton
+            titulo="Ver vistas del personal (demo)"
+            variante="secundario"
+            onPress={() => router.push('/(staff)/rol')}
+          />
+        </>
+      ) : null}
 
       <Boton titulo="Cerrar sesión" variante="peligro" onPress={salir} />
     </ScrollView>

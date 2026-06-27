@@ -1,4 +1,4 @@
-import type { Antro, Corporativo, Evento, Reserva, Usuario } from '@/types';
+import type { Antro, Corporativo, Evento, QRInvitado, Reserva, Usuario } from '@/types';
 
 // Datos de demostración (CLAUDE.md §11). Espejo del seed de Supabase, para
 // navegar el flujo del cliente sin backend. Dos corporativos en Puebla.
@@ -131,3 +131,81 @@ export const DEMO_USUARIO: Usuario = {
 
 /** Store en memoria de reservas creadas durante la sesión demo. */
 export const DEMO_RESERVAS: Reserva[] = [];
+
+// ---------------------------------------------------------------------------
+// Sección 2 — datos para probar la operación en piso (cadenero/hostess/capitán)
+// ---------------------------------------------------------------------------
+
+/** Nombres de RP de demostración (en real saldrían de `usuarios`). */
+export const DEMO_RP_NOMBRES: Record<string, string> = {
+  'rp-ana': 'Ana Torres',
+  'rp-luis': 'Luis Mejía',
+};
+
+/** Token demo para un QR (en real lo firma el servidor con HMAC). */
+function tokenDemo(qrId: string): string {
+  return `AFORO1.${qrId}.demo`;
+}
+
+function qrSeed(id: string, reservaId: string, estado: QRInvitado['estado']): QRInvitado {
+  return {
+    id,
+    reservaId,
+    token: tokenDemo(id),
+    estado,
+    distribuidoEn: estado === 'pendiente' ? null : '2026-07-03T22:30:00Z',
+    usadoEn: estado === 'usado_puerta' ? '2026-07-03T23:10:00Z' : null,
+  };
+}
+
+/**
+ * Reservas pre-sembradas para la puerta. Mezcla de estados para ver el semáforo:
+ * - "Los Martínez": 3 px; un QR distribuido (verde), uno ya adentro (rojo si se
+ *   re-escanea), otro distribuido (verde).
+ * - "Cumple Sofía": 1 px ya adentro + un QR distribuido extra → AMARILLO
+ *   (pertenece a la reserva pero sin accesos restantes).
+ */
+export const DEMO_RESERVAS_SEED: Reserva[] = [
+  {
+    id: 'res-seed-1',
+    eventoId: 'evt-1',
+    antroId: 'antro-1',
+    corporativoId: 'corp-1',
+    clienteId: 'cli-martinez',
+    rpId: 'rp-ana',
+    modalidad: 'mesa',
+    numInvitados: 3,
+    mesaTexto: null,
+    consumoMinimo: DEMO_CONSUMO_MINIMO_MESA,
+    estado: 'confirmada',
+    creadaEn: '2026-07-01T10:00:00Z',
+    canceladaEn: null,
+    qrs: [
+      qrSeed('qr-s1a', 'res-seed-1', 'distribuido'),
+      qrSeed('qr-s1b', 'res-seed-1', 'usado_puerta'),
+      qrSeed('qr-s1c', 'res-seed-1', 'distribuido'),
+    ],
+  },
+  {
+    id: 'res-seed-2',
+    eventoId: 'evt-1',
+    antroId: 'antro-1',
+    corporativoId: 'corp-1',
+    clienteId: 'cli-sofia',
+    rpId: 'rp-luis',
+    modalidad: 'acceso',
+    numInvitados: 1,
+    mesaTexto: null,
+    consumoMinimo: null,
+    estado: 'confirmada',
+    creadaEn: '2026-07-01T11:00:00Z',
+    canceladaEn: null,
+    qrs: [
+      qrSeed('qr-s2a', 'res-seed-2', 'usado_puerta'),
+      qrSeed('qr-s2b', 'res-seed-2', 'distribuido'),
+    ],
+  },
+];
+
+/** Contador de penetración en memoria (clicker del cadenero). */
+export const DEMO_CONTADOR = { sinReserva: 0 };
