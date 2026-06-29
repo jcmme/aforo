@@ -1,4 +1,3 @@
-import { LinearGradient } from 'expo-linear-gradient';
 import type { ReactNode } from 'react';
 import {
   ActivityIndicator,
@@ -12,7 +11,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { colors, gradients, radius, spacing } from '@/theme';
+import { colors, radius, spacing } from '@/theme';
 
 /** Contenedor de pantalla con fondo oscuro y safe area. */
 export function Pantalla({
@@ -31,7 +30,10 @@ export function Pantalla({
   );
 }
 
-/** Botón primario / secundario. */
+/**
+ * Botón. Primario = relleno de acento sólido (elegante), secundario = contorno
+ * hairline, peligro = contorno sobrio. Sin degradados.
+ */
 export function Boton({
   titulo,
   onPress,
@@ -46,50 +48,33 @@ export function Boton({
   deshabilitado?: boolean;
 }) {
   const inactivo = cargando || deshabilitado;
-  const spinnerColor =
-    variante === 'primario' ? '#04141A' : variante === 'secundario' ? colors.text : '#fff';
-  const contenido = cargando ? (
-    <ActivityIndicator color={spinnerColor} />
-  ) : (
-    <Text
-      style={[
-        styles.botonTexto,
-        variante === 'primario' && styles.botonTextoPrimario,
-        variante === 'secundario' && styles.botonTextoSecundario,
-      ]}
-    >
-      {titulo}
-    </Text>
-  );
-
-  // Primario: degradado cian (vistoso). Secundario/peligro: relleno sólido.
-  if (variante === 'primario') {
-    return (
-      <Pressable onPress={onPress} disabled={inactivo} style={inactivo && styles.botonInactivo}>
-        <LinearGradient
-          colors={gradients.primary}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={styles.boton}
-        >
-          {contenido}
-        </LinearGradient>
-      </Pressable>
-    );
-  }
-
+  const spinnerColor = variante === 'primario' ? colors.onAccent : colors.text;
   return (
     <Pressable
       onPress={onPress}
       disabled={inactivo}
-      style={[
+      style={({ pressed }) => [
         styles.boton,
+        variante === 'primario' && styles.botonPrimario,
         variante === 'secundario' && styles.botonSecundario,
         variante === 'peligro' && styles.botonPeligro,
+        pressed && styles.botonPress,
         inactivo && styles.botonInactivo,
       ]}
     >
-      {contenido}
+      {cargando ? (
+        <ActivityIndicator color={spinnerColor} />
+      ) : (
+        <Text
+          style={[
+            styles.botonTexto,
+            variante === 'primario' && styles.botonTextoPrimario,
+            variante === 'peligro' && styles.botonTextoPeligro,
+          ]}
+        >
+          {titulo}
+        </Text>
+      )}
     </Pressable>
   );
 }
@@ -102,11 +87,7 @@ export function Campo({
   return (
     <View style={styles.campoWrap}>
       {etiqueta ? <Text style={styles.campoEtiqueta}>{etiqueta}</Text> : null}
-      <TextInput
-        placeholderTextColor={colors.textFaint}
-        style={styles.campo}
-        {...props}
-      />
+      <TextInput placeholderTextColor={colors.textFaint} style={styles.campo} {...props} />
     </View>
   );
 }
@@ -114,35 +95,32 @@ export function Campo({
 const styles = StyleSheet.create({
   pantalla: { flex: 1, backgroundColor: colors.bg },
   boton: {
-    backgroundColor: colors.primary,
     borderRadius: radius.md,
-    paddingVertical: spacing.md + 2,
+    paddingVertical: spacing.md + 3,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  botonSecundario: {
-    backgroundColor: colors.surfaceAlt,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  botonPeligro: { backgroundColor: colors.danger },
-  botonInactivo: { opacity: 0.5 },
-  botonTexto: { color: '#fff', fontWeight: '800', fontSize: 16, letterSpacing: 0.3 },
-  botonTextoPrimario: { color: '#04141A' },
-  botonTextoSecundario: { color: colors.text },
-  campoWrap: { gap: spacing.xs },
+  botonPrimario: { backgroundColor: colors.accent },
+  botonSecundario: { backgroundColor: 'transparent', borderWidth: 1, borderColor: colors.border },
+  botonPeligro: { backgroundColor: 'transparent', borderWidth: 1, borderColor: 'rgba(224,105,107,0.4)' },
+  botonPress: { opacity: 0.85 },
+  botonInactivo: { opacity: 0.4 },
+  botonTexto: { color: colors.text, fontWeight: '700', fontSize: 15, letterSpacing: 0.2 },
+  botonTextoPrimario: { color: colors.onAccent, fontWeight: '800' },
+  botonTextoPeligro: { color: colors.danger },
+  campoWrap: { gap: spacing.sm },
   campoEtiqueta: {
     color: colors.textMuted,
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: '700',
     textTransform: 'uppercase',
-    letterSpacing: 0.5,
+    letterSpacing: 1.2,
   },
   campo: {
     backgroundColor: colors.surface,
     borderRadius: radius.md,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.md + 2,
     color: colors.text,
     fontSize: 15,
     borderWidth: 1,

@@ -7,7 +7,9 @@ import type { Antro } from '@/types';
 /** Tarjeta de un antro en el listado de "explorar". */
 export function AntroCard({ antro, onPress }: { antro: Antro; onPress: () => void }) {
   return (
-    <Pressable style={styles.card} onPress={onPress}>
+    <Pressable style={({ pressed }) => [styles.card, pressed && styles.press]} onPress={onPress}>
+      {/* Respaldo elegante: si la foto no carga, queda un degradado, no un hueco. */}
+      <LinearGradient colors={gradients.foto} style={styles.fondo} />
       <Image source={{ uri: antro.fotos[0] }} style={styles.image} resizeMode="cover" />
       <LinearGradient colors={gradients.scrim} style={styles.scrim} />
       <View style={styles.zonaPill}>
@@ -27,14 +29,16 @@ export function AntroCard({ antro, onPress }: { antro: Antro; onPress: () => voi
 
 const styles = StyleSheet.create({
   card: {
-    height: 200,
-    borderRadius: radius.xl,
+    height: 210,
+    borderRadius: radius.lg,
     overflow: 'hidden',
     backgroundColor: colors.surface,
     borderWidth: 1,
     borderColor: colors.border,
     justifyContent: 'flex-end',
   },
+  press: { opacity: 0.92 },
+  fondo: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 },
   image: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 },
   scrim: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 },
   zonaPill: {
@@ -42,20 +46,20 @@ const styles = StyleSheet.create({
     top: spacing.md,
     left: spacing.md,
     paddingVertical: 5,
-    paddingHorizontal: spacing.sm + 2,
+    paddingHorizontal: spacing.md,
     borderRadius: radius.pill,
-    backgroundColor: 'rgba(6,182,212,0.18)',
+    backgroundColor: 'rgba(10,10,12,0.55)',
     borderWidth: 1,
-    borderColor: colors.primary,
+    borderColor: 'rgba(216,185,138,0.5)',
   },
   zonaPillTxt: {
-    color: colors.primary,
-    fontSize: 11,
-    fontWeight: '800',
-    letterSpacing: 0.5,
+    color: colors.accent,
+    fontSize: 10,
+    fontWeight: '700',
+    letterSpacing: 1.5,
     textTransform: 'uppercase',
   },
   body: { padding: spacing.lg },
-  nombre: { color: '#fff', fontSize: 24, fontWeight: '900', letterSpacing: -0.3 },
-  horario: { color: 'rgba(244,248,251,0.8)', fontSize: 13, marginTop: 2, fontWeight: '600' },
+  nombre: { color: '#fff', fontSize: 23, fontWeight: '800', letterSpacing: -0.4 },
+  horario: { color: 'rgba(247,246,243,0.72)', fontSize: 13, marginTop: 3, fontWeight: '500' },
 });

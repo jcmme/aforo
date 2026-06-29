@@ -1,38 +1,56 @@
-// Tokens visuales de AFORO — app del cliente (CLAUDE.md §9).
-// Estética de vida nocturna: modo oscuro, alto contraste, tipografía marcada.
-// Paleta: cian eléctrico como color principal con acento coral.
+// Tokens visuales de AFORO — sistema "minimalista elegante" (CLAUDE.md §9).
+// Vida nocturna premium: negro profundo, monocromático, un solo acento
+// champagne/oro usado con mesura. Menos ruido, más aire y jerarquía.
 
 export const colors = {
-  bg: '#07090F',
-  bgAlt: '#0A0E17',
-  surface: '#10151F',
-  surfaceAlt: '#161C29',
-  border: '#222A3A',
-  borderGlow: '#0E7490',
-  text: '#F4F8FB',
-  textMuted: '#93A1B5',
-  textFaint: '#5E6B80',
-  primary: '#06B6D4',
-  primaryDark: '#0891B2',
-  accent: '#FB7185',
-  accentDark: '#E11D63',
-  success: '#22C55E',
-  warning: '#F59E0B',
-  danger: '#F43F5E',
+  // Fondos en capas (elevación muy sutil).
+  bg: '#0A0A0C',
+  bgElevated: '#101013',
+  surface: '#141417',
+  surfaceAlt: '#1A1A1F',
+
+  // Líneas: hairline casi invisible para un look limpio.
+  border: '#26262D',
+  hairline: 'rgba(255,255,255,0.06)',
+
+  // Texto cálido, alto contraste.
+  text: '#F7F6F3',
+  textMuted: '#9C9CA6',
+  textFaint: '#5E5E68',
+
+  // Acento único: champagne/oro.
+  accent: '#D8B98A',
+  accentSoft: '#ECD9B6',
+  accentDeep: '#B7976A',
+
+  // Sobre el acento va texto casi negro.
+  onAccent: '#0A0A0C',
+
+  // Semáforo y estados, en tonos sobrios (no neón).
+  success: '#5FB890',
+  warning: '#E0AE63',
+  danger: '#E0696B',
+
   qrBg: '#FFFFFF',
-  qrFg: '#07090F',
+  qrFg: '#0A0A0C',
+
+  // Alias de compatibilidad (el acento ahora es champagne/oro).
+  primary: '#D8B98A',
+  primaryDark: '#B7976A',
+  bgAlt: '#101013',
+  borderGlow: '#26262D',
 } as const;
 
-// Degradados (de claro a oscuro). Se usan con expo-linear-gradient.
+// Degradados muy sutiles; se usan con mesura (scrim de fotos, anillo del QR).
 export const gradients = {
-  // Marca / botones primarios: cian → teal profundo.
-  primary: ['#22D3EE', '#06B6D4', '#0E7490'] as const,
-  // Acento cálido para realces puntuales.
-  accent: ['#FB7185', '#F43F5E'] as const,
-  // Overlay inferior para fotos (texto legible encima).
-  scrim: ['transparent', 'rgba(7,9,15,0.15)', 'rgba(7,9,15,0.95)'] as const,
-  // Fondo sutil de cabeceras.
-  header: ['#0E1626', '#07090F'] as const,
+  accent: ['#ECD9B6', '#D8B98A', '#B7976A'] as const,
+  // Respaldo elegante detrás de las fotos (para que nunca se vea hueco).
+  foto: ['#1C1C22', '#121216', '#0A0A0C'] as const,
+  // Oscurecedor inferior para texto sobre imagen.
+  scrim: ['transparent', 'rgba(10,10,12,0.1)', 'rgba(10,10,12,0.92)'] as const,
+  // Alias de compatibilidad.
+  primary: ['#ECD9B6', '#D8B98A', '#B7976A'] as const,
+  header: ['#101013', '#0A0A0C'] as const,
 } as const;
 
 export const spacing = {
@@ -41,33 +59,35 @@ export const spacing = {
   md: 12,
   lg: 16,
   xl: 24,
-  xxl: 32,
+  xxl: 36,
 } as const;
 
 export const radius = {
-  sm: 8,
-  md: 12,
-  lg: 18,
-  xl: 26,
+  sm: 10,
+  md: 14,
+  lg: 20,
+  xl: 28,
   pill: 999,
 } as const;
 
 export const font = {
-  title: { fontSize: 30, fontWeight: '900' as const, color: colors.text, letterSpacing: -0.5 },
-  h2: { fontSize: 21, fontWeight: '800' as const, color: colors.text, letterSpacing: -0.3 },
-  h3: { fontSize: 17, fontWeight: '700' as const, color: colors.text },
-  body: { fontSize: 15, fontWeight: '500' as const, color: colors.text },
-  muted: { fontSize: 13, fontWeight: '500' as const, color: colors.textMuted },
+  // Jerarquía clara; títulos firmes, cuerpo ligero, etiquetas con tracking.
+  display: { fontSize: 40, fontWeight: '800' as const, color: colors.text, letterSpacing: 4 },
+  title: { fontSize: 28, fontWeight: '800' as const, color: colors.text, letterSpacing: -0.4 },
+  h2: { fontSize: 20, fontWeight: '700' as const, color: colors.text, letterSpacing: -0.2 },
+  h3: { fontSize: 16, fontWeight: '700' as const, color: colors.text },
+  body: { fontSize: 15, fontWeight: '400' as const, color: colors.text, lineHeight: 22 },
+  muted: { fontSize: 13, fontWeight: '400' as const, color: colors.textMuted, lineHeight: 19 },
   kicker: {
-    fontSize: 12,
-    fontWeight: '800' as const,
-    letterSpacing: 2,
+    fontSize: 11,
+    fontWeight: '700' as const,
+    letterSpacing: 2.5,
     textTransform: 'uppercase' as const,
-    color: colors.primary,
+    color: colors.accent,
   },
 } as const;
 
-/** Colores del semáforo de validación de puerta (se usa desde Sección 2). */
+/** Semáforo de validación de puerta (tonos sobrios). */
 export const semaforo = {
   verde: colors.success,
   amarillo: colors.warning,

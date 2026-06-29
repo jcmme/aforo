@@ -31,9 +31,9 @@ export default function LoginScreen() {
     <Pantalla>
       <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
         <View style={styles.brand}>
-          <Text style={font.kicker}>Vida nocturna</Text>
           <Text style={styles.logo}>AFORO</Text>
-          <Text style={font.muted}>Reserva, comparte tu acceso y entra sin filas.</Text>
+          <View style={styles.regla} />
+          <Text style={styles.tagline}>Reserva, comparte tu acceso y entra sin filas.</Text>
         </View>
 
         {demo ? (
@@ -72,12 +72,14 @@ export default function LoginScreen() {
 }
 
 const styles = StyleSheet.create({
-  content: { padding: spacing.xl, gap: spacing.xl, flexGrow: 1, justifyContent: 'center' },
-  brand: { gap: spacing.xs, alignItems: 'flex-start' },
-  logo: { fontSize: 44, fontWeight: '900', color: colors.text, letterSpacing: 2 },
-  demo: { color: colors.primary, fontSize: 13 },
-  form: { gap: spacing.md },
+  content: { padding: spacing.xl, gap: spacing.xxl, flexGrow: 1, justifyContent: 'center' },
+  brand: { gap: spacing.md, alignItems: 'flex-start' },
+  logo: { fontSize: 46, fontWeight: '800', color: colors.text, letterSpacing: 8 },
+  regla: { width: 48, height: 2, backgroundColor: colors.accent, borderRadius: 1 },
+  tagline: { color: colors.textMuted, fontSize: 15, lineHeight: 22, maxWidth: 280 },
+  demo: { color: colors.accent, fontSize: 13 },
+  form: { gap: spacing.lg },
   error: { color: colors.danger, fontSize: 13 },
   footer: { flexDirection: 'row', gap: spacing.sm, justifyContent: 'center', alignItems: 'center' },
-  link: { color: colors.primary, fontWeight: '800' },
+  link: { color: colors.accent, fontWeight: '700' },
 });

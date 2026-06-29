@@ -1,6 +1,7 @@
+import { LinearGradient } from 'expo-linear-gradient';
 import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 
-import { colors, radius, spacing } from '@/theme';
+import { colors, gradients, radius, spacing } from '@/theme';
 import type { Evento } from '@/types';
 
 const FORMATO_FECHA: Intl.DateTimeFormatOptions = {
@@ -28,8 +29,11 @@ function etiquetaCupo(evento: Evento): { texto: string; color: string } {
 export function EventoCard({ evento, onPress }: { evento: Evento; onPress: () => void }) {
   const cupo = etiquetaCupo(evento);
   return (
-    <Pressable style={styles.card} onPress={onPress}>
-      <Image source={{ uri: evento.fotos[0] }} style={styles.image} resizeMode="cover" />
+    <Pressable style={({ pressed }) => [styles.card, pressed && styles.press]} onPress={onPress}>
+      <View style={styles.imageWrap}>
+        <LinearGradient colors={gradients.foto} style={styles.fondo} />
+        <Image source={{ uri: evento.fotos[0] }} style={styles.image} resizeMode="cover" />
+      </View>
       <View style={styles.body}>
         <Text style={styles.fecha}>
           {new Date(evento.fecha).toLocaleString('es-MX', FORMATO_FECHA)}
@@ -55,16 +59,19 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.border,
   },
-  image: { width: 96, height: 96, backgroundColor: colors.surfaceAlt },
-  body: { flex: 1, padding: spacing.md, gap: 2, justifyContent: 'center' },
+  press: { opacity: 0.92 },
+  imageWrap: { width: 100, height: 104 },
+  fondo: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 },
+  image: { width: 100, height: 104 },
+  body: { flex: 1, padding: spacing.md, gap: 3, justifyContent: 'center' },
   fecha: {
-    color: colors.primary,
-    fontSize: 11,
-    fontWeight: '800',
+    color: colors.accent,
+    fontSize: 10,
+    fontWeight: '700',
     textTransform: 'uppercase',
-    letterSpacing: 0.5,
+    letterSpacing: 1.2,
   },
-  nombre: { color: colors.text, fontSize: 15, fontWeight: '700' },
+  nombre: { color: colors.text, fontSize: 15, fontWeight: '700', letterSpacing: -0.2 },
   cupoRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 4 },
   dot: { width: 7, height: 7, borderRadius: 4 },
   cupo: { fontSize: 12, fontWeight: '600' },
