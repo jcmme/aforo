@@ -43,12 +43,18 @@ npm run android    # emulador Android
 ## Conectar Supabase (datos reales)
 
 1. Crea un proyecto en [supabase.com](https://supabase.com).
-2. En el **SQL Editor**, ejecuta en orden:
-   `supabase/migrations/0001_schema.sql`, `0002_rls.sql`, `0003_config_seed.sql`
-   y luego `supabase/seed.sql`.
+2. En el **SQL Editor**, ejecuta en orden todas las migraciones
+   (`supabase/migrations/0001_schema.sql` … `0008_feed.sql`) y luego
+   `supabase/seed.sql`.
 3. Despliega las Edge Functions y su secreto:
    ```bash
-   supabase functions deploy crear-reserva cancelar-reserva reclamar-qr
+   supabase functions deploy \
+     crear-reserva cancelar-reserva reclamar-qr \
+     validar-puerta acceso-manual mover-mesa escanear-mesa acuse-promo \
+     contador-penetracion capturar-consumo recalcular-fantasmas \
+     generar-invitacion revocar-invitacion reclamar-invitacion \
+     editar-parametro crear-promocion gestion-minimo \
+     editar-tyc-antro aprobar-tyc crear-resena eliminar-cuenta
    supabase secrets set AFORO_QR_SECRET="$(openssl rand -hex 32)"
    ```
 4. Copia las credenciales del proyecto:
@@ -75,6 +81,7 @@ docs/       ARCHITECTURE.md · DATA_MODEL.md
 | 3 | Red social + perfil del staff + motor de fantasmas | **Hecho** — menú de tarjetas por rol; vista del cajero (captura de consumo + C. Mínimos); feed, ranking semanal e insignias; perfil del RP; motor de detección de fantasmas (huella, score, alertas, acciones graduadas). |
 | 4 | Paneles de gestión + Súper Admin | **Hecho** — panel del gerente (métricas + penetración, antro/consolidado); panel Cadena (incidencias); DATOS EXTRAÍBLES (7 reportes, formato + rango, vista previa/CSV); gestión de invitaciones (escalera, generar/revocar/reclamar); panel de Súper Admin (parámetros sin código, promociones, corporativos + feature flags + suspender, planes, salud del producto, auditoría, switches de notificaciones). |
 | 5 | Ronda de pulido (post-4 secciones) | **Hecho** — capitán registra reservas de invitados sin cuenta (nombre + teléfono, link de reclamo con QR real + compartir por WhatsApp + invitación a crear cuenta); métricas/insignias de capitán generalizadas desde RP con metas por rol; reseñas del antro (estrellas + foto); T&C en 3 niveles (app/corporativo/antro) con responsable designado por antro, aprobación de Súper Admin y corte semanal (martes 12:00); feed social persistido con comentarios y reacciones, formato tipo timeline. |
+| 6 | Preparación para tiendas | **En curso** — borrado de cuenta dentro de la app (App Store 5.1.1(v) / LFPDPPP) con Edge Function `eliminar-cuenta`; permisos declarados (cámara, galería); `eas.json` y config de builds nativos; guía completa de publicación en [`docs/TIENDAS.md`](docs/TIENDAS.md). Pendiente: backend de producción, SMS real, cuentas de desarrollador (trámites de MABI). |
 
 ## Scripts
 

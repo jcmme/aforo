@@ -29,6 +29,8 @@ interface AuthContextValue {
   iniciarSesion: (email: string, password: string) => Promise<void>;
   registrar: (datos: DatosRegistro) => Promise<void>;
   cerrarSesion: () => Promise<void>;
+  /** Borra la cuenta del titular (App Store 5.1.1(v) / LFPDPPP). */
+  eliminarCuenta: () => Promise<void>;
   /** Cambia el rol activo SOLO en modo demo (para recorrer las vistas). */
   cambiarRolDemo: (rol: Rol) => void;
 }
@@ -135,13 +137,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setRolActivo('cliente');
   }
 
+  async function eliminarCuenta() {
+    if (!supabase) {
+      // Demo: no hay backend; el borrado se simula cerrando la sesión.
+      setUsuario(null);
+      setRolActivo('cliente');
+      return;
+    }
+    // El borrado real (anonimizar reservas + cascada) vive en el servidor.
+    const { error } = await supabase.functions.invoke('eliminar-cuenta');
+    if (error) throw new Error('No se pudo eliminar la cuenta. Intenta de nuevo.');
+    await supabase.auth.signOut();
+    setUsuario(null);
+    setRolActivo('cliente');
+  }
+
   function cambiarRolDemo(rol: Rol) {
     // Solo demo: en producción el rol proviene de las membresías del usuario.
     if (demo) setRolActivo(rol);
   }
 
   const value = useMemo<AuthContextValue>(
-    () => ({ usuario, rolActivo, loading, demo, iniciarSesion, registrar, cerrarSesion, cambiarRolDemo }),
+    () => ({ usuario, rolActivo, loading, demo, iniciarSesion, registrar, cerrarSesion, eliminarCuenta, cambiarRolDemo }),
     [usuario, rolActivo, loading, demo],
   );
 

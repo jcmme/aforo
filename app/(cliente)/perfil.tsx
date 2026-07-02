@@ -9,14 +9,31 @@ import { colors, font, radius, spacing } from '@/theme';
 
 export default function PerfilScreen() {
   const router = useRouter();
-  const { usuario, cerrarSesion, demo, cambiarRolDemo } = useAuth();
+  const { usuario, cerrarSesion, eliminarCuenta, demo, cambiarRolDemo } = useAuth();
   const [mostrarCodigo, setMostrarCodigo] = useState(false);
   const [codigo, setCodigo] = useState('');
   const [mensaje, setMensaje] = useState<string | null>(null);
+  const [mostrarEliminar, setMostrarEliminar] = useState(false);
+  const [eliminando, setEliminando] = useState(false);
+  const [errorEliminar, setErrorEliminar] = useState<string | null>(null);
 
   async function salir() {
     await cerrarSesion();
     router.replace('/(auth)/login');
+  }
+
+  async function borrarCuenta() {
+    // Requisito de tiendas (App Store 5.1.1(v)) y LFPDPPP: el titular puede
+    // eliminar su cuenta desde la propia app, con confirmación explícita.
+    setErrorEliminar(null);
+    setEliminando(true);
+    try {
+      await eliminarCuenta();
+      router.replace('/(auth)/login');
+    } catch (e) {
+      setErrorEliminar(e instanceof Error ? e.message : 'No se pudo eliminar la cuenta.');
+      setEliminando(false);
+    }
   }
 
   async function canjearCodigo() {
@@ -88,6 +105,32 @@ export default function PerfilScreen() {
       ) : null}
 
       <Boton titulo="Cerrar sesión" variante="peligro" onPress={salir} />
+
+      {/* Borrado de cuenta: visible pero discreto, con doble confirmación. */}
+      <Pressable onPress={() => setMostrarEliminar((v) => !v)}>
+        <Text style={styles.eliminarLink}>Eliminar mi cuenta</Text>
+      </Pressable>
+      {mostrarEliminar ? (
+        <View style={styles.eliminarBox}>
+          <Text style={styles.eliminarTitulo}>Esta acción es permanente</Text>
+          <Text style={styles.eliminarTexto}>
+            Se borran tu perfil, tus datos personales y tus códigos QR. Tus
+            reservas pasadas quedan anonimizadas. No se puede deshacer.
+          </Text>
+          {errorEliminar ? <Text style={styles.eliminarError}>{errorEliminar}</Text> : null}
+          <Boton
+            titulo={eliminando ? 'Eliminando…' : 'Eliminar definitivamente'}
+            variante="peligro"
+            deshabilitado={eliminando}
+            onPress={borrarCuenta}
+          />
+          <Boton
+            titulo="Conservar mi cuenta"
+            variante="secundario"
+            onPress={() => setMostrarEliminar(false)}
+          />
+        </View>
+      ) : null}
     </ScrollView>
   );
 }
@@ -131,4 +174,16 @@ const styles = StyleSheet.create({
   codigoLink: { color: colors.textFaint, fontSize: 13, textAlign: 'center', marginTop: spacing.sm },
   codigoBox: { gap: spacing.sm },
   demo: { color: colors.primary, fontSize: 13, textAlign: 'center' },
+  eliminarLink: { color: colors.textFaint, fontSize: 13, textAlign: 'center', marginTop: spacing.md },
+  eliminarBox: {
+    backgroundColor: colors.surface,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    borderColor: colors.danger,
+    padding: spacing.md,
+    gap: spacing.sm,
+  },
+  eliminarTitulo: { color: colors.danger, fontSize: 14, fontWeight: '800' },
+  eliminarTexto: { color: colors.textMuted, fontSize: 13, lineHeight: 19 },
+  eliminarError: { color: colors.danger, fontSize: 13 },
 });
