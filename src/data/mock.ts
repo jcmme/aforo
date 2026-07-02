@@ -140,6 +140,7 @@ export const DEMO_RESERVAS: Reserva[] = [];
 export const DEMO_RP_NOMBRES: Record<string, string> = {
   'rp-ana': 'Ana Torres',
   'rp-luis': 'Luis Mejía',
+  'cap-edgar': 'Edgar Nava',
 };
 
 /** Token demo para un QR (en real lo firma el servidor con HMAC). */
@@ -185,6 +186,8 @@ export const DEMO_RESERVAS_SEED: Reserva[] = [
       qrSeed('qr-s1b', 'res-seed-1', 'usado_puerta'),
       qrSeed('qr-s1c', 'res-seed-1', 'distribuido'),
     ],
+    invitadoNombre: null,
+    invitadoTelefono: null,
   },
   {
     id: 'res-seed-2',
@@ -204,6 +207,29 @@ export const DEMO_RESERVAS_SEED: Reserva[] = [
       qrSeed('qr-s2a', 'res-seed-2', 'usado_puerta'),
       qrSeed('qr-s2b', 'res-seed-2', 'distribuido'),
     ],
+    invitadoNombre: null,
+    invitadoTelefono: null,
+  },
+  // Walk-in metido por el capitán Edgar (sin cuenta en la app): solo nombre +
+  // teléfono. Su único QR queda "pendiente" para poder probar el link de
+  // reclamo (que debe mostrar el QR real, no solo confirmar).
+  {
+    id: 'res-seed-3',
+    eventoId: 'evt-1',
+    antroId: 'antro-1',
+    corporativoId: 'corp-1',
+    clienteId: null,
+    rpId: 'cap-edgar',
+    modalidad: 'acceso',
+    numInvitados: 1,
+    mesaTexto: null,
+    consumoMinimo: null,
+    estado: 'confirmada',
+    creadaEn: '2026-07-03T21:00:00Z',
+    canceladaEn: null,
+    qrs: [qrSeed('qr-s3a', 'res-seed-3', 'pendiente')],
+    invitadoNombre: 'Verónica Escobar',
+    invitadoTelefono: '+522213955697',
   },
 ];
 
@@ -245,6 +271,16 @@ export const DEMO_RPS: RpDemo[] = [
   { id: 'rp-mile', nombre: 'Mile López', personasHistoricas: 120 },
 ];
 
+/**
+ * Capitanes: se miden EXACTAMENTE igual que los RP (mismas métricas, ranking
+ * e insignias), pero con metas diferenciadas por rol (ver
+ * `hito_*_capitan` en DEMO_PARAMS) — CLAUDE.md: "al capitán se le exige mucho
+ * menos [volumen] que al RP".
+ */
+export const DEMO_CAPITANES: RpDemo[] = [
+  { id: 'cap-edgar', nombre: 'Edgar Nava', personasHistoricas: 140 },
+];
+
 export interface ReservaHist {
   id: string;
   rpId: string;
@@ -275,6 +311,9 @@ export const DEMO_RESERVAS_HIST: ReservaHist[] = [
   { id: 'h8', rpId: 'rp-mile', clienteId: 'cli-inv', fecha: '2026-06-25', distribuidos: 2, llegaron: 0, consumoReal: null, consumoMinimo: null, mesaTexto: null },
   { id: 'h9', rpId: 'rp-mile', clienteId: 'cli-j', fecha: '2026-06-26', distribuidos: 1, llegaron: 0, consumoReal: null, consumoMinimo: null, mesaTexto: null },
   { id: 'h10', rpId: 'rp-mile', clienteId: 'cli-inv2', fecha: '2026-06-24', distribuidos: 2, llegaron: 2, consumoReal: 15000, consumoMinimo: 5000, mesaTexto: 'Mesa 12' },
+  // Edgar (capitán) — también mete reservas de mesa; mismas métricas que un RP.
+  { id: 'h11', rpId: 'cap-edgar', clienteId: 'cli-maria', fecha: '2026-06-25', distribuidos: 2, llegaron: 2, consumoReal: 22000, consumoMinimo: 5000, mesaTexto: 'Mesa 3' },
+  { id: 'h12', rpId: 'cap-edgar', clienteId: 'cli-carlos', fecha: '2026-06-26', distribuidos: 3, llegaron: 3, consumoReal: 18000, consumoMinimo: 5000, mesaTexto: 'Mesa 5' },
 ];
 
 /** Insignias base (clave → nombre/descr) espejo de la migración. */
@@ -286,12 +325,19 @@ export const DEMO_INSIGNIAS = [
   { clave: 'volumen_historico', nombre: 'Volumen histórico', descripcion: '1,000 personas traídas en total' },
 ];
 
-/** Umbrales (en real viven en config_parametros; aquí se reflejan para demo). */
+/**
+ * Umbrales (en real viven en config_parametros; aquí se reflejan para demo).
+ * Metas de hitos diferenciadas por rol: al RP se le exige volumen alto, al
+ * capitán mucho menos (CLAUDE.md §6). Editable desde Súper Admin → Parámetros.
+ */
 export const DEMO_PARAMS = {
   hitoConstanciaReservas: 15,
+  hitoConstanciaReservasCapitan: 6,
   hitoMaquinaVentas: 250000,
+  hitoMaquinaVentasCapitan: 100000,
   hitoConfiabilidad: 0.85,
   hitoVolumenHistorico: 1000,
+  hitoVolumenHistoricoCapitan: 400,
   scoreUmbralFantasma: 60,
   scorePorNoShow: 20,
 };
@@ -415,8 +461,11 @@ export const DEMO_CONFIG_EDITABLE: { clave: string; valor: string; descripcion: 
   { clave: 'ventana_cancelacion_default', valor: '18:00', descripcion: 'Hora límite de cancelación' },
   { clave: 'consumo_minimo_mesa_default', valor: '5000', descripcion: 'Consumo mínimo por mesa (MXN)' },
   { clave: 'consumo_minimo_masivo', valor: 'false', descripcion: 'Flexibilizar mínimo en eventos masivos' },
-  { clave: 'hito_constancia_reservas', valor: '15', descripcion: 'Insignia Constancia (reservas/noche)' },
-  { clave: 'hito_maquina_ventas', valor: '250000', descripcion: 'Insignia Máquina de ventas (MXN/noche)' },
+  { clave: 'hito_constancia_reservas', valor: '15', descripcion: 'Insignia Constancia — RP (reservas/noche)' },
+  { clave: 'hito_constancia_reservas_capitan', valor: '6', descripcion: 'Insignia Constancia — Capitán (reservas/noche)' },
+  { clave: 'hito_maquina_ventas', valor: '250000', descripcion: 'Insignia Máquina de ventas — RP (MXN/noche)' },
+  { clave: 'hito_maquina_ventas_capitan', valor: '100000', descripcion: 'Insignia Máquina de ventas — Capitán (MXN/noche)' },
+  { clave: 'tyc_corte_semanal', valor: 'martes 12:00', descripcion: 'Corte semanal para que un cambio de T&C aplique esa semana' },
 ];
 
 /** Invitaciones generadas en la sesión (en memoria). */
@@ -433,3 +482,129 @@ export interface InvitacionSeed {
   creadaEn: string;
 }
 export const DEMO_INVITACIONES: InvitacionSeed[] = [];
+
+// ---------------------------------------------------------------------------
+// Ronda 5 — reservas de invitados sin cuenta, reseñas, T&C y feed social
+// ---------------------------------------------------------------------------
+
+/** Reseñas de clientes hacia un antro (estrellas + foto; comentario sin UI aún). */
+export interface ResenaSeed {
+  id: string;
+  antroId: string;
+  clienteNombre: string;
+  estrellas: number;
+  fotoUrl: string | null;
+  comentario: string | null;
+  creadoEn: string;
+}
+export const DEMO_RESENAS: ResenaSeed[] = [
+  { id: 'res-1', antroId: 'antro-1', clienteNombre: 'Carlos Ruiz', estrellas: 5, fotoUrl: 'https://images.unsplash.com/photo-1566417713940-fe7c737a9ef2?w=800', comentario: null, creadoEn: '2026-06-25T05:00:00Z' },
+  { id: 'res-2', antroId: 'antro-1', clienteNombre: 'María López', estrellas: 4, fotoUrl: null, comentario: null, creadoEn: '2026-06-26T05:00:00Z' },
+  { id: 'res-3', antroId: 'antro-3', clienteNombre: 'Invitado', estrellas: 5, fotoUrl: 'https://images.unsplash.com/photo-1571266028243-e4733b0f0bb0?w=800', comentario: null, creadoEn: '2026-06-27T05:00:00Z' },
+];
+
+/** T&C por antro, con workflow de aprobación del Súper Admin. */
+export interface TycAntroSeed {
+  antroId: string;
+  textoVigente: string;
+  textoPendiente: string | null;
+  estado: 'sin_cambios' | 'esperando_aprobacion';
+  responsableId: string | null;
+  responsableNombre: string | null;
+  propuestoEn: string | null;
+  aprobadoEn: string | null;
+  aplicaDesde: string | null;
+}
+export const DEMO_TYC_GENERAL =
+  'Uso de AFORO sujeto a mayoría de edad y a las políticas de privacidad de la plataforma.';
+export const DEMO_TYC_CORPORATIVO: Record<string, string> = {
+  'corp-1': 'Grupo Nocturno Puebla: acceso sujeto a disponibilidad y políticas del grupo.',
+  'corp-2': 'Distrito Angelópolis: acceso sujeto a disponibilidad y políticas del grupo.',
+};
+export const DEMO_TYC_ANTRO: Record<string, TycAntroSeed> = {
+  'antro-1': {
+    antroId: 'antro-1',
+    textoVigente: 'Lumen: cover no reembolsable. Acceso solo con identificación vigente.',
+    textoPendiente: null,
+    estado: 'sin_cambios',
+    responsableId: 'cap-edgar',
+    responsableNombre: 'Edgar Nava',
+    propuestoEn: null,
+    aprobadoEn: null,
+    aplicaDesde: null,
+  },
+  'antro-2': {
+    antroId: 'antro-2',
+    textoVigente: 'Terraza Cholula: evento al aire libre, sujeto a condiciones climáticas.',
+    textoPendiente: null,
+    estado: 'sin_cambios',
+    responsableId: null,
+    responsableNombre: null,
+    propuestoEn: null,
+    aprobadoEn: null,
+    aplicaDesde: null,
+  },
+  'antro-3': {
+    antroId: 'antro-3',
+    textoVigente: 'Distrito 23: código de vestimenta estricto. Reservado el derecho de admisión.',
+    textoPendiente: null,
+    estado: 'sin_cambios',
+    responsableId: null,
+    responsableNombre: null,
+    propuestoEn: null,
+    aprobadoEn: null,
+    aplicaDesde: null,
+  },
+};
+
+/** Feed persistido (comentarios/reacciones necesitan un id estable, no calculado al vuelo). */
+export interface FeedComentarioSeed {
+  id: string;
+  autorNombre: string;
+  texto: string;
+  creadoEn: string;
+}
+export interface FeedEventoSeed {
+  id: string;
+  tipo: 'insignia' | 'ranking' | 'racha';
+  autorId: string;
+  autorNombre: string;
+  texto: string;
+  creadoEn: string;
+  reaccionesDe: string[]; // ids de usuario demo que reaccionaron
+  comentarios: FeedComentarioSeed[];
+}
+export const DEMO_FEED_EVENTOS: FeedEventoSeed[] = [
+  {
+    id: 'feed-1',
+    tipo: 'racha',
+    autorId: 'rp-ana',
+    autorNombre: 'Ana Torres',
+    texto: 'entró al top 3 del ranking semanal — medalla de oro (racha de 3 semanas)',
+    creadoEn: '2026-06-27T04:00:00Z',
+    reaccionesDe: ['rp-luis', 'cap-edgar'],
+    comentarios: [
+      { id: 'c1', autorNombre: 'Luis Mejía', texto: '¡Vamos Ana!', creadoEn: '2026-06-27T04:10:00Z' },
+    ],
+  },
+  {
+    id: 'feed-2',
+    tipo: 'ranking',
+    autorId: 'rp-luis',
+    autorNombre: 'Luis Mejía',
+    texto: 'entró al top 3 del ranking semanal — medalla de plata',
+    creadoEn: '2026-06-27T04:05:00Z',
+    reaccionesDe: [],
+    comentarios: [],
+  },
+  {
+    id: 'feed-3',
+    tipo: 'insignia',
+    autorId: 'rp-ana',
+    autorNombre: 'Ana Torres',
+    texto: 'desbloqueó la insignia "Volumen histórico"',
+    creadoEn: '2026-06-26T22:00:00Z',
+    reaccionesDe: ['rp-mile'],
+    comentarios: [],
+  },
+];

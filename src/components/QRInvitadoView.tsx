@@ -5,6 +5,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import QRCode from 'react-native-qrcode-svg';
 
 import { enlaceReclamo } from '@/lib/qr';
+import { enviarPorWhatsApp, mensajeInvitacion } from '@/lib/whatsapp';
 import { colors, gradients, radius, spacing } from '@/theme';
 import type { QRInvitado } from '@/types';
 
@@ -16,24 +17,35 @@ const ESTADO_LABEL: Record<QRInvitado['estado'], { texto: string; color: string 
 
 /**
  * QR de un invitado, protagonista de la pantalla posterior a la reserva
- * (CLAUDE.md §9). Permite copiar el enlace de reclamo para distribuirlo.
+ * (CLAUDE.md §9). Permite copiar el enlace de reclamo o enviarlo por WhatsApp.
  */
 export function QRInvitadoView({
   qr,
   indice,
   total,
+  eventoNombre,
 }: {
   qr: QRInvitado;
   indice: number;
   total: number;
+  /** Si se pasa, "Enviar por WhatsApp" arma un mensaje con el nombre del lugar. */
+  eventoNombre?: string;
 }) {
   const [copiado, setCopiado] = useState(false);
   const estado = ESTADO_LABEL[qr.estado];
+  const link = enlaceReclamo(qr.token);
 
   async function copiarEnlace() {
-    await Clipboard.setStringAsync(enlaceReclamo(qr.token));
+    await Clipboard.setStringAsync(link);
     setCopiado(true);
     setTimeout(() => setCopiado(false), 1800);
+  }
+
+  function compartirWhatsApp() {
+    const mensaje = eventoNombre
+      ? mensajeInvitacion({ nombreInvitado: 'ahí', lugar: eventoNombre, link })
+      : link;
+    enviarPorWhatsApp(mensaje);
   }
 
   return (
@@ -60,11 +72,14 @@ export function QRInvitadoView({
         <View style={[styles.dot, { backgroundColor: estado.color }]} />
         <Text style={[styles.estadoTexto, { color: estado.color }]}>{estado.texto}</Text>
       </View>
-      <Pressable style={styles.compartir} onPress={copiarEnlace}>
-        <Text style={styles.compartirTexto}>
-          {copiado ? 'Enlace copiado' : 'Copiar enlace de reclamo'}
-        </Text>
-      </Pressable>
+      <View style={styles.acciones}>
+        <Pressable style={styles.compartir} onPress={copiarEnlace}>
+          <Text style={styles.compartirTexto}>{copiado ? 'Copiado' : 'Copiar enlace'}</Text>
+        </Pressable>
+        <Pressable style={[styles.compartir, styles.whatsapp]} onPress={compartirWhatsApp}>
+          <Text style={styles.whatsappTexto}>Enviar por WhatsApp</Text>
+        </Pressable>
+      </View>
     </View>
   );
 }
@@ -106,6 +121,7 @@ const styles = StyleSheet.create({
   },
   dot: { width: 7, height: 7, borderRadius: 4 },
   estadoTexto: { fontSize: 12, fontWeight: '700' },
+  acciones: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm, justifyContent: 'center' },
   compartir: {
     paddingVertical: spacing.sm,
     paddingHorizontal: spacing.lg,
@@ -114,5 +130,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.border,
   },
+  whatsapp: { backgroundColor: colors.accent, borderColor: colors.accent },
   compartirTexto: { color: colors.text, fontWeight: '700', fontSize: 13 },
+  whatsappTexto: { color: colors.onAccent, fontWeight: '800', fontSize: 13 },
 });

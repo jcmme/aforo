@@ -5,21 +5,28 @@ import { ActivityIndicator, Image, ScrollView, StyleSheet, Text, View } from 're
 import { EventoCard } from '@/components/EventoCard';
 import { obtenerAntro } from '@/data/antros';
 import { listarEventosDeAntro } from '@/data/eventos';
-import { colors, font, spacing } from '@/theme';
-import type { Antro, Evento } from '@/types';
+import { listarResenasDeAntro, promedioEstrellas } from '@/data/resenas';
+import { colors, font, radius, spacing } from '@/theme';
+import type { Antro, Evento, Resena } from '@/types';
 
 export default function AntroScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const [antro, setAntro] = useState<Antro | null>(null);
   const [eventos, setEventos] = useState<Evento[]>([]);
+  const [resenas, setResenas] = useState<Resena[]>([]);
   const [cargando, setCargando] = useState(true);
 
   useEffect(() => {
     (async () => {
-      const [a, e] = await Promise.all([obtenerAntro(id), listarEventosDeAntro(id)]);
+      const [a, e, r] = await Promise.all([
+        obtenerAntro(id),
+        listarEventosDeAntro(id),
+        listarResenasDeAntro(id),
+      ]);
       setAntro(a);
       setEventos(e);
+      setResenas(r);
       setCargando(false);
     })();
   }, [id]);
@@ -39,11 +46,22 @@ export default function AntroScreen() {
     );
   }
 
+  const promedio = promedioEstrellas(resenas);
+  const fotosResenas = resenas.filter((r) => r.fotoUrl).map((r) => r.fotoUrl as string);
+
   return (
     <ScrollView style={{ backgroundColor: colors.bg }} contentContainerStyle={styles.content}>
       <Image source={{ uri: antro.fotos[0] }} style={styles.hero} resizeMode="cover" />
       <View style={styles.body}>
-        <Text style={font.title}>{antro.nombre}</Text>
+        <View style={styles.headRow}>
+          <Text style={font.title}>{antro.nombre}</Text>
+          {resenas.length > 0 ? (
+            <View style={styles.rating}>
+              <Text style={styles.ratingTxt}>★ {promedio.toFixed(1)}</Text>
+              <Text style={styles.ratingCount}>({resenas.length})</Text>
+            </View>
+          ) : null}
+        </View>
         <Text style={font.muted}>
           {antro.zona} · {antro.horario}
         </Text>
@@ -60,6 +78,17 @@ export default function AntroScreen() {
             ))
           )}
         </View>
+
+        {fotosResenas.length > 0 ? (
+          <>
+            <Text style={[font.h2, { marginTop: spacing.lg }]}>Fotos de quienes fueron</Text>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.galeria}>
+              {fotosResenas.map((f, i) => (
+                <Image key={i} source={{ uri: f }} style={styles.fotoResena} />
+              ))}
+            </ScrollView>
+          </>
+        ) : null}
       </View>
     </ScrollView>
   );
@@ -70,7 +99,13 @@ const styles = StyleSheet.create({
   content: { paddingBottom: spacing.xxl },
   hero: { width: '100%', height: 240, backgroundColor: colors.surfaceAlt },
   body: { padding: spacing.lg, gap: spacing.xs },
+  headRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  rating: { flexDirection: 'row', alignItems: 'baseline', gap: 4 },
+  ratingTxt: { color: colors.accent, fontSize: 16, fontWeight: '800' },
+  ratingCount: { color: colors.textFaint, fontSize: 12 },
   desc: { ...font.body, marginTop: spacing.sm, lineHeight: 22 },
   direccion: { color: colors.textFaint, fontSize: 13, marginTop: spacing.xs },
   eventos: { gap: spacing.md, marginTop: spacing.md },
+  galeria: { gap: spacing.sm },
+  fotoResena: { width: 110, height: 110, borderRadius: radius.md, backgroundColor: colors.surfaceAlt },
 });

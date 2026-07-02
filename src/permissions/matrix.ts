@@ -34,6 +34,12 @@ const MATRIZ: Record<Accion, Rol[]> = {
   cargar_promociones: ['super_admin'],
   alta_corporativos: ['super_admin'],
   feature_flags_planes: ['super_admin'],
+  // El responsable de T&C es una persona designada por antro (no un rol fijo):
+  // aquí solo se listan los roles elegibles para SER designados; la pantalla
+  // valida en runtime que el usuario actual sea el responsable asignado.
+  editar_tyc: ['gerente', 'capitan', 'hostess', 'cajero', 'rp', 'super_admin'],
+  aprobar_tyc: ['super_admin'],
+  dejar_resena: ['cliente'],
 };
 
 /** Gerente general comparte permisos de gerente; se normaliza aquí. */

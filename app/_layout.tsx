@@ -30,7 +30,8 @@ export default function RootLayout() {
             name="reserva/[id]"
             options={{ title: 'Tu reserva', headerBackVisible: false }}
           />
-          <Stack.Screen name="reclamar/[token]" options={{ title: 'Reclamar acceso' }} />
+          <Stack.Screen name="reclamar/[token]" options={{ title: 'Tu acceso' }} />
+          <Stack.Screen name="resena/[reservaId]" options={{ title: 'Calificar', presentation: 'modal' }} />
         </Stack>
       </AuthProvider>
     </SafeAreaProvider>

@@ -1,8 +1,11 @@
 // Edge Function: recalcular-fantasmas (job de inteligencia)
 // Recalcula no-shows, score de reputación y alertas a partir de datos REALES:
 // un QR DISTRIBUIDO que nunca fue usado en puerta, tras pasar el evento, es un
-// no-show. Vincula identidades por teléfono normalizado. Pensado para correr en
-// segundo plano (cron) o tras la noche. Solo súper admin / service.
+// no-show. Vincula identidades por teléfono normalizado — incluye reservas de
+// INVITADOS SIN CUENTA (cliente_id null, invitado_telefono), que se detectan
+// igual pero no tienen fila en `reputacion` (requiere un usuario real; el
+// vínculo automático al crear cuenta queda para una fase posterior). Pensado
+// para correr en segundo plano (cron) o tras la noche. Solo súper admin.
 
 import { cors, json } from '../_shared/cors.ts';
 import { clienteServicio, puedeAccion, usuarioDeRequest } from '../_shared/auth.ts';
@@ -26,26 +29,38 @@ Deno.serve(async (req) => {
   const scorePorNoShow = (await obtenerParametro<number>(svc, 'score_por_noshow')) ?? 20;
   const ahora = new Date();
 
-  // Reservas con sus QR y la fecha del evento + cliente.
+  // Reservas con sus QR, fecha del evento, cliente (o invitado sin cuenta).
   const { data: reservas } = await svc
     .from('reservas')
-    .select('id, cliente_id, corporativo_id, eventos(fecha), qr_codes(estado)');
+    .select('id, cliente_id, invitado_telefono, corporativo_id, eventos(fecha), qr_codes(estado)');
 
-  // Agregado por cliente.
+  // Agregado por cliente CON cuenta (alimenta `reputacion`).
   const porCliente = new Map<string, { noShows: number; total: number; corp: string }>();
+  // Agregado por teléfono de INVITADO sin cuenta (solo alertas; sin reputacion).
+  const porTelInvitado = new Map<string, { noShows: number; total: number; corp: string }>();
+
   for (const r of reservas ?? []) {
     const fecha = new Date((r as Record<string, any>).eventos?.fecha ?? 0);
     const qrs = (r as Record<string, any>).qr_codes ?? [];
     const distribuidos = qrs.filter((q: any) => q.estado === 'distribuido' || q.estado === 'usado_puerta').length;
     const usados = qrs.filter((q: any) => q.estado === 'usado_puerta').length;
     const noShow = fecha < ahora && distribuidos > 0 && usados === 0;
-    const g = porCliente.get(r.cliente_id) ?? { noShows: 0, total: 0, corp: r.corporativo_id };
-    g.total += 1;
-    if (noShow) g.noShows += 1;
-    porCliente.set(r.cliente_id, g);
+
+    if (r.cliente_id) {
+      const g = porCliente.get(r.cliente_id) ?? { noShows: 0, total: 0, corp: r.corporativo_id };
+      g.total += 1;
+      if (noShow) g.noShows += 1;
+      porCliente.set(r.cliente_id, g);
+    } else if (r.invitado_telefono) {
+      const tel = normTel(r.invitado_telefono);
+      const g = porTelInvitado.get(tel) ?? { noShows: 0, total: 0, corp: r.corporativo_id };
+      g.total += 1;
+      if (noShow) g.noShows += 1;
+      porTelInvitado.set(tel, g);
+    }
   }
 
-  // Upsert reputación por cliente.
+  // Upsert reputación (solo clientes con cuenta real).
   for (const [usuarioId, g] of porCliente) {
     const score = Math.max(0, 100 - g.noShows * scorePorNoShow);
     const showRate = g.total > 0 ? (g.total - g.noShows) / g.total : 1;
@@ -55,7 +70,20 @@ Deno.serve(async (req) => {
     );
   }
 
-  // Alertas por identidad (teléfono normalizado).
+  // Alertas de invitados sin cuenta con score bajo (sin fila de reputación).
+  for (const [tel, g] of porTelInvitado) {
+    const score = Math.max(0, 100 - g.noShows * scorePorNoShow);
+    if (g.noShows > 0) {
+      await svc.from('alertas_fantasma').insert({
+        usuario_id: null,
+        corporativo_id: g.corp,
+        tipo: 'invitado_sin_cuenta_no_show',
+        detalle: { telefono: tel, noShows: g.noShows, total: g.total, score },
+      });
+    }
+  }
+
+  // Alertas por identidad (teléfono normalizado) — usuarios con cuenta.
   const { data: usuarios } = await svc.from('usuarios').select('id, nombre, telefono');
   const porTel = new Map<string, { nombres: Set<string>; ids: string[] }>();
   for (const u of usuarios ?? []) {
@@ -87,5 +115,5 @@ Deno.serve(async (req) => {
     }
   }
 
-  return json({ ok: true, clientes: porCliente.size }, 200);
+  return json({ ok: true, clientes: porCliente.size, invitados: porTelInvitado.size }, 200);
 });

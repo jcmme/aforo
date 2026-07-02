@@ -1,24 +1,31 @@
 import { useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
-import { insigniasDeRP, listarRanking, metricasRP } from '@/data/social';
+import { useAuth } from '@/context/AuthContext';
+import { DEMO_IDENTIDAD_POR_ROL, insigniasDeRP, listarRanking, metricasRP } from '@/data/social';
 import { colors, font, radius, spacing } from '@/theme';
 import type { InsigniaEstado, MetricasRP } from '@/types';
 
-// RP de demostración (la sesión "es" este RP). En real saldría del usuario.
-const RP_DEMO = 'rp-ana';
+const ETIQUETA_ROL: Record<string, string> = { rp: 'RP', capitan: 'Capitán' };
 
-/** Perfil del RP: insignias permanentes, posición y métricas propias. */
-export default function PerfilRPScreen() {
+/**
+ * Perfil propio: insignias permanentes, posición y métricas propias. Sirve
+ * tanto para RP como para capitán — se miden exactamente igual (CLAUDE.md §6).
+ */
+export default function PerfilScreen() {
+  const { rolActivo } = useAuth();
+  const creadorId = DEMO_IDENTIDAD_POR_ROL[rolActivo] ?? 'rp-ana';
+  const rol = rolActivo === 'capitan' ? 'capitan' : 'rp';
+
   const [m, setM] = useState<MetricasRP | null>(null);
   const [insignias, setInsignias] = useState<InsigniaEstado[]>([]);
   const [posicion, setPosicion] = useState<number>(0);
 
   useEffect(() => {
-    setM(metricasRP(RP_DEMO));
-    setInsignias(insigniasDeRP(RP_DEMO));
-    setPosicion(listarRanking().find((e) => e.rpId === RP_DEMO)?.posicion ?? 0);
-  }, []);
+    setM(metricasRP(creadorId));
+    setInsignias(insigniasDeRP(creadorId, rol));
+    setPosicion(listarRanking().find((e) => e.rpId === creadorId)?.posicion ?? 0);
+  }, [creadorId, rol]);
 
   if (!m) return null;
 
@@ -26,10 +33,10 @@ export default function PerfilRPScreen() {
     <ScrollView style={{ backgroundColor: colors.bg }} contentContainerStyle={styles.content}>
       <View style={styles.cab}>
         <Text style={font.title}>{m.nombre}</Text>
-        <Text style={font.muted}>RP · posición #{posicion} esta semana</Text>
+        <Text style={font.muted}>{ETIQUETA_ROL[rol]} · posición #{posicion} esta semana</Text>
       </View>
 
-      {/* Métricas propias (el RP sí ve sus montos). */}
+      {/* Métricas propias (cada quien ve las suyas). */}
       <View style={styles.metricas}>
         <Metrica valor={String(m.creadas)} etiqueta="Reservas" />
         <Metrica valor={String(m.completas)} etiqueta="Completas" />
@@ -40,12 +47,15 @@ export default function PerfilRPScreen() {
       </View>
 
       <Text style={[font.h2, { marginTop: spacing.md }]}>Insignias</Text>
-      <Text style={font.muted}>Logros permanentes. No se reinician.</Text>
+      <Text style={font.muted}>
+        Logros permanentes. No se reinician.{' '}
+        {rol === 'capitan' ? 'Metas ajustadas al rol de capitán.' : ''}
+      </Text>
       <View style={styles.insignias}>
         {insignias.map((i) => (
           <View key={i.clave} style={[styles.insignia, !i.desbloqueada && styles.bloqueada]}>
-            <View style={[styles.medalla, { backgroundColor: i.desbloqueada ? colors.primary : colors.surfaceAlt }]}>
-              <Text style={[styles.medallaTxt, { color: i.desbloqueada ? '#04141A' : colors.textFaint }]}>
+            <View style={[styles.medalla, { backgroundColor: i.desbloqueada ? colors.accent : colors.surfaceAlt }]}>
+              <Text style={[styles.medallaTxt, { color: i.desbloqueada ? colors.onAccent : colors.textFaint }]}>
                 {i.nombre.slice(0, 1)}
               </Text>
             </View>

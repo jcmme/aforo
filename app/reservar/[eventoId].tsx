@@ -6,6 +6,7 @@ import { Boton } from '@/components/ui';
 import { DEMO_CONSUMO_MINIMO_MESA } from '@/data/mock';
 import { obtenerEvento } from '@/data/eventos';
 import { crearReserva, ErrorReserva } from '@/data/reservas';
+import { tycCorporativo, tycEfectivoDeAntro, tycGeneral } from '@/data/tyc';
 import { colors, font, radius, spacing } from '@/theme';
 import type { Evento, ModalidadReserva } from '@/types';
 
@@ -19,6 +20,8 @@ export default function ReservarScreen() {
   const [invitados, setInvitados] = useState(1);
   const [enviando, setEnviando] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [tycAntro, setTycAntro] = useState('');
+  const [mostrarTycCompleto, setMostrarTycCompleto] = useState(false);
 
   useEffect(() => {
     obtenerEvento(eventoId).then((e) => {
@@ -26,6 +29,7 @@ export default function ReservarScreen() {
       if (e && !e.modalidades.includes('acceso') && e.modalidades.includes('mesa')) {
         setModalidad('mesa');
       }
+      if (e) tycEfectivoDeAntro(e.antroId).then(setTycAntro);
     });
   }, [eventoId]);
 
@@ -93,6 +97,24 @@ export default function ReservarScreen() {
           </View>
         ) : null}
 
+        {tycAntro ? (
+          <View style={styles.tyc}>
+            <Text style={styles.tycTitulo}>Antes de reservar</Text>
+            <Text style={styles.tycTexto}>{tycAntro}</Text>
+            {mostrarTycCompleto ? (
+              <>
+                <Text style={styles.tycExtra}>{tycCorporativo(evento.corporativoId)}</Text>
+                <Text style={styles.tycExtra}>{tycGeneral()}</Text>
+              </>
+            ) : null}
+            <Pressable onPress={() => setMostrarTycCompleto((v) => !v)}>
+              <Text style={styles.tycLink}>
+                {mostrarTycCompleto ? 'Ocultar' : 'Ver términos completos'}
+              </Text>
+            </Pressable>
+          </View>
+        ) : null}
+
         {error ? <Text style={styles.error}>{error}</Text> : null}
       </ScrollView>
 
@@ -150,6 +172,19 @@ const styles = StyleSheet.create({
   minimoEtiqueta: { color: colors.textMuted, fontSize: 12, fontWeight: '700', textTransform: 'uppercase' },
   minimoMonto: { color: colors.text, fontSize: 22, fontWeight: '900' },
   error: { color: colors.danger, fontSize: 13, marginTop: spacing.sm },
+  tyc: {
+    backgroundColor: colors.surface,
+    borderRadius: radius.md,
+    borderWidth: 1,
+    borderColor: colors.border,
+    padding: spacing.md,
+    gap: 4,
+    marginTop: spacing.md,
+  },
+  tycTitulo: { color: colors.textMuted, fontSize: 11, fontWeight: '800', textTransform: 'uppercase', letterSpacing: 0.5 },
+  tycTexto: { color: colors.text, fontSize: 12, lineHeight: 17 },
+  tycExtra: { color: colors.textFaint, fontSize: 11, lineHeight: 16, marginTop: 4 },
+  tycLink: { color: colors.accent, fontSize: 12, fontWeight: '700', marginTop: 4 },
   footer: { padding: spacing.lg, borderTopWidth: 1, borderTopColor: colors.border, gap: spacing.sm },
   nota: { color: colors.textFaint, fontSize: 12, textAlign: 'center' },
 });

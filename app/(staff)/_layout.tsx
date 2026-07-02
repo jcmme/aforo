@@ -34,19 +34,23 @@ export default function StaffLayout() {
       <Stack.Screen name="cajero-consumo" options={{ title: 'Capturar consumo' }} />
       <Stack.Screen name="cajero-minimos" options={{ title: 'C. Mínimos' }} />
       <Stack.Screen name="feed" options={{ title: 'Red social' }} />
+      <Stack.Screen name="feed-post/[id]" options={{ title: 'Publicación' }} />
       <Stack.Screen name="ranking" options={{ title: 'Ranking semanal' }} />
-      <Stack.Screen name="perfil-rp" options={{ title: 'Mi perfil' }} />
+      <Stack.Screen name="perfil" options={{ title: 'Mi perfil' }} />
+      <Stack.Screen name="nueva-reserva" options={{ title: 'Nueva reserva' }} />
       <Stack.Screen name="fantasmas" options={{ title: 'Detección de fantasmas' }} />
       <Stack.Screen name="metricas" options={{ title: 'Métricas' }} />
       <Stack.Screen name="cadena" options={{ title: 'Panel Cadena' }} />
       <Stack.Screen name="datos" options={{ title: 'Datos extraíbles' }} />
       <Stack.Screen name="invitaciones" options={{ title: 'Invitaciones' }} />
+      <Stack.Screen name="tyc-antro" options={{ title: 'T&C del antro' }} />
       <Stack.Screen name="sa-parametros" options={{ title: 'Parámetros' }} />
       <Stack.Screen name="sa-promociones" options={{ title: 'Promociones' }} />
       <Stack.Screen name="sa-corporativos" options={{ title: 'Corporativos' }} />
       <Stack.Screen name="sa-planes" options={{ title: 'Planes y cobro' }} />
       <Stack.Screen name="sa-salud" options={{ title: 'Salud del producto' }} />
       <Stack.Screen name="sa-auditoria" options={{ title: 'Auditoría' }} />
+      <Stack.Screen name="sa-tyc" options={{ title: 'Aprobar T&C' }} />
       <Stack.Screen name="rol" options={{ title: 'Cambiar rol', presentation: 'modal' }} />
     </Stack>
   );

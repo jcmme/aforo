@@ -20,9 +20,21 @@ Deno.serve(async (req) => {
   }
 
   const body = await req.json().catch(() => null);
-  const { eventoId, modalidad, numInvitados, rpId } = body ?? {};
+  const { eventoId, modalidad, numInvitados, invitado, rpId } = body ?? {};
   if (!eventoId || !modalidad || !Number.isInteger(numInvitados) || numInvitados < 1) {
     return json({ error: 'Datos de reserva inválidos' }, 400);
+  }
+
+  // Reserva de invitado sin cuenta: solo la puede meter STAFF (no un cliente
+  // reservando "para otro" con solo su propio permiso base). Se valida el rol
+  // real (sin el atajo de "todo cliente puede crear_reserva").
+  if (invitado) {
+    if (!invitado.nombre?.trim() || !invitado.telefono?.trim()) {
+      return json({ error: 'Falta nombre o teléfono del invitado' }, 400);
+    }
+    if (!(await puedeAccion(svc, usuario.id, 'crear_reserva', []))) {
+      return json({ error: 'Solo el staff puede registrar invitados sin cuenta' }, 403);
+    }
   }
 
   // Evento + antro (para validar modalidad, cupo y resolver config).
@@ -63,8 +75,13 @@ Deno.serve(async (req) => {
       evento_id: eventoId,
       antro_id: evento.antro_id,
       corporativo_id: evento.corporativo_id,
-      cliente_id: usuario.id,
-      rp_id: rpId ?? null,
+      // Invitado sin cuenta: sin cliente_id, con su nombre/teléfono. El rp_id
+      // en ese caso es SIEMPRE quien llama (nunca se confía en un id del
+      // body); si es un cliente normal, puede traer el rpId de un referido.
+      cliente_id: invitado ? null : usuario.id,
+      rp_id: invitado ? usuario.id : (rpId ?? null),
+      invitado_nombre: invitado?.nombre?.trim() ?? null,
+      invitado_telefono: invitado?.telefono?.trim() ?? null,
       modalidad,
       num_invitados: numInvitados,
       consumo_minimo: consumoMinimo,

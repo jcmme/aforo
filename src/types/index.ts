@@ -51,7 +51,10 @@ export type Accion =
   | 'gestionar_invitaciones'
   | 'cargar_promociones'
   | 'alta_corporativos'
-  | 'feature_flags_planes';
+  | 'feature_flags_planes'
+  | 'editar_tyc'
+  | 'aprobar_tyc'
+  | 'dejar_resena';
 
 // ---------------------------------------------------------------------------
 // Identidad y tenancy (CLAUDE.md §2)
@@ -160,7 +163,8 @@ export interface Reserva {
   eventoId: string;
   antroId: string;
   corporativoId: string;
-  clienteId: string;
+  /** Nulo cuando la reserva es de un invitado sin cuenta (la metió staff). */
+  clienteId: string | null;
   /** RP dueño de la reserva, si vino por un enlace de RP. */
   rpId: string | null;
   modalidad: ModalidadReserva;
@@ -173,6 +177,9 @@ export interface Reserva {
   creadaEn: string;
   canceladaEn: string | null;
   qrs: QRInvitado[];
+  /** Solo si `clienteId` es nulo: identidad del invitado (nombre + teléfono). */
+  invitadoNombre: string | null;
+  invitadoTelefono: string | null;
 }
 
 /** Datos para crear una reserva desde el cliente. */
@@ -181,6 +188,8 @@ export interface NuevaReserva {
   modalidad: ModalidadReserva;
   numInvitados: number;
   rpId?: string | null;
+  /** Reserva hecha por staff (RP/capitán) para alguien sin cuenta en la app. */
+  invitado?: { nombre: string; telefono: string } | null;
 }
 
 // ---------------------------------------------------------------------------
@@ -306,14 +315,6 @@ export interface ClienteFantasma {
   accion: AccionFantasma;
 }
 
-/** Evento del feed de la red social del staff. */
-export interface FeedItem {
-  id: string;
-  tipo: 'insignia' | 'ranking' | 'racha';
-  texto: string;
-  rpNombre: string;
-  cuando: string;
-}
 
 // ---------------------------------------------------------------------------
 // Paneles de gestión (CLAUDE.md §6 — Sección 4). Estos paneles LEEN y
@@ -416,4 +417,53 @@ export interface AuditoriaItem {
   actor: string;
   corporativo: string;
   cuando: string;
+}
+
+// ---------------------------------------------------------------------------
+// Ronda 5 — reseñas, T&C y feed social persistido
+// ---------------------------------------------------------------------------
+
+/** Reseña de un cliente hacia un antro (solo si su reserva llegó). */
+export interface Resena {
+  id: string;
+  antroId: string;
+  clienteNombre: string;
+  estrellas: number; // 1-5
+  fotoUrl: string | null;
+  /** Listo en el modelo; sin UI todavía ("veremos"). */
+  comentario: string | null;
+  creadoEn: string;
+}
+
+/** T&C de un antro con su workflow de aprobación. */
+export interface TycAntro {
+  antroId: string;
+  textoVigente: string;
+  textoPendiente: string | null;
+  estado: 'sin_cambios' | 'esperando_aprobacion';
+  responsableId: string | null;
+  responsableNombre: string | null;
+  propuestoEn: string | null;
+  aprobadoEn: string | null;
+  aplicaDesde: string | null;
+}
+
+/** Publicación persistida del feed social del staff. */
+export interface FeedEvento {
+  id: string;
+  tipo: 'insignia' | 'ranking' | 'racha';
+  autorId: string;
+  autorNombre: string;
+  texto: string;
+  creadoEn: string;
+  reacciones: number;
+  reaccionadoPorMi: boolean;
+  comentarios: FeedComentario[];
+}
+
+export interface FeedComentario {
+  id: string;
+  autorNombre: string;
+  texto: string;
+  creadoEn: string;
 }

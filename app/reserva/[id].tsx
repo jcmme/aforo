@@ -97,7 +97,7 @@ export default function ReservaScreen() {
         showsHorizontalScrollIndicator={false}
         renderItem={({ item, index }) => (
           <View style={{ width: ANCHO - spacing.lg * 2, paddingHorizontal: spacing.xs }}>
-            <QRInvitadoView qr={item} indice={index + 1} total={reserva.qrs.length} />
+            <QRInvitadoView qr={item} indice={index + 1} total={reserva.qrs.length} eventoNombre={evento?.nombre} />
           </View>
         )}
         ListEmptyComponent={<Text style={font.muted}>Esta reserva no tiene QR.</Text>}

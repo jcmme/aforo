@@ -6,8 +6,14 @@ import {
   DEMO_CONSUMO_MINIMO_MESA,
   DEMO_EVENTOS,
   DEMO_RESERVAS,
+  DEMO_RESERVAS_SEED,
   DEMO_USUARIO,
 } from './mock';
+
+/** Todas las reservas visibles en el demo: sembradas + creadas en la sesión. */
+function todasLasReservas(): Reserva[] {
+  return [...DEMO_RESERVAS_SEED, ...DEMO_RESERVAS];
+}
 
 /** Error de negocio legible para mostrar en la UI. */
 export class ErrorReserva extends Error {}
@@ -32,6 +38,8 @@ function filaAReserva(r: Record<string, any>): Reserva {
     estado: r.estado,
     creadaEn: r.creada_en,
     canceladaEn: r.cancelada_en,
+    invitadoNombre: r.invitado_nombre ?? null,
+    invitadoTelefono: r.invitado_telefono ?? null,
     qrs: (r.qr_codes ?? []).map(
       (q: Record<string, any>): QRInvitado => ({
         id: q.id,
@@ -91,7 +99,8 @@ export async function crearReserva(datos: NuevaReserva): Promise<Reserva> {
     eventoId: evento.id,
     antroId: evento.antroId,
     corporativoId: evento.corporativoId,
-    clienteId: DEMO_USUARIO.id,
+    // Reserva de invitado sin cuenta (la mete staff): sin cliente_id.
+    clienteId: datos.invitado ? null : DEMO_USUARIO.id,
     rpId: datos.rpId ?? null,
     modalidad: datos.modalidad,
     numInvitados: datos.numInvitados,
@@ -101,6 +110,8 @@ export async function crearReserva(datos: NuevaReserva): Promise<Reserva> {
     creadaEn: new Date().toISOString(),
     canceladaEn: null,
     qrs,
+    invitadoNombre: datos.invitado?.nombre ?? null,
+    invitadoTelefono: datos.invitado?.telefono ?? null,
   };
 
   DEMO_RESERVAS.unshift(reserva);
@@ -171,7 +182,7 @@ export async function reclamarQr(token: string): Promise<void> {
     if (error) throw new ErrorReserva(error.message);
     return;
   }
-  for (const reserva of DEMO_RESERVAS) {
+  for (const reserva of todasLasReservas()) {
     const qr = reserva.qrs.find((q) => q.token === token);
     if (qr && qr.estado === 'pendiente') {
       qr.estado = 'distribuido';
@@ -179,4 +190,40 @@ export async function reclamarQr(token: string): Promise<void> {
       return;
     }
   }
+}
+
+/**
+ * Devuelve el QR de un token (con el nombre del evento), para pintarlo en la
+ * pantalla de reclamo: el enlace ES el acceso de quien no tiene la app.
+ */
+export async function obtenerQrPorToken(
+  token: string,
+): Promise<{ qr: QRInvitado; eventoNombre: string } | null> {
+  if (supabase) {
+    const { data } = await supabase
+      .from('qr_codes')
+      .select('*, reservas(eventos(nombre))')
+      .eq('token', token)
+      .maybeSingle();
+    if (!data) return null;
+    return {
+      qr: {
+        id: data.id,
+        reservaId: data.reserva_id,
+        token: data.token,
+        estado: data.estado,
+        distribuidoEn: data.distribuido_en,
+        usadoEn: data.usado_en,
+      },
+      eventoNombre: data.reservas?.eventos?.nombre ?? 'tu evento',
+    };
+  }
+  for (const reserva of todasLasReservas()) {
+    const qr = reserva.qrs.find((q) => q.token === token);
+    if (qr) {
+      const evento = DEMO_EVENTOS.find((e) => e.id === reserva.eventoId);
+      return { qr, eventoNombre: evento?.nombre ?? 'tu evento' };
+    }
+  }
+  return null;
 }

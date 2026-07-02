@@ -3,6 +3,7 @@ import { useCallback, useState } from 'react';
 import { ActivityIndicator, FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { EstadoReservaBadge } from '@/components/EstadoReservaBadge';
+import { Boton } from '@/components/ui';
 import { listarMisReservas } from '@/data/reservas';
 import { obtenerEvento } from '@/data/eventos';
 import { colors, font, radius, spacing } from '@/theme';
@@ -73,6 +74,15 @@ export default function ReservasScreen() {
           <Text style={styles.meta}>
             {item.reserva.modalidad === 'mesa' ? 'Mesa' : 'Acceso'} · {item.reserva.numInvitados} invitado(s) · {item.reserva.qrs.length} QR
           </Text>
+          {item.reserva.qrs.some((q) => q.estado === 'usado_puerta') ? (
+            <View style={{ marginTop: spacing.xs }}>
+              <Boton
+                titulo="Calificar este lugar"
+                variante="secundario"
+                onPress={() => router.push(`/resena/${item.reserva.id}`)}
+              />
+            </View>
+          ) : null}
         </Pressable>
       )}
       ListEmptyComponent={
