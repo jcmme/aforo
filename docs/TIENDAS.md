@@ -9,30 +9,48 @@ siguientes.
 
 ---
 
-## 1. Trámites que solo puede hacer MABI (empezar YA, son los más lentos)
+## 1. Trámites externos (empezar YA, son los más lentos)
 
-### 1.1 Número D-U-N-S (requisito previo a las dos cuentas)
+> **Situación actual: MABI aún no está constituida** y el proyecto lo lleva
+> una persona física. La ruta elegida es **arrancar con cuentas personales y
+> migrar a la empresa después** — ambas tiendas permiten transferir la app
+> (App Transfer en App Store Connect / transferencia de app en Play Console)
+> sin perder usuarios, reseñas ni historial. Nada del trabajo se repite.
 
-- Identificador de 9 dígitos que emite **Dun & Bradstreet** para acreditar que
-  una empresa existe legalmente. Apple y Google lo usan para verificar
-  cuentas de **organización**. Es **gratuito**.
-- Se solicita con los datos legales de MABI (razón social, domicilio fiscal,
-  teléfono, representante). Vías:
-  - Herramienta de Apple (busca/solicita D-U-N-S): https://developer.apple.com/enroll/duns-lookup/
-  - Directo con D&B: https://www.dnb.com/duns-number.html
-- Tarda de **días a ~4 semanas** en México. Si D&B llama para verificar
-  datos, responder rápido acorta el trámite.
-- Quien lo solicite debe ser empleado/representante autorizado de MABI y usar
-  un correo del dominio de la empresa si existe.
-
-### 1.2 Cuentas de desarrollador
+### 1.1 Ruta de arranque (persona física, disponible HOY)
 
 | | Apple Developer Program | Google Play Console |
 |---|---|---|
+| Tipo | **Individual** | **Personal** |
 | Costo | $99 USD / año | $25 USD una sola vez |
-| Tipo recomendado | **Organización** (requiere D-U-N-S) | **Organización** (requiere D-U-N-S) |
-| Por qué organización | Publica como "MABI", permite varios miembros, evita ligar la app a una persona | Igual, y **evita** el requisito de prueba cerrada de cuentas personales (12 testers × 14 días) |
+| Requisitos | Identificación oficial + verificación de identidad en línea | Identificación + verificación |
+| Diferencia visible | La ficha muestra el nombre personal como vendedor (hasta transferir a la empresa) | Igual; además algunos datos de contacto del desarrollador se muestran públicos — usar correo/teléfono dedicados al proyecto, no personales |
+| Requisito extra | — | **Prueba cerrada obligatoria: 12 testers inscritos durante 14 días** antes de poder publicar. Se cubre con staff/RPs/amigos y sirve como beta real pre-lanzamiento |
 | URL | https://developer.apple.com/programs/enroll/ | https://play.google.com/console/signup |
+
+### 1.2 Ruta de la empresa (en paralelo, sin costo)
+
+1. **e.firma del SAT** (si no se tiene): cita presencial. Es el prerequisito
+   real de todo lo demás.
+2. **Constituir una SAS** (Sociedad por Acciones Simplificada): gratuita,
+   100% en línea en el portal de la Secretaría de Economía
+   (https://www.gob.mx/tuempresa), puede ser **unipersonal**. Lista en días.
+   Tope de ingresos anuales de varios millones de pesos — suficiente para
+   arrancar. Esta entidad se convierte en "MABI".
+3. **Número D-U-N-S**: identificador de 9 dígitos de **Dun & Bradstreet**
+   que acredita que la empresa existe. Gratuito; tarda de días a ~4 semanas
+   en México. Vías: herramienta de Apple
+   (https://developer.apple.com/enroll/duns-lookup/ — buscar primero si ya
+   existe uno) o directo con D&B (https://www.dnb.com/duns-number.html).
+4. **Cuentas de organización** en ambas tiendas → **transferir las apps**
+   desde las cuentas personales. Las cuentas de organización de Google
+   además no tienen el requisito de los 12 testers.
+
+> **Importante (responsabilidad, no tiendas):** operar el piloto con datos
+> reales de los antros y cobrar suscripciones sin entidad significa que la
+> responsabilidad legal (LFPDPPP, contratos con corporativos) recae en la
+> persona física. La SAS conviene tenerla ANTES del piloto con clientes
+> reales, no solo para las tiendas.
 
 ### 1.3 Legal (conecta con el pendiente LFPDPPP del CLAUDE.md)
 
@@ -188,10 +206,14 @@ Ambas tiendas exigen declarar también: **los datos se cifran en tránsito**
 
 ## 6. Orden de ejecución sugerido
 
-1. MABI: D-U-N-S → cuentas de desarrollador → abogado (aviso de privacidad)
-   → dominio. Todo en paralelo, hoy.
+1. Persona física, hoy: cuenta de Supabase (gratis) + dominio + cuentas de
+   desarrollador individuales (§1.1) + arrancar e.firma/SAS en paralelo
+   (§1.2) + abogado (aviso de privacidad).
 2. Código: proyecto Supabase de producción + SMS real + revisión de
    seguridad externa.
-3. Builds EAS de producción + pruebas en dispositivos físicos.
+3. Builds EAS de producción + pruebas en dispositivos físicos + prueba
+   cerrada de Google (12 testers × 14 días) con el staff del piloto.
 4. Fichas, formularios de privacidad, cuenta de revisor, capturas.
 5. Checklist final completo → someter a las dos tiendas el mismo día.
+6. Cuando la SAS y su D-U-N-S existan: cuentas de organización y App
+   Transfer en ambas tiendas (sin pérdida de usuarios ni reseñas).
