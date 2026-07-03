@@ -1,9 +1,10 @@
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Linking, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { Boton, Campo, Pantalla } from '@/components/ui';
 import { useAuth } from '@/context/AuthContext';
+import { avisoPrivacidadUrl } from '@/data/legal';
 import { colors, font, spacing } from '@/theme';
 
 export default function RegistroScreen() {
@@ -16,6 +17,11 @@ export default function RegistroScreen() {
   const [password, setPassword] = useState('');
   const [cargando, setCargando] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  async function abrirAviso() {
+    const url = await avisoPrivacidadUrl();
+    if (url) Linking.openURL(url).catch(() => {});
+  }
 
   async function crear() {
     setError(null);
@@ -54,6 +60,14 @@ export default function RegistroScreen() {
           <Campo etiqueta="Contraseña" value={password} onChangeText={setPassword} placeholder="Mínimo 8 caracteres" secureTextEntry />
           {error ? <Text style={styles.error}>{error}</Text> : null}
           <Boton titulo="Crear cuenta" onPress={crear} cargando={cargando} />
+          {/* Consentimiento informado (LFPDPPP) y enlace exigido por las tiendas. */}
+          <Text style={styles.legal}>
+            Al crear tu cuenta aceptas el tratamiento de tus datos conforme al{' '}
+            <Text style={styles.legalLink} onPress={abrirAviso}>
+              Aviso de privacidad
+            </Text>
+            .
+          </Text>
         </View>
       </ScrollView>
     </Pantalla>
@@ -66,4 +80,6 @@ const styles = StyleSheet.create({
   demo: { color: colors.primary, fontSize: 13 },
   form: { gap: spacing.md },
   error: { color: colors.danger, fontSize: 13 },
+  legal: { color: colors.textFaint, fontSize: 12, textAlign: 'center', lineHeight: 18 },
+  legalLink: { color: colors.textMuted, textDecorationLine: 'underline' },
 });

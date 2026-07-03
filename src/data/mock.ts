@@ -466,6 +466,7 @@ export const DEMO_CONFIG_EDITABLE: { clave: string; valor: string; descripcion: 
   { clave: 'hito_maquina_ventas', valor: '250000', descripcion: 'Insignia Máquina de ventas — RP (MXN/noche)' },
   { clave: 'hito_maquina_ventas_capitan', valor: '100000', descripcion: 'Insignia Máquina de ventas — Capitán (MXN/noche)' },
   { clave: 'tyc_corte_semanal', valor: 'martes 12:00', descripcion: 'Corte semanal para que un cambio de T&C aplique esa semana' },
+  { clave: 'aviso_privacidad_url', valor: 'https://jcmme.github.io/aforo/aviso-privacidad.html', descripcion: 'URL pública del aviso de privacidad (sustituir por la del dominio propio)' },
 ];
 
 /** Invitaciones generadas en la sesión (en memoria). */

@@ -79,6 +79,15 @@ siguientes.
 - [x] **Cifrado exento** declarado (`usesNonExemptEncryption: false` — solo
       HTTPS estándar), evita el cuestionario de exportación en cada build.
 - [x] `eas.json` con perfiles development / preview / production.
+- [x] **Enlace al aviso de privacidad DENTRO de la app** (lo exige Google y
+      lo revisa Apple): en el registro (consentimiento al crear cuenta) y en
+      el perfil. La URL es parámetro editable (`aviso_privacidad_url`,
+      migración 0009) — al tener la versión del abogado en el dominio propio
+      se cambia sin publicar actualización. Mientras tanto apunta al
+      borrador hospedado (`web/aviso-privacidad.html`, marcado BORRADOR).
+- [x] **iPhone-only** (`supportsTablet: false`): el caso de uso es 100%
+      teléfono; evita que Apple pruebe el layout en iPad. Reversible cuando
+      se quiera dar soporte real a tablet.
 - [x] Identificadores fijados: `com.aforo.app` (iOS y Android), versión 0.1.0.
 - [x] Contraseñas con bcrypt (Supabase Auth), QR firmado, RLS deny-by-default.
 
@@ -168,9 +177,11 @@ Preparar en el entorno de producción y poner en "App Review Information"
 - Enlaces de soporte y privacidad **vivos** (no 404) en la ficha.
 - La app pide permisos **solo cuando se usan** (cámara al escanear, galería
   al adjuntar foto) — ya es el comportamiento actual.
-- iPad: `supportsTablet: true` implica que Apple la prueba en iPad; verificar
-  que el layout no se rompa (o cambiar a `false` para iPhone-only, decisión
-  pendiente).
+- iPad: resuelto — la app es iPhone-only (`supportsTablet: false`), Apple no
+  la prueba en iPad.
+- El aviso de privacidad del borrador (`web/aviso-privacidad.html`) debe
+  sustituirse por la versión del abogado ANTES de someter (está marcado
+  BORRADOR a propósito, como recordatorio bloqueante).
 
 ---
 

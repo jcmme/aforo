@@ -1,10 +1,11 @@
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { Boton, Campo } from '@/components/ui';
 import { useAuth } from '@/context/AuthContext';
 import { reclamarInvitacion } from '@/data/invitaciones';
+import { avisoPrivacidadUrl } from '@/data/legal';
 import { colors, font, radius, spacing } from '@/theme';
 
 export default function PerfilScreen() {
@@ -105,6 +106,16 @@ export default function PerfilScreen() {
       ) : null}
 
       <Boton titulo="Cerrar sesión" variante="peligro" onPress={salir} />
+
+      {/* Enlace legal exigido por las tiendas dentro de la app. */}
+      <Pressable
+        onPress={async () => {
+          const url = await avisoPrivacidadUrl();
+          if (url) Linking.openURL(url).catch(() => {});
+        }}
+      >
+        <Text style={styles.eliminarLink}>Aviso de privacidad</Text>
+      </Pressable>
 
       {/* Borrado de cuenta: visible pero discreto, con doble confirmación. */}
       <Pressable onPress={() => setMostrarEliminar((v) => !v)}>
