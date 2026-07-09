@@ -46,7 +46,7 @@ export default function DatosScreen() {
         <View style={styles.formatos}>
           {FORMATOS.map((f) => (
             <Pressable key={f.v} style={[styles.fmt, formato === f.v && styles.fmtActivo]} onPress={() => setFormato(f.v)}>
-              <Text style={[styles.fmtTxt, formato === f.v && { color: '#04141A' }]}>{f.label}</Text>
+              <Text style={[styles.fmtTxt, formato === f.v && { color: colors.onAccent }]}>{f.label}</Text>
             </Pressable>
           ))}
         </View>

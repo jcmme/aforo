@@ -1,7 +1,7 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 
-import { colors, gradients, radius, spacing } from '@/theme';
+import { colors, familias, gradients, radius, spacing } from '@/theme';
 import type { Antro } from '@/types';
 
 /** Tarjeta de un antro en el listado de "explorar". */
@@ -48,18 +48,18 @@ const styles = StyleSheet.create({
     paddingVertical: 5,
     paddingHorizontal: spacing.md,
     borderRadius: radius.pill,
-    backgroundColor: 'rgba(10,10,12,0.55)',
-    borderWidth: 1,
-    borderColor: 'rgba(216,185,138,0.5)',
+    backgroundColor: 'rgba(9,9,11,0.55)',
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: 'rgba(236,230,218,0.45)',
   },
   zonaPillTxt: {
-    color: colors.accent,
+    color: colors.accentSoft,
+    fontFamily: familias.sansSemi,
     fontSize: 10,
-    fontWeight: '700',
     letterSpacing: 1.5,
     textTransform: 'uppercase',
   },
   body: { padding: spacing.lg },
-  nombre: { color: '#fff', fontSize: 23, fontWeight: '800', letterSpacing: -0.4 },
-  horario: { color: 'rgba(247,246,243,0.72)', fontSize: 13, marginTop: 3, fontWeight: '500' },
+  nombre: { color: '#fff', fontFamily: familias.displaySemi, fontSize: 28, letterSpacing: 0.2 },
+  horario: { color: 'rgba(245,244,241,0.72)', fontFamily: familias.sans, fontSize: 13, marginTop: 3 },
 });

@@ -37,7 +37,7 @@ export default function SaPromocionesScreen() {
         <View style={styles.chips}>
           {antros.map((a) => (
             <Pressable key={a.id} style={[styles.chip, antroId === a.id && styles.chipOn]} onPress={() => setAntroId(a.id)}>
-              <Text style={[styles.chipTxt, antroId === a.id && { color: '#04141A' }]}>{a.nombre}</Text>
+              <Text style={[styles.chipTxt, antroId === a.id && { color: colors.onAccent }]}>{a.nombre}</Text>
             </Pressable>
           ))}
         </View>
@@ -79,7 +79,7 @@ const styles = StyleSheet.create({
   checkRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
   check: { width: 24, height: 24, borderRadius: 6, borderWidth: 1.5, borderColor: colors.border, alignItems: 'center', justifyContent: 'center' },
   checkOn: { backgroundColor: colors.primary, borderColor: colors.primary },
-  checkTxt: { color: '#04141A', fontWeight: '900' },
+  checkTxt: { color: colors.onAccent, fontWeight: '900' },
   card: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, backgroundColor: colors.surface, borderRadius: radius.md, borderWidth: 1, borderColor: colors.border, padding: spacing.md },
   accion: { color: colors.primary, fontWeight: '800', fontSize: 13 },
 });

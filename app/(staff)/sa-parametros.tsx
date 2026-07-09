@@ -56,5 +56,5 @@ const styles = StyleSheet.create({
   input: { flex: 1, backgroundColor: colors.bg, borderRadius: radius.sm, borderWidth: 1, borderColor: colors.border, color: colors.text, paddingHorizontal: spacing.md, paddingVertical: spacing.sm, fontSize: 14 },
   guardar: { backgroundColor: colors.primary, borderRadius: radius.sm, paddingVertical: spacing.sm, paddingHorizontal: spacing.md },
   guardarOff: { opacity: 0.4 },
-  guardarTxt: { color: '#04141A', fontWeight: '800', fontSize: 13 },
+  guardarTxt: { color: colors.onAccent, fontWeight: '800', fontSize: 13 },
 });

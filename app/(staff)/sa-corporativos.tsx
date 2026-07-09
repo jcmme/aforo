@@ -56,7 +56,7 @@ const styles = StyleSheet.create({
   card: { backgroundColor: colors.surface, borderRadius: radius.lg, borderWidth: 1, borderColor: colors.border, padding: spacing.md, gap: spacing.sm },
   head: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
   estado: { paddingVertical: 4, paddingHorizontal: spacing.sm, borderRadius: radius.pill },
-  estadoTxt: { color: '#04141A', fontWeight: '800', fontSize: 11 },
+  estadoTxt: { color: colors.onAccent, fontWeight: '800', fontSize: 11 },
   label: { ...font.muted, fontWeight: '800', textTransform: 'uppercase', letterSpacing: 0.5, marginTop: spacing.xs },
   flagRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   suspender: { borderWidth: 1, borderRadius: radius.md, paddingVertical: spacing.sm, alignItems: 'center', marginTop: spacing.xs },

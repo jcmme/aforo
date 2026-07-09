@@ -78,6 +78,6 @@ const styles = StyleSheet.create({
   stat: { color: colors.textMuted, fontSize: 13, fontWeight: '600' },
   alerta: { color: colors.text, fontSize: 13 },
   accion: { borderRadius: radius.sm, paddingVertical: spacing.sm, paddingHorizontal: spacing.md, alignItems: 'center', marginTop: spacing.xs },
-  accionTxt: { color: '#04141A', fontWeight: '800', fontSize: 13 },
+  accionTxt: { color: colors.onAccent, fontWeight: '800', fontSize: 13 },
   nota: { color: colors.textFaint, fontSize: 12, textAlign: 'center', marginTop: spacing.md },
 });

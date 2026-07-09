@@ -57,7 +57,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  masTxt: { fontSize: 64, fontWeight: '900', color: '#04141A' },
+  masTxt: { fontSize: 64, fontWeight: '900', color: colors.onAccent },
   menos: {
     paddingVertical: spacing.sm,
     paddingHorizontal: spacing.lg,

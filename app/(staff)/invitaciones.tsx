@@ -57,7 +57,7 @@ export default function InvitacionesScreen() {
       <View style={styles.roles}>
         {invitables.map((r) => (
           <Pressable key={r} style={[styles.rolChip, rolSel === r && styles.rolChipActivo]} onPress={() => setRolSel(r)}>
-            <Text style={[styles.rolTxt, rolSel === r && { color: '#04141A' }]}>{NOMBRE_ROL[r] ?? r}</Text>
+            <Text style={[styles.rolTxt, rolSel === r && { color: colors.onAccent }]}>{NOMBRE_ROL[r] ?? r}</Text>
           </Pressable>
         ))}
       </View>
@@ -110,7 +110,7 @@ const styles = StyleSheet.create({
   checkRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
   check: { width: 24, height: 24, borderRadius: 6, borderWidth: 1.5, borderColor: colors.border, alignItems: 'center', justifyContent: 'center' },
   checkOn: { backgroundColor: colors.primary, borderColor: colors.primary },
-  checkTxt: { color: '#04141A', fontWeight: '900' },
+  checkTxt: { color: colors.onAccent, fontWeight: '900' },
   generada: { backgroundColor: colors.surfaceAlt, borderRadius: radius.lg, borderWidth: 1, borderColor: colors.primary, padding: spacing.md, gap: spacing.sm, alignItems: 'center' },
   generadaEt: { color: colors.primary, fontSize: 12, fontWeight: '800', textTransform: 'uppercase' },
   codigo: { color: colors.text, fontSize: 26, fontWeight: '900', letterSpacing: 2 },

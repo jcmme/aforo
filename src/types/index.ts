@@ -390,6 +390,21 @@ export interface PromocionItem {
   monto: number | null;
 }
 
+/**
+ * Promoción tal como la ve el CLIENTE en el espacio de promociones (escaparate
+ * neutral, no pertenece a ningún corporativo). Cada una lleva a su antro dueño.
+ * `destacada` = difusión pagada; se muestra en grande SIN letrero de "pagada".
+ */
+export interface PromoDisponible {
+  id: string;
+  nombre: string;
+  antroId: string;
+  antroNombre: string;
+  zona: string | null;
+  foto: string | null;
+  destacada: boolean;
+}
+
 /** Corporativo con su estado para el panel de Súper Admin. */
 export interface CorporativoAdmin {
   id: string;

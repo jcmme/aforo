@@ -66,7 +66,7 @@ export default function MetricasScreen() {
 function Opcion({ activo, label, onPress }: { activo: boolean; label: string; onPress: () => void }) {
   return (
     <Pressable style={[styles.opcion, activo && styles.opcionActiva]} onPress={onPress}>
-      <Text style={[styles.opcionTxt, activo && { color: '#04141A' }]}>{label}</Text>
+      <Text style={[styles.opcionTxt, activo && { color: colors.onAccent }]}>{label}</Text>
     </Pressable>
   );
 }

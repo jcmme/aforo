@@ -65,7 +65,7 @@ export function listarPromociones(): PromocionItem[] {
 }
 
 export function crearPromocion(nombre: string, antroId: string, pagada: boolean, monto: number | null) {
-  DEMO_PROMOCIONES.unshift({ id: `promo-${Date.now()}`, nombre, antroId, inicio: new Date().toISOString().slice(0, 10), fin: null, pausada: false, pagada, monto });
+  DEMO_PROMOCIONES.unshift({ id: `promo-${Date.now()}`, nombre, antroId, foto: null, inicio: new Date().toISOString().slice(0, 10), fin: null, pausada: false, pagada, monto });
 }
 
 export function togglePausaPromo(id: string) {

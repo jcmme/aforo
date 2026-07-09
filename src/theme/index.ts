@@ -1,56 +1,56 @@
-// Tokens visuales de AFORO — sistema "minimalista elegante" (CLAUDE.md §9).
-// Vida nocturna premium: negro profundo, monocromático, un solo acento
-// champagne/oro usado con mesura. Menos ruido, más aire y jerarquía.
+// Tokens visuales de AFORO — sistema "Platino" (CLAUDE.md §9).
+// Vida nocturna premium en clave monocroma: negro profundo, blanco cálido y
+// aire. El "acento" es crema/platino (no dorado): se reserva para acciones y
+// estados activos. Tipografía elegante: serif Cormorant para los títulos
+// grandes, sans Jost para la interfaz. Divisores hairline, cero ruido.
 
 export const colors = {
-  // Fondos en capas (elevación muy sutil).
-  bg: '#0A0A0C',
-  bgElevated: '#101013',
-  surface: '#141417',
-  surfaceAlt: '#1A1A1F',
+  // Fondos en capas (elevación muy sutil), negro casi puro.
+  bg: '#09090B',
+  bgElevated: '#0E0E11',
+  surface: '#121215',
+  surfaceAlt: '#17171B',
 
-  // Líneas: hairline casi invisible para un look limpio.
-  border: '#26262D',
-  hairline: 'rgba(255,255,255,0.06)',
+  // Líneas: hairline casi invisible para el look limpio tipo guía.
+  border: '#232329',
+  hairline: 'rgba(255,255,255,0.055)',
 
   // Texto cálido, alto contraste.
-  text: '#F7F6F3',
-  textMuted: '#9C9CA6',
-  textFaint: '#5E5E68',
+  text: '#F5F4F1',
+  textMuted: '#9A9AA2',
+  textFaint: '#5C5C64',
 
-  // Acento único: champagne/oro.
-  accent: '#D8B98A',
-  accentSoft: '#ECD9B6',
-  accentDeep: '#B7976A',
-
-  // Sobre el acento va texto casi negro.
-  onAccent: '#0A0A0C',
-
-  // Semáforo y estados, en tonos sobrios (no neón).
-  success: '#5FB890',
-  warning: '#E0AE63',
-  danger: '#E0696B',
+  // Acento único: crema/platino (blanco cálido). Sobre él va texto casi negro.
+  accent: '#ECE6DA',
+  accentSoft: '#CFC9BB',
+  accentDeep: '#B8B2A4',
+  onAccent: '#0B0B0D',
 
   qrBg: '#FFFFFF',
   qrFg: '#0A0A0C',
 
-  // Alias de compatibilidad (el acento ahora es champagne/oro).
-  primary: '#D8B98A',
-  primaryDark: '#B7976A',
-  bgAlt: '#101013',
-  borderGlow: '#26262D',
+  // Semáforo y estados: SÍ llevan color (es funcional, no decorativo).
+  success: '#5FB890',
+  warning: '#E0AE63',
+  danger: '#E0696B',
+
+  // Alias de compatibilidad (el acento ahora es crema/platino).
+  primary: '#ECE6DA',
+  primaryDark: '#B8B2A4',
+  bgAlt: '#0E0E11',
+  borderGlow: '#232329',
 } as const;
 
-// Degradados muy sutiles; se usan con mesura (scrim de fotos, anillo del QR).
+// Degradados muy sutiles; se usan con mesura (scrim de fotos, respaldo).
 export const gradients = {
-  accent: ['#ECD9B6', '#D8B98A', '#B7976A'] as const,
+  accent: ['#F3EEE4', '#ECE6DA', '#CFC9BB'] as const,
   // Respaldo elegante detrás de las fotos (para que nunca se vea hueco).
-  foto: ['#1C1C22', '#121216', '#0A0A0C'] as const,
+  foto: ['#1B1B20', '#121216', '#09090B'] as const,
   // Oscurecedor inferior para texto sobre imagen.
-  scrim: ['transparent', 'rgba(10,10,12,0.1)', 'rgba(10,10,12,0.92)'] as const,
+  scrim: ['transparent', 'rgba(9,9,11,0.1)', 'rgba(9,9,11,0.94)'] as const,
   // Alias de compatibilidad.
-  primary: ['#ECD9B6', '#D8B98A', '#B7976A'] as const,
-  header: ['#101013', '#0A0A0C'] as const,
+  primary: ['#F3EEE4', '#ECE6DA', '#CFC9BB'] as const,
+  header: ['#0E0E11', '#09090B'] as const,
 } as const;
 
 export const spacing = {
@@ -70,20 +70,33 @@ export const radius = {
   pill: 999,
 } as const;
 
+// Familias tipográficas (cargadas en el arranque; ver src/lib/fuentes.ts).
+// Serif de alto contraste para lo editorial; sans geométrica para la interfaz.
+export const familias = {
+  displaySemi: 'Cormorant_600SemiBold',
+  displayBold: 'Cormorant_700Bold',
+  displayMed: 'Cormorant_500Medium',
+  sans: 'Jost_400Regular',
+  sansMed: 'Jost_500Medium',
+  sansSemi: 'Jost_600SemiBold',
+} as const;
+
 export const font = {
-  // Jerarquía clara; títulos firmes, cuerpo ligero, etiquetas con tracking.
-  display: { fontSize: 40, fontWeight: '800' as const, color: colors.text, letterSpacing: 4 },
-  title: { fontSize: 28, fontWeight: '800' as const, color: colors.text, letterSpacing: -0.4 },
-  h2: { fontSize: 20, fontWeight: '700' as const, color: colors.text, letterSpacing: -0.2 },
-  h3: { fontSize: 16, fontWeight: '700' as const, color: colors.text },
-  body: { fontSize: 15, fontWeight: '400' as const, color: colors.text, lineHeight: 22 },
-  muted: { fontSize: 13, fontWeight: '400' as const, color: colors.textMuted, lineHeight: 19 },
+  // Títulos en serif Cormorant (grandes, elegantes); interfaz en Jost.
+  display: { fontFamily: familias.displayBold, fontSize: 46, fontWeight: '700' as const, color: colors.text, letterSpacing: 0.5 },
+  title: { fontFamily: familias.displaySemi, fontSize: 34, fontWeight: '600' as const, color: colors.text, letterSpacing: 0.2 },
+  h2: { fontFamily: familias.displaySemi, fontSize: 24, fontWeight: '600' as const, color: colors.text, letterSpacing: 0.2 },
+  // Encabezados funcionales pequeños: sans, más legibles que la serif fina.
+  h3: { fontFamily: familias.sansSemi, fontSize: 16, fontWeight: '600' as const, color: colors.text, letterSpacing: 0.1 },
+  body: { fontFamily: familias.sans, fontSize: 15, fontWeight: '400' as const, color: colors.text, lineHeight: 23 },
+  muted: { fontFamily: familias.sans, fontSize: 13, fontWeight: '400' as const, color: colors.textMuted, lineHeight: 19 },
   kicker: {
+    fontFamily: familias.sansSemi,
     fontSize: 11,
-    fontWeight: '700' as const,
+    fontWeight: '600' as const,
     letterSpacing: 2.5,
     textTransform: 'uppercase' as const,
-    color: colors.accent,
+    color: colors.accentSoft,
   },
 } as const;
 

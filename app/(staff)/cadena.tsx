@@ -31,7 +31,7 @@ export default function CadenaScreen() {
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filtros}>
         {FILTROS.map((f) => (
           <Pressable key={f} style={[styles.chip, filtro === f && styles.chipActivo]} onPress={() => setFiltro(f)}>
-            <Text style={[styles.chipTxt, filtro === f && { color: '#04141A' }]}>
+            <Text style={[styles.chipTxt, filtro === f && { color: colors.onAccent }]}>
               {f === 'Todas' ? 'Todas' : ETIQUETA_TIPO[f] ?? f}
             </Text>
           </Pressable>

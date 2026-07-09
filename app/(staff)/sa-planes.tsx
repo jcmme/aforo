@@ -27,7 +27,7 @@ export default function SaPlanesScreen() {
           <View style={styles.planes}>
             {PLANES.map((p) => (
               <Pressable key={p} style={[styles.plan, c.plan === p && styles.planOn]} onPress={() => cambiar(c.id, p)}>
-                <Text style={[styles.planTxt, c.plan === p && { color: '#04141A' }]}>{p}</Text>
+                <Text style={[styles.planTxt, c.plan === p && { color: colors.onAccent }]}>{p}</Text>
               </Pressable>
             ))}
           </View>

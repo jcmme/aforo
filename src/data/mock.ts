@@ -407,6 +407,7 @@ export interface PromocionSeed {
   id: string;
   nombre: string;
   antroId: string;
+  foto: string | null;
   inicio: string | null;
   fin: string | null;
   pausada: boolean;
@@ -414,8 +415,11 @@ export interface PromocionSeed {
   monto: number | null;
 }
 export const DEMO_PROMOCIONES: PromocionSeed[] = [
-  { id: 'promo-1', nombre: 'Botella de cortesía al llegar', antroId: 'antro-1', inicio: '2026-06-01', fin: '2026-07-31', pausada: false, pagada: true, monto: 12000 },
-  { id: 'promo-2', nombre: '2x1 en barra hasta la 1am', antroId: 'antro-3', inicio: '2026-06-15', fin: null, pausada: false, pagada: false, monto: null },
+  { id: 'promo-1', nombre: 'Botella de cortesía al llegar', antroId: 'antro-1', foto: 'https://images.unsplash.com/photo-1470337458703-46ad1756a187?w=800', inicio: '2026-06-01', fin: '2026-07-31', pausada: false, pagada: true, monto: 12000 },
+  { id: 'promo-2', nombre: '2x1 en barra hasta la 1 AM', antroId: 'antro-3', foto: 'https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?w=800', inicio: '2026-06-15', fin: null, pausada: false, pagada: false, monto: null },
+  { id: 'promo-3', nombre: 'Mesa VIP sin consumo mínimo los miércoles', antroId: 'antro-2', foto: 'https://images.unsplash.com/photo-1551024709-8f23befc6f87?w=800', inicio: '2026-06-01', fin: null, pausada: false, pagada: false, monto: null },
+  { id: 'promo-4', nombre: 'Welcome shot de la casa al reservar', antroId: 'antro-1', foto: 'https://images.unsplash.com/photo-1536935338788-846bb9981813?w=800', inicio: '2026-06-01', fin: null, pausada: false, pagada: false, monto: null },
+  { id: 'promo-5', nombre: 'Acceso preferente antes de medianoche', antroId: 'antro-3', foto: 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=800', inicio: '2026-06-01', fin: null, pausada: false, pagada: false, monto: null },
 ];
 
 export const DEMO_PLANES = ['Básico', 'Pro', 'Premium'];
