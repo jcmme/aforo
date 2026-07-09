@@ -422,6 +422,37 @@ export const DEMO_PROMOCIONES: PromocionSeed[] = [
   { id: 'promo-5', nombre: 'Acceso preferente antes de medianoche', antroId: 'antro-3', foto: 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=800', inicio: '2026-06-01', fin: null, pausada: false, pagada: false, monto: null },
 ];
 
+/**
+ * Fotos por antro (las suben los antros, las aprueba el Súper Admin). Varias
+ * aprobadas por antro para la galería con swipe + una pendiente para probar la
+ * cola de moderación. Formato estándar 3:2 horizontal (ver antros.ts).
+ */
+export interface FotoAntroSeed {
+  id: string;
+  antroId: string;
+  url: string;
+  estado: 'pendiente' | 'aprobada' | 'rechazada';
+  orden: number;
+}
+export const DEMO_FOTOS_ANTRO: FotoAntroSeed[] = [
+  // Lumen (antro-1): 4 aprobadas.
+  { id: 'f-1a', antroId: 'antro-1', url: 'https://images.unsplash.com/photo-1566417713940-fe7c737a9ef2?w=1200', estado: 'aprobada', orden: 0 },
+  { id: 'f-1b', antroId: 'antro-1', url: 'https://images.unsplash.com/photo-1571266028243-e4733b0f0bb0?w=1200', estado: 'aprobada', orden: 1 },
+  { id: 'f-1c', antroId: 'antro-1', url: 'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=1200', estado: 'aprobada', orden: 2 },
+  { id: 'f-1d', antroId: 'antro-1', url: 'https://images.unsplash.com/photo-1470337458703-46ad1756a187?w=1200', estado: 'aprobada', orden: 3 },
+  // Terraza Cholula (antro-2): 3 aprobadas.
+  { id: 'f-2a', antroId: 'antro-2', url: 'https://images.unsplash.com/photo-1545128485-c400e7702796?w=1200', estado: 'aprobada', orden: 0 },
+  { id: 'f-2b', antroId: 'antro-2', url: 'https://images.unsplash.com/photo-1551024709-8f23befc6f87?w=1200', estado: 'aprobada', orden: 1 },
+  { id: 'f-2c', antroId: 'antro-2', url: 'https://images.unsplash.com/photo-1514933651103-005eec06c04b?w=1200', estado: 'aprobada', orden: 2 },
+  // Distrito 23 (antro-3): 3 aprobadas.
+  { id: 'f-3a', antroId: 'antro-3', url: 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=1200', estado: 'aprobada', orden: 0 },
+  { id: 'f-3b', antroId: 'antro-3', url: 'https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?w=1200', estado: 'aprobada', orden: 1 },
+  { id: 'f-3c', antroId: 'antro-3', url: 'https://images.unsplash.com/photo-1536935338788-846bb9981813?w=1200', estado: 'aprobada', orden: 2 },
+  // Pendientes de aprobación (cola del Súper Admin).
+  { id: 'f-1e', antroId: 'antro-1', url: 'https://images.unsplash.com/photo-1493676304819-0d7a8d026dcf?w=1200', estado: 'pendiente', orden: 4 },
+  { id: 'f-2d', antroId: 'antro-2', url: 'https://images.unsplash.com/photo-1574391884720-bbc3740c59d1?w=1200', estado: 'pendiente', orden: 3 },
+];
+
 export const DEMO_PLANES = ['Básico', 'Pro', 'Premium'];
 
 /** Feature flags por corporativo (editable por Súper Admin). */

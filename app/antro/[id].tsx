@@ -3,7 +3,8 @@ import { useEffect, useState } from 'react';
 import { ActivityIndicator, Image, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { EventoCard } from '@/components/EventoCard';
-import { obtenerAntro } from '@/data/antros';
+import { GaleriaAntro } from '@/components/GaleriaAntro';
+import { fotosAprobadasDeAntro, obtenerAntro } from '@/data/antros';
 import { listarEventosDeAntro } from '@/data/eventos';
 import { listarResenasDeAntro, promedioEstrellas } from '@/data/resenas';
 import { colors, font, radius, spacing } from '@/theme';
@@ -15,18 +16,21 @@ export default function AntroScreen() {
   const [antro, setAntro] = useState<Antro | null>(null);
   const [eventos, setEventos] = useState<Evento[]>([]);
   const [resenas, setResenas] = useState<Resena[]>([]);
+  const [fotos, setFotos] = useState<string[]>([]);
   const [cargando, setCargando] = useState(true);
 
   useEffect(() => {
     (async () => {
-      const [a, e, r] = await Promise.all([
+      const [a, e, r, f] = await Promise.all([
         obtenerAntro(id),
         listarEventosDeAntro(id),
         listarResenasDeAntro(id),
+        fotosAprobadasDeAntro(id),
       ]);
       setAntro(a);
       setEventos(e);
       setResenas(r);
+      setFotos(f);
       setCargando(false);
     })();
   }, [id]);
@@ -51,7 +55,7 @@ export default function AntroScreen() {
 
   return (
     <ScrollView style={{ backgroundColor: colors.bg }} contentContainerStyle={styles.content}>
-      <Image source={{ uri: antro.fotos[0] }} style={styles.hero} resizeMode="cover" />
+      <GaleriaAntro fotos={fotos.length > 0 ? fotos : antro.fotos} />
       <View style={styles.body}>
         <View style={styles.headRow}>
           <Text style={font.title}>{antro.nombre}</Text>
@@ -97,7 +101,6 @@ export default function AntroScreen() {
 const styles = StyleSheet.create({
   center: { flex: 1, backgroundColor: colors.bg, alignItems: 'center', justifyContent: 'center' },
   content: { paddingBottom: spacing.xxl },
-  hero: { width: '100%', height: 240, backgroundColor: colors.surfaceAlt },
   body: { padding: spacing.lg, gap: spacing.xs },
   headRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   rating: { flexDirection: 'row', alignItems: 'baseline', gap: 4 },

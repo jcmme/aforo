@@ -54,7 +54,9 @@ export type Accion =
   | 'feature_flags_planes'
   | 'editar_tyc'
   | 'aprobar_tyc'
-  | 'dejar_resena';
+  | 'dejar_resena'
+  | 'subir_foto_antro'
+  | 'moderar_fotos';
 
 // ---------------------------------------------------------------------------
 // Identidad y tenancy (CLAUDE.md §2)
@@ -388,6 +390,21 @@ export interface PromocionItem {
   pausada: boolean;
   pagada: boolean;
   monto: number | null;
+}
+
+/**
+ * Foto de un antro. Las suben los propios antros y el Súper Admin las aprueba
+ * antes de mostrarse al cliente. Formato estándar: 3:2 horizontal (ver
+ * FORMATO_FOTO_ANTRO). El cliente solo ve las `aprobada`.
+ */
+export type EstadoFoto = 'pendiente' | 'aprobada' | 'rechazada';
+export interface FotoAntro {
+  id: string;
+  antroId: string;
+  antroNombre?: string;
+  url: string;
+  estado: EstadoFoto;
+  orden: number;
 }
 
 /**

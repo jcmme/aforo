@@ -1,14 +1,14 @@
 import { Stack, useRouter } from 'expo-router';
 import { Pressable, Text } from 'react-native';
 
-import { colors } from '@/theme';
+import { colors, familias } from '@/theme';
 
 /** Botón de cabecera para cambiar de rol (demo). */
 function BotonRol() {
   const router = useRouter();
   return (
     <Pressable onPress={() => router.push('/(staff)/rol')} hitSlop={10}>
-      <Text style={{ color: colors.primary, fontWeight: '800', fontSize: 13 }}>Rol</Text>
+      <Text style={{ color: colors.primary, fontFamily: familias.medium, fontSize: 13 }}>Rol</Text>
     </Pressable>
   );
 }
@@ -19,7 +19,7 @@ export default function StaffLayout() {
       screenOptions={{
         headerStyle: { backgroundColor: colors.bgAlt },
         headerTintColor: colors.text,
-        headerTitleStyle: { fontWeight: '800' },
+        headerTitleStyle: { fontFamily: familias.sansSemi },
         headerShadowVisible: false,
         contentStyle: { backgroundColor: colors.bg },
         headerRight: () => <BotonRol />,
@@ -46,6 +46,7 @@ export default function StaffLayout() {
       <Stack.Screen name="tyc-antro" options={{ title: 'T&C del antro' }} />
       <Stack.Screen name="sa-parametros" options={{ title: 'Parámetros' }} />
       <Stack.Screen name="sa-promociones" options={{ title: 'Promociones' }} />
+      <Stack.Screen name="sa-fotos" options={{ title: 'Aprobar fotos' }} />
       <Stack.Screen name="sa-corporativos" options={{ title: 'Corporativos' }} />
       <Stack.Screen name="sa-planes" options={{ title: 'Planes y cobro' }} />
       <Stack.Screen name="sa-salud" options={{ title: 'Salud del producto' }} />

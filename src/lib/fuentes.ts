@@ -1,27 +1,25 @@
-// Carga de tipografías y fuente base uniforme para TODA la app.
+// Carga de tipografía y fuente base uniforme para TODA la app.
 //
-// Serif Cormorant (títulos) + sans Jost (interfaz). Para que el cuerpo use Jost
-// sin tocar cada <Text> de las 40+ pantallas, se parcha una sola vez el render
-// de Text/TextInput inyectando la familia base; los estilos explícitos (roles
-// del tema con Cormorant, tamaños, colores) siguen ganando por orden.
+// UNA sola familia: Jost (la jerarquía va por peso, no por familias distintas).
+// Para que TODO <Text> use Jost sin tocar las 40+ pantallas, se parcha una vez
+// el render de Text/TextInput inyectando la familia base; los estilos
+// explícitos (roles del tema, tamaños, colores) siguen ganando por orden.
 
 import { cloneElement } from 'react';
 import { Text as RNText, TextInput as RNTextInput } from 'react-native';
 
 import {
-  Cormorant_500Medium,
-  Cormorant_600SemiBold,
-  Cormorant_700Bold,
-} from '@expo-google-fonts/cormorant';
-import { Jost_400Regular, Jost_500Medium, Jost_600SemiBold } from '@expo-google-fonts/jost';
+  Jost_300Light,
+  Jost_400Regular,
+  Jost_500Medium,
+  Jost_600SemiBold,
+} from '@expo-google-fonts/jost';
 
 import { familias } from '@/theme';
 
-/** Mapa para `useFonts` en el layout raíz. */
+/** Mapa para `useFonts` en el layout raíz. Una sola familia: Jost. */
 export const fuentesAforo = {
-  Cormorant_500Medium,
-  Cormorant_600SemiBold,
-  Cormorant_700Bold,
+  Jost_300Light,
   Jost_400Regular,
   Jost_500Medium,
   Jost_600SemiBold,

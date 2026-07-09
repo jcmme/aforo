@@ -46,6 +46,7 @@ const MENUS: Partial<Record<Rol, ItemMenu[]>> = {
     { clave: 'parametros', titulo: 'Parámetros', subtitulo: 'Editar sin código', ruta: '/(staff)/sa-parametros', accion: 'feature_flags_planes' },
     { clave: 'sa-tyc', titulo: 'Aprobar T&C', subtitulo: 'Cola de cambios pendientes', ruta: '/(staff)/sa-tyc', accion: 'aprobar_tyc' },
     { clave: 'promociones', titulo: 'Promociones', subtitulo: 'Crear y asignar', ruta: '/(staff)/sa-promociones', accion: 'cargar_promociones' },
+    { clave: 'sa-fotos', titulo: 'Aprobar fotos', subtitulo: 'Fotos de antros pendientes', ruta: '/(staff)/sa-fotos', accion: 'moderar_fotos' },
     { clave: 'corporativos', titulo: 'Corporativos', subtitulo: 'Alta, flags, suspender', ruta: '/(staff)/sa-corporativos', accion: 'alta_corporativos' },
     { clave: 'planes', titulo: 'Planes y cobro', subtitulo: 'Tier de suscripción', ruta: '/(staff)/sa-planes', accion: 'feature_flags_planes' },
     { clave: 'salud', titulo: 'Salud del producto', subtitulo: 'Adopción por corporativo', ruta: '/(staff)/sa-salud', accion: 'feature_flags_planes' },

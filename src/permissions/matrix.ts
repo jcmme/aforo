@@ -40,6 +40,10 @@ const MATRIZ: Record<Accion, Rol[]> = {
   editar_tyc: ['gerente', 'capitan', 'hostess', 'cajero', 'rp', 'super_admin'],
   aprobar_tyc: ['super_admin'],
   dejar_resena: ['cliente'],
+  // Los antros suben sus fotos (gerente); el Súper Admin las aprueba antes de
+  // que se muestren al cliente.
+  subir_foto_antro: ['gerente', 'super_admin'],
+  moderar_fotos: ['super_admin'],
 };
 
 /** Gerente general comparte permisos de gerente; se normaliza aquí. */

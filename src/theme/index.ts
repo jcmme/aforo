@@ -70,30 +70,38 @@ export const radius = {
   pill: 999,
 } as const;
 
-// Familias tipográficas (cargadas en el arranque; ver src/lib/fuentes.ts).
-// Serif de alto contraste para lo editorial; sans geométrica para la interfaz.
+// Tipografía: UNA sola familia en toda la app (Jost, geométrica y elegante).
+// La jerarquía se logra con el PESO, no con familias distintas: títulos en
+// ligero (delgado y aireado), interfaz en regular, énfasis en medio. Nada de
+// serif ni mezclas — look uniforme. `fontWeight` acompaña a cada familia para
+// que web no sintetice pesos falsos (evita que se vea dispareja).
 export const familias = {
-  displaySemi: 'Cormorant_600SemiBold',
-  displayBold: 'Cormorant_700Bold',
-  displayMed: 'Cormorant_500Medium',
+  light: 'Jost_300Light',
+  regular: 'Jost_400Regular',
+  medium: 'Jost_500Medium',
+  semi: 'Jost_600SemiBold',
+  // Alias de compatibilidad (todo apunta a Jost).
   sans: 'Jost_400Regular',
   sansMed: 'Jost_500Medium',
   sansSemi: 'Jost_600SemiBold',
+  displayLight: 'Jost_300Light',
+  displaySemi: 'Jost_400Regular',
+  displayBold: 'Jost_500Medium',
+  displayMed: 'Jost_400Regular',
 } as const;
 
 export const font = {
-  // Títulos en serif Cormorant (grandes, elegantes); interfaz en Jost.
-  display: { fontFamily: familias.displayBold, fontSize: 46, fontWeight: '700' as const, color: colors.text, letterSpacing: 0.5 },
-  title: { fontFamily: familias.displaySemi, fontSize: 34, fontWeight: '600' as const, color: colors.text, letterSpacing: 0.2 },
-  h2: { fontFamily: familias.displaySemi, fontSize: 24, fontWeight: '600' as const, color: colors.text, letterSpacing: 0.2 },
-  // Encabezados funcionales pequeños: sans, más legibles que la serif fina.
-  h3: { fontFamily: familias.sansSemi, fontSize: 16, fontWeight: '600' as const, color: colors.text, letterSpacing: 0.1 },
-  body: { fontFamily: familias.sans, fontSize: 15, fontWeight: '400' as const, color: colors.text, lineHeight: 23 },
-  muted: { fontFamily: familias.sans, fontSize: 13, fontWeight: '400' as const, color: colors.textMuted, lineHeight: 19 },
+  // Títulos delgados y elegantes (Jost Light); cuerpo regular; énfasis medio.
+  display: { fontFamily: familias.light, fontSize: 44, fontWeight: '300' as const, color: colors.text, letterSpacing: 0.5 },
+  title: { fontFamily: familias.light, fontSize: 32, fontWeight: '300' as const, color: colors.text, letterSpacing: 0.3 },
+  h2: { fontFamily: familias.regular, fontSize: 23, fontWeight: '400' as const, color: colors.text, letterSpacing: 0.1 },
+  h3: { fontFamily: familias.medium, fontSize: 16, fontWeight: '500' as const, color: colors.text, letterSpacing: 0.1 },
+  body: { fontFamily: familias.regular, fontSize: 15, fontWeight: '400' as const, color: colors.text, lineHeight: 23 },
+  muted: { fontFamily: familias.regular, fontSize: 13, fontWeight: '400' as const, color: colors.textMuted, lineHeight: 19 },
   kicker: {
-    fontFamily: familias.sansSemi,
+    fontFamily: familias.medium,
     fontSize: 11,
-    fontWeight: '600' as const,
+    fontWeight: '500' as const,
     letterSpacing: 2.5,
     textTransform: 'uppercase' as const,
     color: colors.accentSoft,
