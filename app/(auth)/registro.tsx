@@ -32,8 +32,9 @@ export default function RegistroScreen() {
     setCargando(true);
     try {
       await registrar({ nombre: nombre.trim(), username: username.trim(), email: email.trim(), telefono: telefono.trim(), password });
-      // Tras registrar, se verifica el correo. En demo se entra directo.
-      router.replace(demo ? '/(cliente)' : '/(auth)/verificar');
+      // Tras registrar: pantalla de bienvenida/consentimiento (demo) o
+      // verificación de correo (real, que luego lleva a la bienvenida).
+      router.replace(demo ? '/bienvenida' : '/(auth)/verificar');
     } catch (e) {
       setError(e instanceof Error ? e.message : 'No se pudo crear la cuenta.');
     } finally {

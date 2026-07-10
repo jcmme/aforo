@@ -6,7 +6,7 @@
 // explícitos (roles del tema, tamaños, colores) siguen ganando por orden.
 
 import { cloneElement } from 'react';
-import { Text as RNText, TextInput as RNTextInput } from 'react-native';
+import { StyleSheet, Text as RNText, TextInput as RNTextInput } from 'react-native';
 
 import {
   Jost_300Light,
@@ -33,8 +33,11 @@ function parchar(Comp: unknown) {
   c.render = function (this: unknown, ...args: unknown[]) {
     const el = orig.apply(this, args);
     if (!el) return el;
-    // La familia base va primero; el estilo explícito del elemento gana.
-    return cloneElement(el, { style: [{ fontFamily: familias.sans }, el.props?.style] });
+    // La familia base va primero y el estilo explícito gana. Se APLANA a un solo
+    // objeto (StyleSheet.flatten) para no dejar arreglos anidados que
+    // react-native-web no procesa (rompía con <Text> anidados con onPress).
+    const style = StyleSheet.flatten([{ fontFamily: familias.sans }, el.props?.style]);
+    return cloneElement(el, { style });
   };
   c.__aforoFont = true;
 }

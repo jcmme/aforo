@@ -37,6 +37,9 @@ export default function RootLayout() {
           <Stack.Screen name="(cliente)" options={{ headerShown: false }} />
           <Stack.Screen name="(staff)" options={{ headerShown: false }} />
           <Stack.Screen name="promociones" options={{ title: 'Promociones' }} />
+          <Stack.Screen name="bienvenida" options={{ headerShown: false }} />
+          <Stack.Screen name="privacidad" options={{ title: 'Políticas y privacidad' }} />
+          <Stack.Screen name="ajustes-privacidad" options={{ title: 'Ajustes de privacidad' }} />
           <Stack.Screen name="antro/[id]" options={{ title: '' }} />
           <Stack.Screen name="evento/[id]" options={{ title: '' }} />
           <Stack.Screen name="reservar/[eventoId]" options={{ title: 'Reservar' }} />
