@@ -4,7 +4,7 @@
 // Notificación al RP CONDICIONAL (solo si se requiere su presencia).
 
 import { cors, json } from '../_shared/cors.ts';
-import { clienteServicio, puedeAccion, usuarioDeRequest } from '../_shared/auth.ts';
+import { clienteServicio, puedeAccion, usuarioDeRequest, verificarTenant } from '../_shared/auth.ts';
 import { verificarToken } from '../_shared/qr.ts';
 
 Deno.serve(async (req) => {
@@ -33,6 +33,11 @@ Deno.serve(async (req) => {
     .eq('id', qr.reserva_id)
     .maybeSingle();
   if (!reserva) return json({ error: 'Reserva no encontrada' }, 404);
+
+  // Aislamiento: el capitán debe ser de ESTE antro/corporativo.
+  if (!(await verificarTenant(svc, usuario.id, { corporativoId: reserva.corporativo_id, antroId }))) {
+    return json({ error: 'No autorizado en este antro' }, 403);
+  }
 
   // Notificación al RP solo si se requiere su presencia.
   if (requierePresencia && reserva.rp?.id) {

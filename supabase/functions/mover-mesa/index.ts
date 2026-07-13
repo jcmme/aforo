@@ -3,7 +3,7 @@
 // "mesa actual" = último eslabón. Hostess, capitán o gerente.
 
 import { cors, json } from '../_shared/cors.ts';
-import { clienteServicio, puedeAccion, usuarioDeRequest } from '../_shared/auth.ts';
+import { clienteServicio, puedeAccion, usuarioDeRequest, verificarTenant } from '../_shared/auth.ts';
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: cors });
@@ -24,10 +24,15 @@ Deno.serve(async (req) => {
 
   const { data: reserva } = await svc
     .from('reservas')
-    .select('id, mesa_texto, corporativo_id')
+    .select('id, mesa_texto, antro_id, corporativo_id')
     .eq('id', reservaId)
     .maybeSingle();
   if (!reserva) return json({ error: 'Reserva no encontrada' }, 404);
+
+  // Aislamiento: solo personal de ESE antro/corporativo mueve esta mesa.
+  if (!(await verificarTenant(svc, usuario.id, { corporativoId: reserva.corporativo_id, antroId: reserva.antro_id }))) {
+    return json({ error: 'No autorizado en este antro' }, 403);
+  }
 
   // Nuevo eslabón en el historial (la asignación inicial nunca se borra).
   await svc.from('movimientos_mesa').insert({

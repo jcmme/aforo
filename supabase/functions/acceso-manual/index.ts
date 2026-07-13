@@ -4,7 +4,7 @@
 // También cubre el override de amarillo. Solo cadenero/hostess.
 
 import { cors, json } from '../_shared/cors.ts';
-import { clienteServicio, puedeAccion, usuarioDeRequest } from '../_shared/auth.ts';
+import { clienteServicio, puedeAccion, usuarioDeRequest, verificarTenant } from '../_shared/auth.ts';
 import { obtenerParametro } from '../_shared/config.ts';
 
 Deno.serve(async (req) => {
@@ -39,6 +39,11 @@ Deno.serve(async (req) => {
     .eq('id', antroId)
     .maybeSingle();
   if (!antro) return json({ error: 'Antro no encontrado' }, 404);
+
+  // Aislamiento: solo personal de este antro/corporativo registra ingresos aquí.
+  if (!(await verificarTenant(svc, usuario.id, { corporativoId: antro.corporativo_id, antroId }))) {
+    return json({ error: 'No autorizado en este antro' }, 403);
+  }
 
   // En override de amarillo, el invitado entra: se marca el QR como usado.
   if (override && qrId) {

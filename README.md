@@ -44,7 +44,7 @@ npm run android    # emulador Android
 
 1. Crea un proyecto en [supabase.com](https://supabase.com).
 2. En el **SQL Editor**, ejecuta en orden todas las migraciones
-   (`supabase/migrations/0001_schema.sql` … `0008_feed.sql`) y luego
+   (`supabase/migrations/0001_schema.sql` … `0011_seguridad.sql`) y luego
    `supabase/seed.sql`.
 3. Despliega las Edge Functions y su secreto:
    ```bash
@@ -85,6 +85,7 @@ docs/       ARCHITECTURE.md · DATA_MODEL.md
 | 7 | Rediseño "Platino" + espacio de promociones | **Hecho** — identidad visual monocroma tipo guía Michelin: negro profundo, acento crema/platino (adiós dorado), divisores hairline. Tipografía **unificada** en una sola familia (Jost) con jerarquía por peso — delgada y elegante, sin mezclas. Espacio de promociones del cliente (escaparate neutral, no pertenece a nadie): destacada en grande + lista editorial, cada una lleva a su antro; base lista para las globales de miembros. |
 | 8 | Galería de fotos por antro (con moderación) | **Hecho** — cada antro puede tener varias fotos; el cliente las desliza fluidamente (galería paginada 3:2 con puntos y contador). Las suben los antros (gerente) y las **aprueba el Súper Admin** antes de mostrarse (cola en "Aprobar fotos"). Formato estándar 3:2 (1620×1080). Backend: tabla `fotos_antro` con RLS (público solo ve aprobadas) + Edge Functions `subir-foto-antro` (valida pertenencia al corporativo) y `moderar-foto-antro`. |
 | 9 | Privacidad en la app + aviso integral | **Hecho** — pantalla de bienvenida/consentimiento (transparente: sin publicidad ni rastreo, huella solo para fraude); "Políticas y privacidad" y "Ajustes de privacidad" (finalidades, promociones opcionales, revocación) — cumple App Review §5.1.1(ii). Aviso de privacidad **integral** para el abogado en [`docs/legal/`](docs/legal/) con anexo que mapea cada requisito de Apple §5.1, Google Data Safety y LFPDPPP a su sección. |
+| 10 | Endurecimiento de seguridad (aislamiento multi-tenant) | **Hecho** — se cierra la brecha por la que un rol autorizaba acciones en un corporativo ajeno: toda Edge Function valida ahora **dos ejes** (matriz de permisos + pertenencia al tenant, `verificarTenant`). Códigos de invitación con **CSPRNG** (no `Math.random`) + **bloqueo por fuerza bruta** (tabla `intentos_codigo`). RLS endurecido: sin escritura directa de reservas/QR (todo por función), escritura de antros/eventos solo con permiso de gestión, **trigger** que impide auto-marcarse verificado, y lectura de reputación acotada al corporativo. Detalle en [`docs/SEGURIDAD.md`](docs/SEGURIDAD.md). |
 
 ## Scripts
 

@@ -3,7 +3,7 @@
 // con reserva al cierre. EXCLUSIVO de esos roles. Alimenta el ranking.
 
 import { cors, json } from '../_shared/cors.ts';
-import { clienteServicio, puedeAccion, usuarioDeRequest } from '../_shared/auth.ts';
+import { clienteServicio, puedeAccion, usuarioDeRequest, verificarTenant } from '../_shared/auth.ts';
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: cors });
@@ -28,6 +28,11 @@ Deno.serve(async (req) => {
     .eq('id', reservaId)
     .maybeSingle();
   if (!reserva) return json({ error: 'Reserva no encontrada' }, 404);
+
+  // Aislamiento: el cajero debe ser de ESE antro/corporativo.
+  if (!(await verificarTenant(svc, usuario.id, { corporativoId: reserva.corporativo_id, antroId: reserva.antro_id }))) {
+    return json({ error: 'No autorizado en este antro' }, 403);
+  }
 
   await svc.from('consumo_mesa').insert({
     reserva_id: reservaId,

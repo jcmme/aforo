@@ -3,7 +3,7 @@
 // firma N QR en el servidor. Denegación por defecto y aislamiento multi-tenant.
 
 import { cors, json } from '../_shared/cors.ts';
-import { clienteServicio, puedeAccion, usuarioDeRequest } from '../_shared/auth.ts';
+import { clienteServicio, puedeAccion, usuarioDeRequest, verificarTenant } from '../_shared/auth.ts';
 import { obtenerParametro } from '../_shared/config.ts';
 import { firmarToken } from '../_shared/qr.ts';
 
@@ -42,6 +42,13 @@ Deno.serve(async (req) => {
   if (!evento) return json({ error: 'Evento no encontrado' }, 404);
   if (!evento.modalidades.includes(modalidad)) {
     return json({ error: 'Modalidad no disponible en este evento' }, 400);
+  }
+
+  // Reserva de invitado sin cuenta: además del rol, el staff debe pertenecer al
+  // corporativo/antro del evento (no se registra personal ajeno en otro tenant).
+  // Un cliente que reserva para sí mismo puede hacerlo en cualquier antro.
+  if (invitado && !(await verificarTenant(svc, usuario.id, { corporativoId: evento.corporativo_id, antroId: evento.antro_id }))) {
+    return json({ error: 'No autorizado en este antro' }, 403);
   }
 
   // Cupo actual = suma de invitados en reservas vigentes.

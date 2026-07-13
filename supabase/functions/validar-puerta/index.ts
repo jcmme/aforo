@@ -3,7 +3,7 @@
 // La firma del QR se valida SIEMPRE en el servidor. Solo cadenero/hostess.
 
 import { cors, json } from '../_shared/cors.ts';
-import { clienteServicio, puedeAccion, usuarioDeRequest } from '../_shared/auth.ts';
+import { clienteServicio, puedeAccion, usuarioDeRequest, verificarTenant } from '../_shared/auth.ts';
 import { verificarToken } from '../_shared/qr.ts';
 
 Deno.serve(async (req) => {
@@ -42,6 +42,12 @@ Deno.serve(async (req) => {
     .maybeSingle();
   if (!reserva || !['confirmada', 'lista_espera', 'completada'].includes(reserva.estado)) {
     return rojo('La reserva no está activa');
+  }
+
+  // Aislamiento: el que escanea debe ser personal de ESTE antro/corporativo.
+  // Tener el rol "cadenero" en otro corporativo no habilita esta puerta.
+  if (!(await verificarTenant(svc, usuario.id, { corporativoId: reserva.corporativo_id, antroId }))) {
+    return json({ error: 'No autorizado en este antro' }, 403);
   }
 
   // 4) Conteo: la puerta espera los QR DISTRIBUIDOS; "adentro" = usado_puerta.
