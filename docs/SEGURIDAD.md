@@ -75,6 +75,24 @@ objetivo**, y además se exige pertenencia explícita.
   servidor) y verificado con comparación de **tiempo constante**. No es
   adivinable ni secuencial.
 
+## Pruebas de aislamiento
+
+El aislamiento se prueba en las dos capas (CLAUDE.md pide "aislamiento probado
+explícitamente"):
+
+1. **Lógica de las Edge Functions** (`supabase/functions/_shared/decision.test.ts`,
+   corre con `npm test`). Ejercita la MISMA función pura (`decision.ts`) que usan
+   las funciones en producción — no una copia — con dos corporativos. Demuestra,
+   en toda dirección, que el personal de un corporativo no puede leer ni ejecutar
+   acciones del otro: mismo corporativo/otro antro, cruce A→B y B→A, roles de
+   alcance corporativo, super_admin transversal, personal revocado y el caso de
+   una persona con roles en dos corporativos.
+2. **RLS de la base de datos** (`supabase/tests/rls_aislamiento.sql`). Se pega en
+   el SQL Editor de Supabase tras aplicar las migraciones; crea dos corporativos,
+   consulta como cada usuario y verifica cero fuga entre tenants, que el cliente
+   no puede escribir reservas ni auto-verificarse. Corre en una transacción con
+   ROLLBACK (no deja datos).
+
 ## Pendientes conocidos (para la fase de producción con datos reales)
 
 - **Verificación real de teléfono**: hoy el teléfono se captura, no se
@@ -87,9 +105,6 @@ objetivo**, y además se exige pertenencia explícita.
   muestran a cualquier cliente). No hay dato secreto de tenant, pero conviene
   exponerlos por una **vista** que omita identificadores internos
   (`cliente_id`, borradores `texto_pendiente`) — minimización de datos.
-- **Pruebas automatizadas de aislamiento**: falta una batería que verifique,
-  con usuarios de dos corporativos, que ninguno alcanza datos del otro
-  (CLAUDE.md pide el aislamiento "probado explícitamente").
 - **Rate limiting a nivel de gateway** (además del de códigos) para login y
   endpoints sensibles, y **respaldos automáticos** con restauración probada.
 
