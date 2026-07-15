@@ -43,9 +43,14 @@ npm run android    # emulador Android
 ## Conectar Supabase (datos reales)
 
 1. Crea un proyecto en [supabase.com](https://supabase.com).
-2. En el **SQL Editor**, ejecuta en orden todas las migraciones
-   (`supabase/migrations/0001_schema.sql` … `0011_seguridad.sql`) y luego
-   `supabase/seed.sql`.
+2. En el **SQL Editor**, aplica el esquema completo. Dos opciones:
+   - **Rápida:** pega y ejecuta `supabase/setup_completo.sql` (las 11
+     migraciones en orden, en un solo archivo).
+   - **Manual:** ejecuta en orden `supabase/migrations/0001_schema.sql` …
+     `0011_seguridad.sql`.
+
+   Luego, para datos demo, ejecuta `supabase/seed.sql`. Verifica el aislamiento
+   con `supabase/tests/rls_aislamiento.sql`.
 3. Despliega las Edge Functions y su secreto:
    ```bash
    supabase functions deploy \
