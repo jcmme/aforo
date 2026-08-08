@@ -125,7 +125,6 @@ export const DEMO_USUARIO: Usuario = {
   email: 'demo@aforo.app',
   telefono: '+522221234567',
   emailVerificado: true,
-  telefonoVerificado: false,
   creadoEn: '2026-06-01T00:00:00Z',
 };
 

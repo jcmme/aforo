@@ -31,10 +31,11 @@ export default function RegistroScreen() {
     }
     setCargando(true);
     try {
-      await registrar({ nombre: nombre.trim(), username: username.trim(), email: email.trim(), telefono: telefono.trim(), password });
+      const correo = email.trim();
+      await registrar({ nombre: nombre.trim(), username: username.trim(), email: correo, telefono: telefono.trim(), password });
       // Tras registrar: pantalla de bienvenida/consentimiento (demo) o
-      // verificación de correo (real, que luego lleva a la bienvenida).
-      router.replace(demo ? '/bienvenida' : '/(auth)/verificar');
+      // "revisa tu correo" (real: todavía no hay sesión hasta confirmarlo).
+      router.replace(demo ? '/bienvenida' : { pathname: '/(auth)/verificar', params: { email: correo } });
     } catch (e) {
       setError(e instanceof Error ? e.message : 'No se pudo crear la cuenta.');
     } finally {

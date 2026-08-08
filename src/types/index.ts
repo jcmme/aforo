@@ -98,7 +98,6 @@ export interface Usuario {
   email: string;
   telefono: string | null;
   emailVerificado: boolean;
-  telefonoVerificado: boolean;
   creadoEn: string;
 }
 

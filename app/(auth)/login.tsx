@@ -21,7 +21,12 @@ export default function LoginScreen() {
       await iniciarSesion(email.trim(), password);
       router.replace('/(cliente)');
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'No se pudo iniciar sesión.');
+      const msg = e instanceof Error ? e.message : '';
+      setError(
+        msg.toLowerCase().includes('email not confirmed')
+          ? 'Todavía no confirmas tu correo. Revisa tu bandeja y abre el enlace que te enviamos.'
+          : msg || 'No se pudo iniciar sesión.',
+      );
     } finally {
       setCargando(false);
     }

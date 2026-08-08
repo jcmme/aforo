@@ -94,13 +94,10 @@ siguientes.
 ### Pendiente de código (bloqueante para someter)
 
 - [ ] **Backend real en producción**: crear el proyecto Supabase de
-      producción y aplicar migraciones 0001–0008 + seed + desplegar TODAS las
+      producción y aplicar migraciones 0001–0012 + seed + desplegar TODAS las
       Edge Functions (lista en README). La app NO puede someterse en modo
       demo: Apple rechaza por guideline 2.1 (App Completeness) cualquier
       contenido simulado.
-- [ ] **Verificación de teléfono real** (proveedor SMS, p. ej. Twilio). Hoy
-      el flujo existe pero el SMS está stubeado. Requiere cuenta y
-      credenciales de MABI.
 - [ ] **Builds nativos**: `eas build --platform ios|android --profile
       production`. Requiere las cuentas de desarrollador (§1.2). Las
       variables `EXPO_PUBLIC_SUPABASE_URL` / `_ANON_KEY` de producción se
@@ -220,8 +217,7 @@ Ambas tiendas exigen declarar también: **los datos se cifran en tránsito**
 1. Persona física, hoy: cuenta de Supabase (gratis) + dominio + cuentas de
    desarrollador individuales (§1.1) + arrancar e.firma/SAS en paralelo
    (§1.2) + abogado (aviso de privacidad).
-2. Código: proyecto Supabase de producción + SMS real + revisión de
-   seguridad externa.
+2. Código: proyecto Supabase de producción + revisión de seguridad externa.
 3. Builds EAS de producción + pruebas en dispositivos físicos + prueba
    cerrada de Google (12 testers × 14 días) con el staff del piloto.
 4. Fichas, formularios de privacidad, cuenta de revisor, capturas.

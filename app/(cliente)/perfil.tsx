@@ -67,11 +67,6 @@ export default function PerfilScreen() {
           valor={usuario?.emailVerificado ? 'Sí' : 'Pendiente'}
           color={usuario?.emailVerificado ? colors.success : colors.warning}
         />
-        <Dato
-          etiqueta="Teléfono verificado"
-          valor={usuario?.telefonoVerificado ? 'Sí' : 'Pendiente'}
-          color={usuario?.telefonoVerificado ? colors.success : colors.warning}
-        />
       </View>
 
       {/* Campo discreto de código de invitación (no se anuncia en pantallas públicas). */}

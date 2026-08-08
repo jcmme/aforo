@@ -51,7 +51,9 @@ AFORO custodia identidad, datos personales, huella de dispositivo y —a futuro�
 La seguridad no es opcional ni "para después".
 
 - Contraseñas hasheadas con **bcrypt o Argon2**. Nunca en texto plano, nunca en logs.
-- **Verificación real** de correo y teléfono en el registro (no solo captura del dato).
+- **Verificación real de correo** en el registro (no solo captura del dato). El
+  teléfono se captura como dato de contacto y para el motor antifraude (huella de
+  identidad, §6), pero no se exige verificarlo para poder usar la cuenta.
 - Sesiones con **expiración y revocables**. Límite de intentos de login y de ingreso de
   códigos de invitación.
 - **QR firmado criptográficamente**, no un número secuencial ni adivinable. Validación

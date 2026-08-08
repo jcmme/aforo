@@ -123,9 +123,9 @@ begin
   -- === Aserción 5: un cliente NO puede auto-marcarse como verificado ========
   perform set_config('request.jwt.claims', json_build_object('sub', cliente_a, 'role', 'authenticated')::text, true);
   set local role authenticated;
-  update usuarios set email_verificado = true, telefono_verificado = true where id = cliente_a;
+  update usuarios set email_verificado = true where id = cliente_a;
   reset role;
-  perform 1 from usuarios where id = cliente_a and (email_verificado or telefono_verificado);
+  perform 1 from usuarios where id = cliente_a and email_verificado;
   if found then
     raise exception 'FALLO CRÍTICO: el cliente se marcó como verificado (trigger no protege)';
   end if;

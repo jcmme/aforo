@@ -28,6 +28,8 @@ interface AuthContextValue {
   demo: boolean;
   iniciarSesion: (email: string, password: string) => Promise<void>;
   registrar: (datos: DatosRegistro) => Promise<void>;
+  /** Reenvía el correo de confirmación (no-op en modo demo). */
+  reenviarConfirmacion: (email: string) => Promise<void>;
   cerrarSesion: () => Promise<void>;
   /** Borra la cuenta del titular (App Store 5.1.1(v) / LFPDPPP). */
   eliminarCuenta: () => Promise<void>;
@@ -46,7 +48,6 @@ function filaAUsuario(r: Record<string, any>): Usuario {
     email: r.email,
     telefono: r.telefono,
     emailVerificado: r.email_verificado ?? false,
-    telefonoVerificado: r.telefono_verificado ?? false,
     creadoEn: r.creado_en,
   };
 }
@@ -113,22 +114,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setRolActivo('cliente');
       return;
     }
-    const { data, error } = await supabase.auth.signUp({
+    // Toda cuenta nace como cliente. La fila en `usuarios` la crea el
+    // servidor (trigger sobre auth.users, migración 0012) en cuanto Auth
+    // registra al usuario — así no depende de tener sesión todavía, que es
+    // justo el caso cuando el proyecto exige confirmar el correo primero.
+    const { error } = await supabase.auth.signUp({
       email: datos.email,
       password: datos.password,
+      options: {
+        data: {
+          nombre: datos.nombre,
+          username: datos.username,
+          telefono: datos.telefono,
+        },
+      },
     });
     if (error) throw error;
-    if (data.user) {
-      // Toda cuenta nace como cliente. Verificación de correo vía Supabase Auth;
-      // la de teléfono se completa en un paso aparte (proveedor SMS).
-      await supabase.from('usuarios').insert({
-        id: data.user.id,
-        nombre: datos.nombre,
-        username: datos.username,
-        email: datos.email,
-        telefono: datos.telefono,
-      });
-    }
+  }
+
+  /** Reenvía el correo de confirmación (registro sin sesión todavía). */
+  async function reenviarConfirmacion(email: string) {
+    if (!supabase) return;
+    const { error } = await supabase.auth.resend({ type: 'signup', email });
+    if (error) throw error;
   }
 
   async function cerrarSesion() {
@@ -158,7 +166,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   const value = useMemo<AuthContextValue>(
-    () => ({ usuario, rolActivo, loading, demo, iniciarSesion, registrar, cerrarSesion, eliminarCuenta, cambiarRolDemo }),
+    () => ({
+      usuario,
+      rolActivo,
+      loading,
+      demo,
+      iniciarSesion,
+      registrar,
+      reenviarConfirmacion,
+      cerrarSesion,
+      eliminarCuenta,
+      cambiarRolDemo,
+    }),
     [usuario, rolActivo, loading, demo],
   );
 
