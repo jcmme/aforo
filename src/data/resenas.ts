@@ -2,6 +2,16 @@ import { supabase } from '@/lib/supabase';
 import { DEMO_RESENAS, DEMO_RESERVAS, DEMO_RESERVAS_SEED, type ResenaSeed } from './mock';
 import type { Resena } from '@/types';
 
+/** Motivos por defecto si no hay config (modo demo). El último exige nota. */
+const MOTIVOS_REPORTE_DEMO = [
+  'Contenido falso o engañoso',
+  'Discurso de odio o discriminación',
+  'Acoso o amenazas',
+  'Contenido sexual o inapropiado',
+  'Suplantación de identidad',
+  'Otro',
+];
+
 // Reseñas del cliente hacia el antro (CLAUDE.md §6, ronda 5). Solo estrellas +
 // foto por ahora; el comentario de texto queda listo en el modelo, sin UI
 // ("veremos"). Solo puede reseñar quien tuvo una reserva `completada` en ese
@@ -85,4 +95,30 @@ export async function crearResena(
     comentario: null,
     creadoEn: new Date().toISOString(),
   });
+}
+
+/** Motivos configurables para reportar una reseña (el último exige nota). */
+export async function motivosReporteContenido(): Promise<string[]> {
+  if (supabase) {
+    const { data } = await supabase
+      .from('config_parametros')
+      .select('valor')
+      .eq('clave', 'motivos_reporte_contenido')
+      .eq('scope', 'global')
+      .maybeSingle();
+    return Array.isArray(data?.valor) ? data.valor : MOTIVOS_REPORTE_DEMO;
+  }
+  return MOTIVOS_REPORTE_DEMO;
+}
+
+/** Reporta una reseña (o su foto) que incumple las Normas de la Comunidad. */
+export async function reportarResena(resenaId: string, motivo: string, nota: string | null): Promise<void> {
+  if (supabase) {
+    const { error } = await supabase.functions.invoke('reportar-resena', {
+      body: { resenaId, motivo, nota },
+    });
+    if (error) throw new Error(error.message);
+    return;
+  }
+  // Demo: no hay panel Cadena dinámico; solo se confirma la acción.
 }

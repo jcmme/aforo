@@ -44,10 +44,10 @@ npm run android    # emulador Android
 
 1. Crea un proyecto en [supabase.com](https://supabase.com).
 2. En el **SQL Editor**, aplica el esquema completo. Dos opciones:
-   - **Rápida:** pega y ejecuta `supabase/setup_completo.sql` (las 12
+   - **Rápida:** pega y ejecuta `supabase/setup_completo.sql` (las 14
      migraciones en orden, en un solo archivo).
    - **Manual:** ejecuta en orden `supabase/migrations/0001_schema.sql` …
-     `0012_verificacion_email.sql`.
+     `0014_reportes_contenido.sql`.
 
    Luego, para datos demo, ejecuta `supabase/seed.sql`. Verifica el aislamiento
    con `supabase/tests/rls_aislamiento.sql`.
@@ -60,7 +60,7 @@ npm run android    # emulador Android
      generar-invitacion revocar-invitacion reclamar-invitacion \
      editar-parametro crear-promocion gestion-minimo \
      editar-tyc-antro aprobar-tyc crear-resena eliminar-cuenta \
-     subir-foto-antro moderar-foto-antro
+     subir-foto-antro moderar-foto-antro reportar-resena
    supabase secrets set AFORO_QR_SECRET="$(openssl rand -hex 32)"
    ```
 4. Copia las credenciales del proyecto:
@@ -93,6 +93,7 @@ docs/       ARCHITECTURE.md · DATA_MODEL.md
 | 9 | Privacidad en la app + aviso integral | **Hecho** — pantalla de bienvenida/consentimiento (transparente: sin publicidad ni rastreo, huella solo para fraude); "Políticas y privacidad" y "Ajustes de privacidad" (finalidades, promociones opcionales, revocación) — cumple App Review §5.1.1(ii). Aviso de privacidad **integral** para el abogado en [`docs/legal/`](docs/legal/) con anexo que mapea cada requisito de Apple §5.1, Google Data Safety y LFPDPPP a su sección. |
 | 10 | Endurecimiento de seguridad (aislamiento multi-tenant) | **Hecho** — se cierra la brecha por la que un rol autorizaba acciones en un corporativo ajeno: toda Edge Function valida ahora **dos ejes** (matriz de permisos + pertenencia al tenant, `verificarTenant`). Códigos de invitación con **CSPRNG** (no `Math.random`) + **bloqueo por fuerza bruta** (tabla `intentos_codigo`). RLS endurecido: sin escritura directa de reservas/QR (todo por función), escritura de antros/eventos solo con permiso de gestión, **trigger** que impide auto-marcarse verificado, y lectura de reputación acotada al corporativo. **Aislamiento probado** (`npm test`): batería con dos corporativos sobre la misma lógica que corre en producción, más una prueba RLS para Supabase. Detalle en [`docs/SEGURIDAD.md`](docs/SEGURIDAD.md). |
 | 11 | Verificación de cuenta solo por correo | **Hecho** — se retira el requisito de verificar teléfono (CLAUDE.md §3 actualizado); el teléfono se sigue capturando como dato de contacto/antifraude, pero deja de bloquear la cuenta. Se cierra además un hueco real: nada dejaba `email_verificado` en `true`. Ahora dos triggers sobre `auth.users` (migración `0012_verificacion_email.sql`) crean la fila de `usuarios` en cuanto Auth registra al usuario (ya no depende de tener sesión) y la marcan verificada al confirmar el correo. Pantalla "Revisa tu correo" con reenvío de confirmación (`app/(auth)/verificar.tsx`). |
+| 12 | Legal dentro de la app + reporte de contenido + búsqueda | **Hecho** — Términos y Aviso de Privacidad (versión del abogado, ago. 2026) ahora se leen COMPLETOS dentro de la app (`app/legal/terminos.tsx`, `app/legal/aviso.tsx`, componente `DocumentoLegal`), no solo como enlace externo; texto editable sin publicar actualización (`config_parametros`, migración `0013_legal_textos.sql`). Aún con placeholders `[correo]`/`[proveedor]` pendientes de MABI, y la Sección 7 del T&C (política de inasistencias) pendiente de que el abogado confirme la redacción alineada al score real. Botón **"Reportar"** en cada reseña (`app/resena/reportar/[resenaId].tsx`, función `reportar-resena`, motivos configurables) que escala al panel Cadena. Buscador + filtro por zona en la pantalla principal (`app/(cliente)/index.tsx`), sin geolocalización todavía. |
 
 ## Scripts
 

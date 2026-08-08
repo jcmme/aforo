@@ -1,18 +1,12 @@
 import { useRouter } from 'expo-router';
-import { Linking, ScrollView, StyleSheet, Text } from 'react-native';
+import { ScrollView, StyleSheet, Text } from 'react-native';
 
 import { Fila, SeccionLabel } from '@/components/ui';
-import { avisoPrivacidadUrl } from '@/data/legal';
 import { colors, font, spacing } from '@/theme';
 
 /** Menú "Políticas y privacidad" (estilo lista tipo guía). */
 export default function PrivacidadScreen() {
   const router = useRouter();
-
-  async function abrirAviso() {
-    const url = await avisoPrivacidadUrl();
-    if (url) Linking.openURL(url).catch(() => {});
-  }
 
   return (
     <ScrollView style={{ backgroundColor: colors.bg }} contentContainerStyle={styles.content}>
@@ -21,8 +15,18 @@ export default function PrivacidadScreen() {
         rastreo entre apps.
       </Text>
 
-      <SeccionLabel>Documentos</SeccionLabel>
-      <Fila titulo="Aviso de privacidad" subtitulo="Qué datos usamos y para qué" onPress={abrirAviso} primera />
+      <SeccionLabel>Legal</SeccionLabel>
+      <Fila
+        titulo="Términos y condiciones"
+        subtitulo="Las reglas de uso del Servicio"
+        onPress={() => router.push('/legal/terminos')}
+        primera
+      />
+      <Fila
+        titulo="Aviso de privacidad"
+        subtitulo="Qué datos usamos y para qué"
+        onPress={() => router.push('/legal/aviso')}
+      />
 
       <SeccionLabel>Tus controles</SeccionLabel>
       <Fila

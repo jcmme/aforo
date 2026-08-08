@@ -1,9 +1,8 @@
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { Boton, Pantalla } from '@/components/ui';
-import { avisoPrivacidadUrl } from '@/data/legal';
 import { aceptarAviso } from '@/lib/consentimiento';
 import { colors, familias, font, radius, spacing } from '@/theme';
 
@@ -17,11 +16,6 @@ export default function BienvenidaScreen() {
   const router = useRouter();
   const [promos, setPromos] = useState(true);
   const [guardando, setGuardando] = useState(false);
-
-  async function abrirAviso() {
-    const url = await avisoPrivacidadUrl();
-    if (url) Linking.openURL(url).catch(() => {});
-  }
 
   async function continuar() {
     setGuardando(true);
@@ -46,7 +40,7 @@ export default function BienvenidaScreen() {
             anunciar ni se comparten con terceros.
           </Text>
 
-          <Pressable style={styles.enlace} onPress={abrirAviso}>
+          <Pressable style={styles.enlace} onPress={() => router.push('/legal/aviso')}>
             <Text style={styles.enlaceTxt}>Leer el Aviso de privacidad</Text>
             <Text style={styles.enlaceFlecha}>›</Text>
           </Pressable>

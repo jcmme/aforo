@@ -39,6 +39,8 @@ export default function RootLayout() {
           <Stack.Screen name="promociones" options={{ title: 'Promociones' }} />
           <Stack.Screen name="bienvenida" options={{ headerShown: false }} />
           <Stack.Screen name="privacidad" options={{ title: 'Políticas y privacidad' }} />
+          <Stack.Screen name="legal/aviso" options={{ title: 'Aviso de privacidad' }} />
+          <Stack.Screen name="legal/terminos" options={{ title: 'Términos y condiciones' }} />
           <Stack.Screen name="ajustes-privacidad" options={{ title: 'Ajustes de privacidad' }} />
           <Stack.Screen name="antro/[id]" options={{ title: '' }} />
           <Stack.Screen name="evento/[id]" options={{ title: '' }} />
@@ -49,6 +51,10 @@ export default function RootLayout() {
           />
           <Stack.Screen name="reclamar/[token]" options={{ title: 'Tu acceso' }} />
           <Stack.Screen name="resena/[reservaId]" options={{ title: 'Calificar', presentation: 'modal' }} />
+          <Stack.Screen
+            name="resena/reportar/[resenaId]"
+            options={{ title: 'Reportar reseña', presentation: 'modal' }}
+          />
         </Stack>
       </AuthProvider>
     </SafeAreaProvider>

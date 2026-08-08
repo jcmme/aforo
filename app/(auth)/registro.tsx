@@ -1,10 +1,9 @@
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { Linking, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { Boton, Campo, Pantalla } from '@/components/ui';
 import { useAuth } from '@/context/AuthContext';
-import { avisoPrivacidadUrl } from '@/data/legal';
 import { colors, font, spacing } from '@/theme';
 
 export default function RegistroScreen() {
@@ -17,11 +16,6 @@ export default function RegistroScreen() {
   const [password, setPassword] = useState('');
   const [cargando, setCargando] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  async function abrirAviso() {
-    const url = await avisoPrivacidadUrl();
-    if (url) Linking.openURL(url).catch(() => {});
-  }
 
   async function crear() {
     setError(null);
@@ -64,8 +58,12 @@ export default function RegistroScreen() {
           <Boton titulo="Crear cuenta" onPress={crear} cargando={cargando} />
           {/* Consentimiento informado (LFPDPPP) y enlace exigido por las tiendas. */}
           <Text style={styles.legal}>
-            Al crear tu cuenta aceptas el tratamiento de tus datos conforme al{' '}
-            <Text style={styles.legalLink} onPress={abrirAviso}>
+            Al crear tu cuenta aceptas los{' '}
+            <Text style={styles.legalLink} onPress={() => router.push('/legal/terminos')}>
+              Términos y condiciones
+            </Text>{' '}
+            y el{' '}
+            <Text style={styles.legalLink} onPress={() => router.push('/legal/aviso')}>
               Aviso de privacidad
             </Text>
             .

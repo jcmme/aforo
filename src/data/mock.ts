@@ -1,4 +1,5 @@
 import type { Antro, Corporativo, Evento, QRInvitado, Reserva, Usuario } from '@/types';
+import { AVISO_PRIVACIDAD_TEXTO, TERMINOS_USO_TEXTO } from './legalTextos';
 
 // Datos de demostración (CLAUDE.md §11). Espejo del seed de Supabase, para
 // navegar el flujo del cliente sin backend. Dos corporativos en Puebla.
@@ -501,6 +502,8 @@ export const DEMO_CONFIG_EDITABLE: { clave: string; valor: string; descripcion: 
   { clave: 'hito_maquina_ventas_capitan', valor: '100000', descripcion: 'Insignia Máquina de ventas — Capitán (MXN/noche)' },
   { clave: 'tyc_corte_semanal', valor: 'martes 12:00', descripcion: 'Corte semanal para que un cambio de T&C aplique esa semana' },
   { clave: 'aviso_privacidad_url', valor: 'https://jcmme.github.io/aforo/aviso-privacidad.html', descripcion: 'URL pública del aviso de privacidad (sustituir por la del dominio propio)' },
+  { clave: 'aviso_privacidad_texto', valor: AVISO_PRIVACIDAD_TEXTO, descripcion: 'Texto completo del aviso de privacidad, mostrado dentro de la app' },
+  { clave: 'terminos_uso_texto', valor: TERMINOS_USO_TEXTO, descripcion: 'Texto completo de los Términos y Condiciones de Uso, mostrado dentro de la app' },
 ];
 
 /** Invitaciones generadas en la sesión (en memoria). */

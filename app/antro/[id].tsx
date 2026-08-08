@@ -1,6 +1,6 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, Image, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { EventoCard } from '@/components/EventoCard';
 import { GaleriaAntro } from '@/components/GaleriaAntro';
@@ -93,6 +93,31 @@ export default function AntroScreen() {
             </ScrollView>
           </>
         ) : null}
+
+        {resenas.length > 0 ? (
+          <>
+            <Text style={[font.h2, { marginTop: spacing.lg }]}>Reseñas</Text>
+            <View style={styles.resenas}>
+              {resenas.map((r) => (
+                <View key={r.id} style={styles.resena}>
+                  <View style={styles.resenaHead}>
+                    <Text style={styles.resenaNombre}>{r.clienteNombre}</Text>
+                    <Text style={styles.resenaEstrellas}>{'★'.repeat(r.estrellas)}{'☆'.repeat(5 - r.estrellas)}</Text>
+                  </View>
+                  {r.comentario ? <Text style={styles.resenaComentario}>{r.comentario}</Text> : null}
+                  <View style={styles.resenaFoot}>
+                    <Text style={styles.resenaFecha}>
+                      {new Date(r.creadoEn).toLocaleDateString('es-MX', { day: '2-digit', month: 'short' })}
+                    </Text>
+                    <Pressable onPress={() => router.push(`/resena/reportar/${r.id}`)}>
+                      <Text style={styles.resenaReportar}>Reportar</Text>
+                    </Pressable>
+                  </View>
+                </View>
+              ))}
+            </View>
+          </>
+        ) : null}
       </View>
     </ScrollView>
   );
@@ -111,4 +136,20 @@ const styles = StyleSheet.create({
   eventos: { gap: spacing.md, marginTop: spacing.md },
   galeria: { gap: spacing.sm },
   fotoResena: { width: 110, height: 110, borderRadius: radius.md, backgroundColor: colors.surfaceAlt },
+  resenas: { gap: spacing.sm, marginTop: spacing.md },
+  resena: {
+    backgroundColor: colors.surface,
+    borderRadius: radius.md,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: colors.hairline,
+    padding: spacing.md,
+    gap: spacing.xs,
+  },
+  resenaHead: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  resenaNombre: { color: colors.text, fontSize: 14, fontWeight: '700' },
+  resenaEstrellas: { color: colors.accent, fontSize: 13 },
+  resenaComentario: { color: colors.textMuted, fontSize: 13, lineHeight: 19 },
+  resenaFoot: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 2 },
+  resenaFecha: { color: colors.textFaint, fontSize: 11 },
+  resenaReportar: { color: colors.textFaint, fontSize: 11, textDecorationLine: 'underline' },
 });

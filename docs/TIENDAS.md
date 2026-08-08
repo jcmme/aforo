@@ -79,12 +79,17 @@ siguientes.
 - [x] **Cifrado exento** declarado (`usesNonExemptEncryption: false` — solo
       HTTPS estándar), evita el cuestionario de exportación en cada build.
 - [x] `eas.json` con perfiles development / preview / production.
-- [x] **Enlace al aviso de privacidad DENTRO de la app** (lo exige Google y
-      lo revisa Apple): en el registro (consentimiento al crear cuenta) y en
-      el perfil. La URL es parámetro editable (`aviso_privacidad_url`,
-      migración 0009) — al tener la versión del abogado en el dominio propio
-      se cambia sin publicar actualización. Mientras tanto apunta al
-      borrador hospedado (`web/aviso-privacidad.html`, marcado BORRADOR).
+- [x] **Aviso de privacidad y Términos de Uso LEGIBLES DENTRO de la app**
+      (lo exige Google y lo revisa Apple), no solo un enlace externo: en el
+      registro (consentimiento al crear cuenta), en la bienvenida y en
+      Perfil → Políticas y privacidad → Legal (`app/legal/aviso.tsx`,
+      `app/legal/terminos.tsx`). El texto completo (versión del abogado,
+      agosto 2026) es parámetro editable (`aviso_privacidad_texto` /
+      `terminos_uso_texto`, migración 0013) — se corrige sin publicar
+      actualización. Aún con placeholders `[correo]`/`[proveedor]`
+      pendientes de MABI antes de someter a revisión. La URL pública
+      (`aviso_privacidad_url`, migración 0009) sigue viva para el campo de
+      privacidad de App Store Connect / Play Console, que piden un link.
 - [x] **iPhone-only** (`supportsTablet: false`): el caso de uso es 100%
       teléfono; evita que Apple pruebe el layout en iPad. Reversible cuando
       se quiera dar soporte real a tablet.
@@ -94,10 +99,16 @@ siguientes.
 ### Pendiente de código (bloqueante para someter)
 
 - [ ] **Backend real en producción**: crear el proyecto Supabase de
-      producción y aplicar migraciones 0001–0012 + seed + desplegar TODAS las
+      producción y aplicar migraciones 0001–0014 + seed + desplegar TODAS las
       Edge Functions (lista en README). La app NO puede someterse en modo
       demo: Apple rechaza por guideline 2.1 (App Completeness) cualquier
       contenido simulado.
+- [ ] **Placeholders del Aviso de Privacidad y los Términos** (`[correo]`,
+      `[proveedor]`) deben sustituirse por los valores reales ANTES de
+      someter — hoy son visibles dentro de la app (§3.3, contenido
+      placeholder = rechazo seguro). Se corrigen editando los parámetros
+      `aviso_privacidad_texto` / `terminos_uso_texto`, sin publicar
+      actualización.
 - [ ] **Builds nativos**: `eas build --platform ios|android --profile
       production`. Requiere las cuentas de desarrollador (§1.2). Las
       variables `EXPO_PUBLIC_SUPABASE_URL` / `_ANON_KEY` de producción se
