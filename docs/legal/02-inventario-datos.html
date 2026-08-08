@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>AFORO · Inventario de datos personales</title>
+<style>
+  @page { margin: 20mm 15mm; }
+  body { font: 10.5pt/1.5 Georgia, "Times New Roman", serif; color: #1a1a1a; margin: 0; }
+  h1 { font-size: 19pt; margin: 0 0 2pt; }
+  .sub { color: #6b5a2e; font: 9.5pt/1.4 Helvetica, Arial, sans-serif; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 16pt; }
+  h2 { font: bold 12.5pt Helvetica, Arial, sans-serif; color: #6b5a2e; margin: 16pt 0 6pt; }
+  p, li { margin: 4pt 0; }
+  ul { padding-left: 18pt; }
+  table { border-collapse: collapse; width: 100%; font-size: 9pt; margin: 8pt 0; }
+  th, td { border: 0.5pt solid #999; padding: 4pt 6pt; text-align: left; vertical-align: top; }
+  th { background: #f0ead9; font-family: Helvetica, Arial, sans-serif; }
+  .pie { margin-top: 22pt; padding-top: 8pt; border-top: 0.5pt solid #999; font-size: 9pt; color: #555; }
+</style>
+</head>
+<body>
+
+<h1>Inventario de datos personales</h1>
+<div class="sub">AFORO · Anexo 02 al brief legal · Confidencial</div>
+
+<p>Relación de todos los datos personales que la plataforma trata, su origen,
+dónde y cómo se almacenan, su finalidad, quién puede verlos y qué ocurre al
+eliminar la cuenta. Base para el aviso de privacidad y para los formularios
+de privacidad de App Store y Google Play.</p>
+
+<h2>1. Datos del cliente final (cuenta registrada)</h2>
+<table>
+  <tr>
+    <th style="width:16%">Dato</th><th style="width:13%">Origen</th>
+    <th style="width:22%">Almacenamiento y protección</th>
+    <th style="width:20%">Finalidad</th>
+    <th style="width:15%">Quién lo ve</th>
+    <th style="width:14%">Al eliminar la cuenta</th>
+  </tr>
+  <tr>
+    <td>Nombre, usuario</td><td>Lo captura el titular al registrarse</td>
+    <td rowspan="4">Base de datos PostgreSQL gestionada (Supabase): cifrado en
+    reposo y en tránsito (TLS); acceso restringido por políticas por fila
+    (RLS) con denegación por defecto</td>
+    <td>Identificar la cuenta y las reservas</td>
+    <td>El titular; el personal del establecimiento donde reservó (solo
+    nombre, para operar el acceso)</td>
+    <td>Se elimina</td>
+  </tr>
+  <tr>
+    <td>Correo electrónico</td><td>Titular (verificado)</td>
+    <td>Inicio de sesión, verificación, notificaciones del servicio</td>
+    <td>El titular; administración de la plataforma</td>
+    <td>Se elimina</td>
+  </tr>
+  <tr>
+    <td>Teléfono</td><td>Titular</td>
+    <td>Prevención de fraude: correlación de reservas incumplidas (sección 3)</td>
+    <td>El titular; administración de la plataforma</td>
+    <td>Se elimina</td>
+  </tr>
+  <tr>
+    <td>Contraseña</td><td>Titular</td>
+    <td>Autenticación. Se almacena únicamente como hash (bcrypt); nunca en
+    claro ni en bitácoras</td>
+    <td>Nadie (ni la administración puede leerla)</td>
+    <td>Se elimina</td>
+  </tr>
+  <tr>
+    <td>Historial de reservas y asistencia (llegó / no llegó / canceló)</td>
+    <td>Generado por el uso</td>
+    <td>Misma base de datos; los QR son tokens firmados criptográficamente,
+    no contienen datos personales legibles</td>
+    <td>Operar las reservas; estadística del negocio; score de asistencia
+    (antifraude)</td>
+    <td>El titular; el personal del establecimiento correspondiente, según
+    su rol</td>
+    <td>Se conserva <strong>anonimizado</strong> (sin vínculo con persona
+    alguna), como estadística de aforo</td>
+  </tr>
+  <tr>
+    <td>Fotografías en reseñas</td><td>Titular, opcional y voluntaria</td>
+    <td>Almacenamiento de archivos del mismo proveedor</td>
+    <td>Contenido público de la reseña del establecimiento</td>
+    <td>Cualquier usuario que vea la ficha del establecimiento</td>
+    <td>Se eliminan</td>
+  </tr>
+</table>
+
+<h2>2. Datos de invitados sin cuenta</h2>
+<table>
+  <tr>
+    <th style="width:16%">Dato</th><th style="width:20%">Origen</th>
+    <th style="width:28%">Finalidad</th><th style="width:18%">Quién lo ve</th>
+    <th style="width:18%">Conservación</th>
+  </tr>
+  <tr>
+    <td>Nombre y teléfono</td>
+    <td>Los aporta un tercero (el miembro del personal que registra la
+    reserva), no el propio titular</td>
+    <td>Emitir el QR de acceso y, en su caso, correlación antifraude por
+    teléfono si acumula inasistencias</td>
+    <td>El personal del establecimiento de esa reserva</td>
+    <td>Ligado a la reserva. <em>Pendiente de definir con la asesoría:
+    obligación de informar al titular (el enlace que recibe puede incluir el
+    aviso de privacidad)</em></td>
+  </tr>
+</table>
+
+<h2>3. Identificadores técnicos y antifraude (punto sensible)</h2>
+<table>
+  <tr>
+    <th style="width:20%">Dato</th><th style="width:30%">Descripción</th>
+    <th style="width:26%">Finalidad única</th><th style="width:24%">Lo que NO se hace</th>
+  </tr>
+  <tr>
+    <td>Huella de dispositivo</td>
+    <td>Identificadores técnicos del equipo desde el que se usa la app,
+    almacenados cifrados</td>
+    <td rowspan="2">Detectar a quien reserva reiteradamente sin presentarse
+    usando cuentas o nombres distintos (fraude de reservas), y aplicar
+    medidas graduales: alerta → límite de reservas → bloqueo</td>
+    <td rowspan="2">No se usa para publicidad; no se comparte ni vende; no se
+    rastrea al usuario fuera de la plataforma; no alimenta perfiles
+    comerciales. En los formularios de Apple/Google se declarará bajo la
+    finalidad permitida de "prevención de fraude"</td>
+  </tr>
+  <tr>
+    <td>Score de reputación</td>
+    <td>Índice derivado del historial verificable de asistencia (porcentaje
+    de reservas cumplidas)</td>
+  </tr>
+</table>
+
+<h2>4. Datos del personal de los establecimientos</h2>
+<table>
+  <tr>
+    <th style="width:22%">Dato</th><th style="width:36%">Finalidad</th>
+    <th style="width:42%">Quién lo ve</th>
+  </tr>
+  <tr>
+    <td>Los mismos de cualquier cuenta (sección 1) + rol y establecimiento</td>
+    <td>Operación (escaneo en puerta, mesas, reservas)</td>
+    <td>Su jerarquía dentro del mismo corporativo (aislamiento estricto
+    entre corporativos)</td>
+  </tr>
+  <tr>
+    <td>Métricas de desempeño (reservas generadas, asistencia de sus
+    invitados, consumo asociado, insignias)</td>
+    <td>Evaluación de desempeño y reconocimiento interno (ranking, feed
+    interno del equipo)</td>
+    <td>El propio trabajador ve lo suyo; gerencia del corporativo ve las
+    cifras; el feed interno muestra logros sin montos</td>
+  </tr>
+  <tr>
+    <td>Bitácora de auditoría (qué acción operativa hizo y cuándo)</td>
+    <td>Trazabilidad de accesos manuales, cambios de mesa e incidencias</td>
+    <td>Gerencia del corporativo y administración de la plataforma</td>
+  </tr>
+</table>
+
+<h2>5. Encargados y terceros</h2>
+<ul>
+  <li><strong>Supabase</strong> (infraestructura de base de datos,
+  autenticación y archivos): cifrado en reposo/tránsito; servidores
+  posiblemente fuera de México (EE. UU.) — tratar como cómputo en la nube /
+  transferencia internacional según indique la asesoría.</li>
+  <li><strong>WhatsApp</strong>: el usuario, por decisión propia, puede
+  compartir su QR por WhatsApp; la plataforma solo abre el enlace de
+  compartir en el dispositivo del usuario.</li>
+  <li><strong>No hay</strong>: redes publicitarias, analytics de terceros,
+  brokers de datos ni venta de información.</li>
+</ul>
+
+<h2>6. Derechos del titular ya implementados en el producto</h2>
+<ul>
+  <li><strong>Eliminación de cuenta dentro de la app</strong> (Perfil →
+  Eliminar mi cuenta, con doble confirmación): borra los datos personales y
+  anonimiza las reservas históricas. Disponible sin intervención humana.</li>
+  <li>Acceso y rectificación: el titular ve y puede corregir sus datos de
+  perfil desde la app.</li>
+  <li>El aviso de privacidad es visible desde el registro (consentimiento al
+  crear la cuenta) y desde el perfil.</li>
+</ul>
+
+<div class="pie">
+Documento de trabajo preparado con asistencia de IA para la sesión con la
+asesoría legal · No constituye asesoría legal · AFORO / [nombre del
+responsable] · [fecha]
+</div>
+
+</body>
+</html>

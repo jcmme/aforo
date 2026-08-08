@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>AFORO · Brief y encargo legal</title>
+<style>
+  @page { margin: 22mm 18mm; }
+  body { font: 11pt/1.55 Georgia, "Times New Roman", serif; color: #1a1a1a; margin: 0; }
+  h1 { font-size: 20pt; margin: 0 0 2pt; letter-spacing: 0.5px; }
+  .sub { color: #6b5a2e; font: 10pt/1.4 Helvetica, Arial, sans-serif; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 18pt; }
+  h2 { font: bold 13pt Helvetica, Arial, sans-serif; color: #6b5a2e; margin: 18pt 0 6pt; }
+  h3 { font: bold 11pt Helvetica, Arial, sans-serif; margin: 12pt 0 4pt; }
+  p, li { margin: 4pt 0; }
+  ul, ol { padding-left: 18pt; }
+  table { border-collapse: collapse; width: 100%; font-size: 10pt; margin: 8pt 0; }
+  th, td { border: 0.5pt solid #999; padding: 5pt 7pt; text-align: left; vertical-align: top; }
+  th { background: #f0ead9; font-family: Helvetica, Arial, sans-serif; }
+  .caja { border: 1pt solid #6b5a2e; background: #faf6ec; padding: 8pt 12pt; margin: 10pt 0; }
+  .pie { margin-top: 24pt; padding-top: 8pt; border-top: 0.5pt solid #999; font-size: 9pt; color: #555; }
+  .rellenar { background: #fdf3d0; }
+</style>
+</head>
+<body>
+
+<h1>AFORO</h1>
+<div class="sub">Brief del proyecto y encargo de asesoría legal · Confidencial</div>
+
+<div class="caja">
+<strong>Objeto de este documento.</strong> Presentar el proyecto AFORO a la
+asesoría legal y solicitar los entregables listados en la sección 7, con
+prioridad en el aviso de privacidad, que es requisito previo para publicar la
+aplicación en App Store y Google Play. Se acompaña de dos anexos: el
+inventario de datos personales (documento 02) y el borrador de trabajo del
+aviso de privacidad (documento 03).
+</div>
+
+<h2>1. Qué es AFORO</h2>
+<p>AFORO es una plataforma tecnológica de gestión de reservas para la
+industria del entretenimiento nocturno (centros nocturnos, "antros") en
+México, con arranque previsto en Puebla. Funciona mediante una aplicación
+móvil (iOS y Android) y web con dos experiencias:</p>
+<ul>
+  <li><strong>Cliente final:</strong> explora establecimientos y eventos, crea
+  reservas y recibe códigos QR firmados criptográficamente que funcionan como
+  derecho de entrada. Puede compartir los QR con sus invitados.</li>
+  <li><strong>Personal del establecimiento</strong> (acceso exclusivamente por
+  invitación): control de acceso en puerta mediante escaneo de QR, asignación
+  de mesas, registro de consumo y métricas de desempeño.</li>
+</ul>
+<p>El diferenciador del producto es la <strong>detección de "reservas
+fantasma"</strong>: identificar clientes que reservan reiteradamente y no se
+presentan (no-show), lo que causa pérdidas a los establecimientos. Para ello
+la plataforma correlaciona identidades mediante teléfono, correo e
+<strong>identificadores técnicos del dispositivo</strong> (ver sección 5, el
+punto que requiere mayor atención legal).</p>
+
+<h2>2. Quién opera y situación corporativa</h2>
+<table>
+  <tr><th>Responsable actual</th><td class="rellenar">[Nombre completo de la persona física], en su carácter de desarrollador y operador del proyecto</td></tr>
+  <tr><th>Domicilio</th><td class="rellenar">[Domicilio para efectos del aviso de privacidad]</td></tr>
+  <tr><th>Correo de contacto</th><td class="rellenar">[Correo dedicado al proyecto]</td></tr>
+  <tr><th>Situación societaria</th><td>La sociedad ("MABI") aún no está constituida. Está en curso la ruta: e.firma → constitución de una SAS unipersonal → migración de cuentas y titularidades a la sociedad. Mientras tanto, el responsable del tratamiento será la persona física.</td></tr>
+</table>
+
+<h2>3. Modelo de negocio y perfiles de usuario</h2>
+<ul>
+  <li><strong>B2B:</strong> los establecimientos (agrupados en "corporativos")
+  pagarán una suscripción por el uso de la plataforma. El cliente final no
+  paga por usar la app.</li>
+  <li><strong>Usuarios finales:</strong> mayores de edad (la app se
+  clasificará 17+/18+ en las tiendas por el contexto de vida nocturna). No se
+  vende alcohol ni contenido a través de la app; es solo gestión de
+  reservas.</li>
+  <li><strong>Personal de los establecimientos:</strong> reciben acceso por
+  invitación de su jerarquía (nunca por solicitud pública) y sus métricas de
+  desempeño (reservas atendidas, asistencia de sus invitados) son visibles
+  para sus superiores dentro del mismo corporativo.</li>
+  <li><strong>Invitados sin cuenta:</strong> el personal puede registrar una
+  reserva a nombre de un tercero capturando únicamente nombre y teléfono; esa
+  persona recibe un enlace (típicamente por WhatsApp) con su QR, sin
+  necesidad de crear cuenta.</li>
+</ul>
+
+<h2>4. Datos personales que se tratan (resumen)</h2>
+<p>El detalle completo, con almacenamiento, protección y plazos, está en el
+anexo <strong>02 · Inventario de datos personales</strong>. En síntesis:</p>
+<ul>
+  <li>Identificación y contacto: nombre, usuario, correo, teléfono.</li>
+  <li>Contraseña (almacenada solo como hash bcrypt, nunca en claro).</li>
+  <li>Historial de reservas, asistencia (llegó / no llegó) y cancelaciones.</li>
+  <li>Identificadores técnicos del dispositivo ("huella") y score de
+  reputación derivado del historial de asistencia.</li>
+  <li>Fotografías que el usuario adjunta voluntariamente a reseñas.</li>
+  <li>De invitados sin cuenta: solo nombre y teléfono.</li>
+  <li>Del personal: además, métricas de desempeño e historial de acciones
+  operativas (bitácora de auditoría).</li>
+</ul>
+<p><strong>No se recaban:</strong> datos sensibles en términos de la ley
+(salud, origen étnico, ideología, etc.), datos financieros del cliente final,
+ni geolocalización continua.</p>
+
+<h2>5. El punto que requiere mayor atención: huella de dispositivo</h2>
+<div class="caja">
+<p>Para detectar fraude de reservas (una misma persona reservando con
+nombres/cuentas distintas para luego no presentarse), la plataforma
+correlaciona: teléfono normalizado, correo, identificadores técnicos del
+dispositivo y patrones de comportamiento.</p>
+<p><strong>Uso exclusivo:</strong> prevención de fraude. No se usa para
+publicidad, no se comparte con terceros y no se rastrea al usuario fuera de
+la plataforma. Apple y Google permiten esta finalidad declarándola como
+"fraud prevention"; así se hará en los formularios de privacidad de ambas
+tiendas.</p>
+<p><strong>Se solicita del abogado:</strong> la redacción del consentimiento
+y del apartado correspondiente del aviso de privacidad de forma que esta
+práctica quede correctamente informada y fundamentada ante la LFPDPPP.</p>
+</div>
+
+<h2>6. Infraestructura y transferencias</h2>
+<ul>
+  <li>Backend en <strong>Supabase</strong> (PostgreSQL gestionado): cifrado en
+  reposo y en tránsito (TLS), controles de acceso por fila a nivel base de
+  datos. Los servidores del proveedor pueden ubicarse fuera de México
+  (típicamente EE. UU.) — <strong>consultar tratamiento como transferencia
+  internacional / cómputo en la nube</strong>.</li>
+  <li>El usuario puede compartir sus QR por WhatsApp; esa acción la inicia el
+  propio usuario desde su dispositivo.</li>
+  <li>Sin publicidad, sin analytics de terceros, sin venta de datos.</li>
+  <li>El titular puede <strong>eliminar su cuenta desde la propia app</strong>;
+  al hacerlo se borran sus datos personales y sus reservas quedan
+  anonimizadas (se conservan como estadística sin identidad).</li>
+</ul>
+
+<h2>7. Entregables solicitados (en orden de prioridad)</h2>
+<ol>
+  <li><strong>Aviso de privacidad integral</strong> conforme a la LFPDPPP,
+  más su <strong>versión corta</strong> para mostrar dentro de la app. Se
+  adjunta borrador de trabajo (documento 03) como punto de partida. Es
+  bloqueante para publicar en las tiendas.</li>
+  <li><strong>Términos y condiciones de uso</strong> de la aplicación
+  (usuario final). Nota: la plataforma maneja además T&C particulares por
+  establecimiento que cada negocio redacta para sus reservas; los del punto
+  presente son los generales de la plataforma.</li>
+  <li><strong>Consentimiento específico</strong> para el uso de
+  identificadores de dispositivo con fines de prevención de fraude
+  (sección 5).</li>
+  <li><strong>Contrato marco de prestación de servicios</strong> con los
+  corporativos (clientes B2B), incluyendo el capítulo de tratamiento de
+  datos: definir quién actúa como responsable y quién como encargado
+  respecto de los datos de los clientes finales que el establecimiento ve
+  para operar el acceso.</li>
+  <li><strong>Opinión sobre la marca "AFORO"</strong>: viabilidad de registro
+  ante el IMPI (y clases recomendadas) antes de invertir en la identidad.</li>
+</ol>
+
+<h2>8. Preguntas específicas para la asesoría</h2>
+<ol>
+  <li>Implicaciones de la <strong>reforma de 2025 a la LFPDPPP</strong> (y la
+  transferencia de funciones del extinto INAI) sobre el aviso y los
+  procedimientos ARCO propuestos.</li>
+  <li>¿La operación como <strong>persona física</strong> durante el piloto
+  requiere alguna mención particular en el aviso, y qué ajustes habrá que
+  hacer al migrar la titularidad a la SAS?</li>
+  <li>¿El almacenamiento en nube extranjera (Supabase) se documenta como
+  transferencia, como encargo, o ambas? ¿Se requiere cláusula específica?</li>
+  <li>Restricción de edad: la app declarará 17+/18+ en tiendas. ¿Es
+  necesario algún mecanismo adicional de verificación de mayoría de edad, o
+  basta la declaración del usuario?</li>
+  <li>Conservación: propuesta actual — datos de cuenta hasta que el titular
+  la elimine; bitácoras operativas y estadísticas anonimizadas por tiempo
+  indefinido. ¿Plazos recomendados?</li>
+  <li>Datos de <strong>invitados sin cuenta</strong> (nombre y teléfono
+  aportados por un tercero): ¿qué obligación de informar aplica y cómo
+  documentarla (el enlace que reciben puede incluir el aviso)?</li>
+</ol>
+
+<div class="pie">
+Documento de trabajo preparado con asistencia de IA para la sesión con la
+asesoría legal · No constituye asesoría legal · AFORO / [nombre del
+responsable] · [fecha]
+</div>
+
+</body>
+</html>
