@@ -8,6 +8,9 @@ import { ModuleRegistryModule } from './core/module-registry/module-registry.mod
 import { ExportModule } from './core/export/export.module';
 import { AuthModule } from './core/auth/auth.module';
 import { ReservasModule } from './modules/reservas/reservas.module';
+import { RequisicionesModule } from './modules/requisiciones/requisiciones.module';
+import { PersonalModule } from './modules/personal/personal.module';
+import { MetricasModule } from './modules/metricas/metricas.module';
 
 @Module({
   imports: [
@@ -29,6 +32,9 @@ import { ReservasModule } from './modules/reservas/reservas.module';
     AuthModule,
     ExportModule,
     ReservasModule,
+    RequisicionesModule,
+    PersonalModule,
+    MetricasModule,
   ],
 })
 export class AppModule {}

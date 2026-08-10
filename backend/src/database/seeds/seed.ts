@@ -49,13 +49,47 @@ async function seed(): Promise<void> {
     roles[base.nombre] = rol;
   }
 
+  console.log('Sembrando rol Super Admin...');
+  let superAdminRol = await rolRepo.findOne({ where: { nombre: 'Super Admin' } });
+  if (!superAdminRol) {
+    superAdminRol = await rolRepo.save(
+      rolRepo.create({ nombre: 'Super Admin', alcanceTipo: RolAlcanceTipo.CORPORATIVO, esRolSistema: true, esSuperAdmin: true }),
+    );
+  } else if (!superAdminRol.esSuperAdmin) {
+    superAdminRol.esSuperAdmin = true;
+    superAdminRol = await rolRepo.save(superAdminRol);
+  }
+  roles['Super Admin'] = superAdminRol;
+
   console.log('Asignando permisos base a los roles...');
+  // Super Admin no necesita filas aquí: RbacService lo detecta por rol.esSuperAdmin
+  // y le da alcance corporativo sobre cualquier permiso, incluidos los futuros.
   const asignacionesPermiso: { rol: string; permisoCodigo: string; alcance: PermissionScope }[] = [
     { rol: 'RP', permisoCodigo: 'reservas.crear', alcance: PermissionScope.PROPIO },
     { rol: 'RP', permisoCodigo: 'reservas.ver', alcance: PermissionScope.PROPIO },
     { rol: 'Gerente de Antro', permisoCodigo: 'reservas.ver', alcance: PermissionScope.ANTRO },
     { rol: 'Gerente General', permisoCodigo: 'reservas.ver', alcance: PermissionScope.CORPORATIVO },
     { rol: 'Dueño', permisoCodigo: 'reservas.ver', alcance: PermissionScope.CORPORATIVO },
+
+    { rol: 'Gerente de Antro', permisoCodigo: 'requisiciones.crear', alcance: PermissionScope.ANTRO },
+    { rol: 'Gerente de Antro', permisoCodigo: 'requisiciones.ver', alcance: PermissionScope.ANTRO },
+    { rol: 'Gerente General', permisoCodigo: 'requisiciones.ver', alcance: PermissionScope.CORPORATIVO },
+    { rol: 'Gerente General', permisoCodigo: 'requisiciones.resolver', alcance: PermissionScope.CORPORATIVO },
+    { rol: 'Dueño', permisoCodigo: 'requisiciones.ver', alcance: PermissionScope.CORPORATIVO },
+
+    { rol: 'Gerente de Antro', permisoCodigo: 'personal.gestionar', alcance: PermissionScope.ANTRO },
+    { rol: 'Gerente de Antro', permisoCodigo: 'personal.ver', alcance: PermissionScope.ANTRO },
+    { rol: 'Gerente de Antro', permisoCodigo: 'asistencia.registrar', alcance: PermissionScope.ANTRO },
+    { rol: 'Gerente de Antro', permisoCodigo: 'nomina.gestionar', alcance: PermissionScope.ANTRO },
+    { rol: 'Gerente de Antro', permisoCodigo: 'nomina.ver', alcance: PermissionScope.ANTRO },
+    { rol: 'Gerente General', permisoCodigo: 'personal.ver', alcance: PermissionScope.CORPORATIVO },
+    { rol: 'Gerente General', permisoCodigo: 'nomina.ver', alcance: PermissionScope.CORPORATIVO },
+    { rol: 'Dueño', permisoCodigo: 'personal.ver', alcance: PermissionScope.CORPORATIVO },
+    { rol: 'Dueño', permisoCodigo: 'nomina.ver', alcance: PermissionScope.CORPORATIVO },
+
+    { rol: 'Gerente de Antro', permisoCodigo: 'metricas.ver', alcance: PermissionScope.ANTRO },
+    { rol: 'Gerente General', permisoCodigo: 'metricas.ver', alcance: PermissionScope.CORPORATIVO },
+    { rol: 'Dueño', permisoCodigo: 'metricas.ver', alcance: PermissionScope.CORPORATIVO },
   ];
 
   for (const asignacion of asignacionesPermiso) {
@@ -92,6 +126,7 @@ async function seed(): Promise<void> {
   }
 
   const usuariosDemo: { nombre: string; email: string; rol: string; antro: Antro | null }[] = [
+    { nombre: 'Super Admin', email: 'jcmme18@gmail.com', rol: 'Super Admin', antro: null },
     { nombre: 'Gerente General Demo', email: 'gerente.general@aforo.dev', rol: 'Gerente General', antro: null },
     { nombre: 'Gerente Antro Centro', email: 'gerente.antro@aforo.dev', rol: 'Gerente de Antro', antro },
     { nombre: 'RP Demo', email: 'rp@aforo.dev', rol: 'RP', antro },

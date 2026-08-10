@@ -20,6 +20,10 @@ export class Rol {
   @Column({ name: 'es_rol_sistema', default: false })
   esRolSistema: boolean;
 
+  /** Cualquier usuario con un rol así ve y hace todo dentro de su corporativo, sin necesitar RolPermiso por cada permiso (ver RbacService.resolveDataScope). */
+  @Column({ name: 'es_super_admin', default: false })
+  esSuperAdmin: boolean;
+
   @OneToMany(() => RolPermiso, (rolPermiso) => rolPermiso.rol)
   rolPermisos: RolPermiso[];
 

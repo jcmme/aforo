@@ -32,6 +32,13 @@ export class RbacService {
       relations: ['rol', 'rol.rolPermisos', 'rol.rolPermisos.permiso'],
     });
 
+    // Super Admin ve y hace todo dentro de su corporativo sin necesitar una
+    // fila de RolPermiso por cada permiso — incluidos los que un módulo
+    // futuro declare y todavía no se le hayan asignado explícitamente.
+    if (asignaciones.some((a) => a.rol.esSuperAdmin)) {
+      return { usuarioId, corporativoId, alcance: PermissionScope.CORPORATIVO, antroIds: null };
+    }
+
     let alcance: PermissionScope | null = null;
     const antroIds = new Set<string>();
 
