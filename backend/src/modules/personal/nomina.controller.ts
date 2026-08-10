@@ -18,6 +18,12 @@ export class NominaController {
     return this.nominaService.crearPeriodo(dto, dataScope);
   }
 
+  @Get('periodos')
+  @RequirePermission('nomina.ver')
+  listarPeriodos(@CurrentDataScope() dataScope: DataScope) {
+    return this.nominaService.listarPeriodos(dataScope);
+  }
+
   @Post('periodos/:periodoId/detalle')
   @RequirePermission('nomina.gestionar')
   registrarDetalle(

@@ -34,6 +34,19 @@ export class NominaService {
     );
   }
 
+  async listarPeriodos(dataScope: DataScope): Promise<NominaPeriodo[]> {
+    const query = this.periodoRepo.createQueryBuilder('periodo').leftJoinAndSelect('periodo.antro', 'antro');
+
+    if (dataScope.alcance === PermissionScope.CORPORATIVO) {
+      query.andWhere('antro.corporativoId = :corporativoId', { corporativoId: dataScope.corporativoId });
+    } else {
+      const antroIds = dataScope.antroIds?.length ? dataScope.antroIds : [null];
+      query.andWhere('periodo.antroId IN (:...antroIds)', { antroIds });
+    }
+
+    return query.orderBy('periodo.periodoInicio', 'DESC').getMany();
+  }
+
   async registrarDetalle(periodoId: string, dto: RegistrarNominaDetalleDto, dataScope: DataScope): Promise<NominaDetalle> {
     const periodo = await this.periodoRepo.findOne({ where: { id: periodoId } });
     if (!periodo) throw new NotFoundException('Periodo de nómina no encontrado.');

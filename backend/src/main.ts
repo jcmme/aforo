@@ -10,6 +10,9 @@ import { sincronizarPermisosDesdeRegistro } from './core/module-registry/sincron
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  // Dev: el frontend (Vite) corre en otro puerto. Restringir el origen en producción.
+  app.enableCors();
+
   app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
 
   // Los módulos ya se registraron a sí mismos (onModuleInit) para cuando
