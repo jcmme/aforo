@@ -4,6 +4,7 @@ import RequisicionesPanel from './panels/RequisicionesPanel';
 import PersonalPanel from './panels/PersonalPanel';
 import NominaPanel from './panels/NominaPanel';
 import MetricasPanel from './panels/MetricasPanel';
+import ProveedoresPanel from './panels/ProveedoresPanel';
 
 const SECCIONES = [
   { id: 'metricas', label: 'Métricas' },
@@ -11,6 +12,7 @@ const SECCIONES = [
   { id: 'requisiciones', label: 'Requisiciones' },
   { id: 'personal', label: 'Personal y asistencia' },
   { id: 'nomina', label: 'Nómina' },
+  { id: 'proveedores', label: 'Proveedores' },
 ] as const;
 
 type SeccionId = (typeof SECCIONES)[number]['id'];
@@ -43,6 +45,7 @@ export default function Dashboard({ email, onLogout }: { email: string; onLogout
         {seccion === 'requisiciones' && <RequisicionesPanel />}
         {seccion === 'personal' && <PersonalPanel />}
         {seccion === 'nomina' && <NominaPanel />}
+        {seccion === 'proveedores' && <ProveedoresPanel />}
       </main>
     </div>
   );

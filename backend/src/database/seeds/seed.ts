@@ -90,6 +90,15 @@ async function seed(): Promise<void> {
     { rol: 'Gerente de Antro', permisoCodigo: 'metricas.ver', alcance: PermissionScope.ANTRO },
     { rol: 'Gerente General', permisoCodigo: 'metricas.ver', alcance: PermissionScope.CORPORATIVO },
     { rol: 'Dueño', permisoCodigo: 'metricas.ver', alcance: PermissionScope.CORPORATIVO },
+
+    { rol: 'Gerente de Antro', permisoCodigo: 'proveedores.ver', alcance: PermissionScope.ANTRO },
+    { rol: 'Gerente de Antro', permisoCodigo: 'compras.registrar', alcance: PermissionScope.ANTRO },
+    { rol: 'Gerente de Antro', permisoCodigo: 'compras.ver', alcance: PermissionScope.ANTRO },
+    { rol: 'Gerente General', permisoCodigo: 'proveedores.gestionar', alcance: PermissionScope.CORPORATIVO },
+    { rol: 'Gerente General', permisoCodigo: 'proveedores.ver', alcance: PermissionScope.CORPORATIVO },
+    { rol: 'Gerente General', permisoCodigo: 'compras.ver', alcance: PermissionScope.CORPORATIVO },
+    { rol: 'Dueño', permisoCodigo: 'proveedores.ver', alcance: PermissionScope.CORPORATIVO },
+    { rol: 'Dueño', permisoCodigo: 'compras.ver', alcance: PermissionScope.CORPORATIVO },
   ];
 
   for (const asignacion of asignacionesPermiso) {

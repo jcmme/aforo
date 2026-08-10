@@ -11,6 +11,7 @@ import { ReservasModule } from './modules/reservas/reservas.module';
 import { RequisicionesModule } from './modules/requisiciones/requisiciones.module';
 import { PersonalModule } from './modules/personal/personal.module';
 import { MetricasModule } from './modules/metricas/metricas.module';
+import { ProveedoresModule } from './modules/proveedores/proveedores.module';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { MetricasModule } from './modules/metricas/metricas.module';
     RequisicionesModule,
     PersonalModule,
     MetricasModule,
+    ProveedoresModule,
   ],
 })
 export class AppModule {}
