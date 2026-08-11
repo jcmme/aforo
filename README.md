@@ -4,3 +4,4 @@ Control interno corporativo para un grupo de antros (Puebla): reservas, métrica
 
 - `backend/` — API (NestJS + PostgreSQL). Ver `backend/README.md` para arranque local.
 - `frontend/` — demo mínimo en React/Vite para ver el backend funcionando en pantalla. Ver `frontend/README.md`.
+- Para publicarlo en un link real (Railway), ver `DEPLOY.md`.
