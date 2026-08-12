@@ -22,7 +22,10 @@ async function bootstrap() {
 
   const configService = app.get(ConfigService);
   const port = configService.get<number>('PORT', 3000);
-  await app.listen(port);
+  // Sin el host explícito, algunos entornos de contenedor (Railway incluido)
+  // no logran alcanzar el proceso desde su proxy — hay que escuchar en
+  // todas las interfaces, no solo localhost.
+  await app.listen(port, '0.0.0.0');
 }
 
 bootstrap();
