@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, ParseUUIDPipe, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, ParseUUIDPipe, Post, Query, UseGuards } from '@nestjs/common';
 import { NominaService } from './nomina.service';
 import { CrearNominaPeriodoDto } from './dto/crear-nomina-periodo.dto';
 import { RegistrarNominaDetalleDto } from './dto/registrar-nomina-detalle.dto';
@@ -20,8 +20,8 @@ export class NominaController {
 
   @Get('periodos')
   @RequirePermission('nomina.ver')
-  listarPeriodos(@CurrentDataScope() dataScope: DataScope) {
-    return this.nominaService.listarPeriodos(dataScope);
+  listarPeriodos(@CurrentDataScope() dataScope: DataScope, @Query('antroId') antroId?: string) {
+    return this.nominaService.listarPeriodos(dataScope, antroId);
   }
 
   @Post('periodos/:periodoId/detalle')

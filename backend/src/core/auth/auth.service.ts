@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { JwtService } from '@nestjs/jwt';
 import { Repository } from 'typeorm';
@@ -47,6 +47,22 @@ export class AuthService {
 
     const payload: JwtPayload = { sub: usuario.id, email: usuario.email, corporativoId: usuario.corporativoId };
     return { accessToken: this.jwtService.sign(payload) };
+  }
+
+  async cambiarPassword(usuarioId: string, passwordActual: string, passwordNuevo: string): Promise<void> {
+    const usuario = await this.usuarioRepo.findOne({ where: { id: usuarioId } });
+    if (!usuario) throw new UnauthorizedException();
+
+    const passwordValido = await bcrypt.compare(passwordActual, usuario.passwordHash);
+    if (!passwordValido) {
+      throw new BadRequestException('La contraseña actual no es correcta.');
+    }
+    if (passwordActual === passwordNuevo) {
+      throw new BadRequestException('La contraseña nueva debe ser distinta de la actual.');
+    }
+
+    usuario.passwordHash = await bcrypt.hash(passwordNuevo, 10);
+    await this.usuarioRepo.save(usuario);
   }
 
   /** Secciones del menú que este usuario puede ver, según lo que ya resuelve el RBAC. */

@@ -1,6 +1,8 @@
 import { FormEvent, useEffect, useState } from 'react';
 import { apiRequest, exportarReporte, listarAntros, Antro, ApiError } from '../../api';
 import AccessDenied from '../../components/AccessDenied';
+import FiltroAntro from '../../components/FiltroAntro';
+import { useAlcance } from '../../scope-context';
 
 interface Proveedor {
   id: string;
@@ -23,6 +25,7 @@ interface Compra {
 const CATEGORIAS = ['licor', 'insumos', 'sonido', 'seguridad', 'limpieza', 'otro'];
 
 export default function ProveedoresPanel() {
+  const { antroFiltro } = useAlcance();
   const [proveedores, setProveedores] = useState<Proveedor[] | null>(null);
   const [compras, setCompras] = useState<Compra[] | null>(null);
   const [antros, setAntros] = useState<Antro[]>([]);
@@ -45,7 +48,8 @@ export default function ProveedoresPanel() {
         proveedorId: f.proveedorId || listaProveedores[0]?.id || '',
       }));
       try {
-        setCompras(await apiRequest<Compra[]>('/compras'));
+        const query = antroFiltro ? `?antroId=${antroFiltro}` : '';
+        setCompras(await apiRequest<Compra[]>(`/compras${query}`));
       } catch {
         setCompras([]);
       }
@@ -57,7 +61,7 @@ export default function ProveedoresPanel() {
 
   useEffect(() => {
     cargar();
-  }, []);
+  }, [antroFiltro]);
 
   async function crearProveedor(e: FormEvent) {
     e.preventDefault();
@@ -197,6 +201,7 @@ export default function ProveedoresPanel() {
 
           <div className="toolbar">
             <h3>Historial de compras</h3>
+            <FiltroAntro />
             <button className="btn btn-secondary" onClick={() => exportarReporte('proveedores.historial_precios')}>
               Exportar PDF
             </button>

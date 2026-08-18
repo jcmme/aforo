@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query, UseGuards } from '@nestjs/common';
 import { ComprasService } from './compras.service';
 import { CrearCompraDto } from './dto/crear-compra.dto';
 import { PermissionGuard } from '../../core/rbac/permission.guard';
@@ -19,7 +19,7 @@ export class ComprasController {
 
   @Get()
   @RequirePermission('compras.ver')
-  listar(@CurrentDataScope() dataScope: DataScope) {
-    return this.comprasService.listar(dataScope);
+  listar(@CurrentDataScope() dataScope: DataScope, @Query('antroId') antroId?: string) {
+    return this.comprasService.listar(dataScope, antroId);
   }
 }

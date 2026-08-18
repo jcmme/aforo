@@ -29,15 +29,18 @@ export class EmpleadosService {
     );
   }
 
-  async listar(dataScope: DataScope): Promise<Empleado[]> {
+  async listar(dataScope: DataScope, antroIdFiltro?: string): Promise<Empleado[]> {
     const query = this.empleadoRepo.createQueryBuilder('empleado').leftJoinAndSelect('empleado.antro', 'antro');
-    this.aplicarAlcance(query, dataScope);
+    this.aplicarAlcance(query, dataScope, antroIdFiltro);
     return query.orderBy('empleado.nombre', 'ASC').getMany();
   }
 
-  aplicarAlcance(query: SelectQueryBuilder<Empleado>, dataScope: DataScope): void {
+  aplicarAlcance(query: SelectQueryBuilder<Empleado>, dataScope: DataScope, antroIdFiltro?: string): void {
     if (dataScope.alcance === PermissionScope.CORPORATIVO) {
       query.andWhere('antro.corporativoId = :corporativoId', { corporativoId: dataScope.corporativoId });
+      if (antroIdFiltro) {
+        query.andWhere('empleado.antroId = :antroIdFiltro', { antroIdFiltro });
+      }
     } else {
       const antroIds = dataScope.antroIds?.length ? dataScope.antroIds : [null];
       query.andWhere('empleado.antroId IN (:...antroIds)', { antroIds });

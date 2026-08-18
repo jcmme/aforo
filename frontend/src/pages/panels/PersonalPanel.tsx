@@ -2,6 +2,8 @@ import { FormEvent, useEffect, useState } from 'react';
 import { apiRequest, exportarReporte, listarAntros, Antro, ApiError } from '../../api';
 import AccessDenied from '../../components/AccessDenied';
 import Pill from '../../components/Pill';
+import FiltroAntro from '../../components/FiltroAntro';
+import { useAlcance } from '../../scope-context';
 
 interface Empleado {
   id: string;
@@ -17,6 +19,7 @@ const TIPOS_PAGO = ['por_hora', 'quincenal'];
 const ESTADOS_ASISTENCIA = ['asistio', 'falta', 'retardo', 'permiso'];
 
 export default function PersonalPanel() {
+  const { antroFiltro } = useAlcance();
   const [empleados, setEmpleados] = useState<Empleado[] | null>(null);
   const [antros, setAntros] = useState<Antro[]>([]);
   const [denegado, setDenegado] = useState<string | null>(null);
@@ -31,7 +34,11 @@ export default function PersonalPanel() {
     setDenegado(null);
     setError(null);
     try {
-      const [listaEmpleados, listaAntros] = await Promise.all([apiRequest<Empleado[]>('/personal/empleados'), listarAntros()]);
+      const query = antroFiltro ? `?antroId=${antroFiltro}` : '';
+      const [listaEmpleados, listaAntros] = await Promise.all([
+        apiRequest<Empleado[]>(`/personal/empleados${query}`),
+        listarAntros(),
+      ]);
       setEmpleados(listaEmpleados);
       setAntros(listaAntros);
       setFormEmpleado((f) => ({ ...f, antroId: f.antroId || listaAntros[0]?.id || '' }));
@@ -44,7 +51,7 @@ export default function PersonalPanel() {
 
   useEffect(() => {
     cargar();
-  }, []);
+  }, [antroFiltro]);
 
   async function crearEmpleado(e: FormEvent) {
     e.preventDefault();
@@ -164,6 +171,7 @@ export default function PersonalPanel() {
       <div className="panel-card">
         <div className="toolbar">
           <h3>Empleados</h3>
+          <FiltroAntro />
           <button className="btn btn-secondary" onClick={() => exportarReporte('personal.export_asistencia')}>
             Exportar asistencia (PDF)
           </button>

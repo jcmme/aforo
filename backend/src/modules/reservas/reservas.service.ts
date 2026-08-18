@@ -29,9 +29,9 @@ export class ReservasService {
     return this.reservaRepo.save(reserva);
   }
 
-  async listar(dataScope: DataScope): Promise<Reserva[]> {
+  async listar(dataScope: DataScope, antroIdFiltro?: string): Promise<Reserva[]> {
     const query = this.reservaRepo.createQueryBuilder('reserva').leftJoinAndSelect('reserva.antro', 'antro');
-    this.aplicarAlcance(query, dataScope);
+    this.aplicarAlcance(query, dataScope, antroIdFiltro);
     return query.orderBy('reserva.fechaEvento', 'DESC').getMany();
   }
 
@@ -53,9 +53,12 @@ export class ReservasService {
     return query.getRawMany();
   }
 
-  private aplicarAlcance(query: SelectQueryBuilder<Reserva>, dataScope: DataScope): void {
+  private aplicarAlcance(query: SelectQueryBuilder<Reserva>, dataScope: DataScope, antroIdFiltro?: string): void {
     if (dataScope.alcance === PermissionScope.CORPORATIVO) {
       query.andWhere('antro.corporativoId = :corporativoId', { corporativoId: dataScope.corporativoId });
+      if (antroIdFiltro) {
+        query.andWhere('reserva.antroId = :antroIdFiltro', { antroIdFiltro });
+      }
     } else {
       const antroIds = dataScope.antroIds?.length ? dataScope.antroIds : [null];
       query.andWhere('reserva.antroId IN (:...antroIds)', { antroIds });

@@ -30,7 +30,7 @@ export class ComprasService {
     );
   }
 
-  async listar(dataScope: DataScope): Promise<Compra[]> {
+  async listar(dataScope: DataScope, antroIdFiltro?: string): Promise<Compra[]> {
     const query = this.compraRepo
       .createQueryBuilder('compra')
       .leftJoinAndSelect('compra.antro', 'antro')
@@ -38,6 +38,9 @@ export class ComprasService {
 
     if (dataScope.alcance === PermissionScope.CORPORATIVO) {
       query.andWhere('antro.corporativoId = :corporativoId', { corporativoId: dataScope.corporativoId });
+      if (antroIdFiltro) {
+        query.andWhere('compra.antroId = :antroIdFiltro', { antroIdFiltro });
+      }
     } else {
       const antroIds = dataScope.antroIds?.length ? dataScope.antroIds : [null];
       query.andWhere('compra.antroId IN (:...antroIds)', { antroIds });

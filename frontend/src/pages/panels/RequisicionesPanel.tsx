@@ -2,6 +2,8 @@ import { FormEvent, useEffect, useState } from 'react';
 import { apiRequest, exportarReporte, listarAntros, Antro, ApiError } from '../../api';
 import AccessDenied from '../../components/AccessDenied';
 import Pill from '../../components/Pill';
+import FiltroAntro from '../../components/FiltroAntro';
+import { useAlcance } from '../../scope-context';
 
 interface Requisicion {
   id: string;
@@ -14,6 +16,7 @@ interface Requisicion {
 }
 
 export default function RequisicionesPanel() {
+  const { antroFiltro } = useAlcance();
   const [requisiciones, setRequisiciones] = useState<Requisicion[] | null>(null);
   const [antros, setAntros] = useState<Antro[]>([]);
   const [denegado, setDenegado] = useState<string | null>(null);
@@ -26,7 +29,8 @@ export default function RequisicionesPanel() {
     setDenegado(null);
     setError(null);
     try {
-      const [lista, listaAntros] = await Promise.all([apiRequest<Requisicion[]>('/requisiciones'), listarAntros()]);
+      const query = antroFiltro ? `?antroId=${antroFiltro}` : '';
+      const [lista, listaAntros] = await Promise.all([apiRequest<Requisicion[]>(`/requisiciones${query}`), listarAntros()]);
       setRequisiciones(lista);
       setAntros(listaAntros);
       setForm((f) => ({ ...f, antroId: f.antroId || listaAntros[0]?.id || '' }));
@@ -38,7 +42,7 @@ export default function RequisicionesPanel() {
 
   useEffect(() => {
     cargar();
-  }, []);
+  }, [antroFiltro]);
 
   async function crear(e: FormEvent) {
     e.preventDefault();
@@ -130,6 +134,7 @@ export default function RequisicionesPanel() {
       <div className="panel-card">
         <div className="toolbar">
           <h3>Requisiciones</h3>
+          <FiltroAntro />
           <button className="btn btn-secondary" onClick={() => exportarReporte('requisiciones.export')}>
             Exportar PDF
           </button>
@@ -160,14 +165,14 @@ export default function RequisicionesPanel() {
                   </td>
                   <td>
                     {r.estado === 'pendiente' ? (
-                      <div style={{ display: 'flex', gap: '0.4rem' }}>
-                        <button className="btn btn-secondary" onClick={() => resolver(r.id, 'aprobada', r.montoSolicitado)}>
+                      <div className="row-actions">
+                        <button className="btn btn-approve" onClick={() => resolver(r.id, 'aprobada', r.montoSolicitado)}>
                           Aprobar
                         </button>
-                        <button className="btn btn-secondary" onClick={() => resolver(r.id, 'ajustada', r.montoSolicitado)}>
+                        <button className="btn btn-adjust" onClick={() => resolver(r.id, 'ajustada', r.montoSolicitado)}>
                           Ajustar
                         </button>
-                        <button className="btn btn-secondary" onClick={() => resolver(r.id, 'rechazada', r.montoSolicitado)}>
+                        <button className="btn btn-reject" onClick={() => resolver(r.id, 'rechazada', r.montoSolicitado)}>
                           Rechazar
                         </button>
                       </div>

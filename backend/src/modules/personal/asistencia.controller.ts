@@ -19,7 +19,12 @@ export class AsistenciaController {
 
   @Get()
   @RequirePermission('personal.ver')
-  listar(@Query('desde') desde: string | undefined, @Query('hasta') hasta: string | undefined, @CurrentDataScope() dataScope: DataScope) {
-    return this.asistenciaService.listar(dataScope, { desde, hasta });
+  listar(
+    @Query('desde') desde: string | undefined,
+    @Query('hasta') hasta: string | undefined,
+    @Query('antroId') antroId: string | undefined,
+    @CurrentDataScope() dataScope: DataScope,
+  ) {
+    return this.asistenciaService.listar(dataScope, { desde, hasta, antroId });
   }
 }

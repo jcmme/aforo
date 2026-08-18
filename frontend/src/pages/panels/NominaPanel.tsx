@@ -1,6 +1,8 @@
 import { FormEvent, useEffect, useState } from 'react';
 import { apiRequest, exportarReporte, listarAntros, Antro, ApiError } from '../../api';
 import AccessDenied from '../../components/AccessDenied';
+import FiltroAntro from '../../components/FiltroAntro';
+import { useAlcance } from '../../scope-context';
 
 interface Periodo {
   id: string;
@@ -26,6 +28,7 @@ interface Detalle {
 }
 
 export default function NominaPanel() {
+  const { antroFiltro } = useAlcance();
   const [periodos, setPeriodos] = useState<Periodo[] | null>(null);
   const [antros, setAntros] = useState<Antro[]>([]);
   const [empleados, setEmpleados] = useState<Empleado[]>([]);
@@ -41,10 +44,11 @@ export default function NominaPanel() {
     setDenegado(null);
     setError(null);
     try {
+      const query = antroFiltro ? `?antroId=${antroFiltro}` : '';
       const [listaPeriodos, listaAntros, listaEmpleados] = await Promise.all([
-        apiRequest<Periodo[]>('/personal/nomina/periodos'),
+        apiRequest<Periodo[]>(`/personal/nomina/periodos${query}`),
         listarAntros(),
-        apiRequest<Empleado[]>('/personal/empleados'),
+        apiRequest<Empleado[]>(`/personal/empleados${query}`),
       ]);
       setPeriodos(listaPeriodos);
       setAntros(listaAntros);
@@ -60,7 +64,7 @@ export default function NominaPanel() {
 
   useEffect(() => {
     cargar();
-  }, []);
+  }, [antroFiltro]);
 
   useEffect(() => {
     if (!periodoSeleccionado) {
@@ -145,7 +149,8 @@ export default function NominaPanel() {
       <div className="panel-card">
         <div className="toolbar">
           <h3>Detalle del periodo</h3>
-          <div style={{ display: 'flex', gap: '0.6rem', alignItems: 'center' }}>
+          <FiltroAntro />
+          <div className="toolbar-controls">
             <select value={periodoSeleccionado} onChange={(e) => setPeriodoSeleccionado(e.target.value)}>
               {periodos?.map((p) => (
                 <option key={p.id} value={p.id}>

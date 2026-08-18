@@ -36,11 +36,14 @@ export class RequisicionesService {
     return this.requisicionRepo.save(requisicion);
   }
 
-  async listar(dataScope: DataScope): Promise<Requisicion[]> {
+  async listar(dataScope: DataScope, antroIdFiltro?: string): Promise<Requisicion[]> {
     const query = this.requisicionRepo.createQueryBuilder('requisicion').leftJoinAndSelect('requisicion.antro', 'antro');
 
     if (dataScope.alcance === PermissionScope.CORPORATIVO) {
       query.andWhere('antro.corporativoId = :corporativoId', { corporativoId: dataScope.corporativoId });
+      if (antroIdFiltro) {
+        query.andWhere('requisicion.antroId = :antroIdFiltro', { antroIdFiltro });
+      }
     } else {
       const antroIds = dataScope.antroIds?.length ? dataScope.antroIds : [null];
       query.andWhere('requisicion.antroId IN (:...antroIds)', { antroIds });

@@ -2,6 +2,8 @@ import { FormEvent, useEffect, useState } from 'react';
 import { apiRequest, exportarReporte, listarAntros, Antro, ApiError } from '../../api';
 import AccessDenied from '../../components/AccessDenied';
 import Pill from '../../components/Pill';
+import FiltroAntro from '../../components/FiltroAntro';
+import { useAlcance } from '../../scope-context';
 
 interface Reserva {
   id: string;
@@ -14,6 +16,7 @@ interface Reserva {
 }
 
 export default function ReservasPanel() {
+  const { antroFiltro } = useAlcance();
   const [reservas, setReservas] = useState<Reserva[] | null>(null);
   const [antros, setAntros] = useState<Antro[]>([]);
   const [denegado, setDenegado] = useState<string | null>(null);
@@ -26,7 +29,8 @@ export default function ReservasPanel() {
     setDenegado(null);
     setError(null);
     try {
-      const [listaReservas, listaAntros] = await Promise.all([apiRequest<Reserva[]>('/reservas'), listarAntros()]);
+      const query = antroFiltro ? `?antroId=${antroFiltro}` : '';
+      const [listaReservas, listaAntros] = await Promise.all([apiRequest<Reserva[]>(`/reservas${query}`), listarAntros()]);
       setReservas(listaReservas);
       setAntros(listaAntros);
       setForm((f) => ({ ...f, antroId: f.antroId || listaAntros[0]?.id || '' }));
@@ -38,7 +42,7 @@ export default function ReservasPanel() {
 
   useEffect(() => {
     cargar();
-  }, []);
+  }, [antroFiltro]);
 
   async function crear(e: FormEvent) {
     e.preventDefault();
@@ -112,6 +116,7 @@ export default function ReservasPanel() {
       <div className="panel-card">
         <div className="toolbar">
           <h3>Historial</h3>
+          <FiltroAntro />
           <button className="btn btn-secondary" onClick={() => exportarReporte('reservas.export_rp')}>
             Exportar PDF (por RP)
           </button>

@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query, UseGuards } from '@nestjs/common';
 import { ReservasService } from './reservas.service';
 import { CrearReservaDto } from './dto/crear-reserva.dto';
 import { PermissionGuard } from '../../core/rbac/permission.guard';
@@ -19,7 +19,7 @@ export class ReservasController {
 
   @Get()
   @RequirePermission('reservas.ver')
-  listar(@CurrentDataScope() dataScope: DataScope) {
-    return this.reservasService.listar(dataScope);
+  listar(@CurrentDataScope() dataScope: DataScope, @Query('antroId') antroId?: string) {
+    return this.reservasService.listar(dataScope, antroId);
   }
 }

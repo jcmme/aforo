@@ -34,11 +34,14 @@ export class NominaService {
     );
   }
 
-  async listarPeriodos(dataScope: DataScope): Promise<NominaPeriodo[]> {
+  async listarPeriodos(dataScope: DataScope, antroIdFiltro?: string): Promise<NominaPeriodo[]> {
     const query = this.periodoRepo.createQueryBuilder('periodo').leftJoinAndSelect('periodo.antro', 'antro');
 
     if (dataScope.alcance === PermissionScope.CORPORATIVO) {
       query.andWhere('antro.corporativoId = :corporativoId', { corporativoId: dataScope.corporativoId });
+      if (antroIdFiltro) {
+        query.andWhere('periodo.antroId = :antroIdFiltro', { antroIdFiltro });
+      }
     } else {
       const antroIds = dataScope.antroIds?.length ? dataScope.antroIds : [null];
       query.andWhere('periodo.antroId IN (:...antroIds)', { antroIds });

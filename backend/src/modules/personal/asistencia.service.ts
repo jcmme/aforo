@@ -36,15 +36,18 @@ export class AsistenciaService {
     );
   }
 
-  async listar(dataScope: DataScope, filtros: { desde?: string; hasta?: string }): Promise<Asistencia[]> {
-    const query = this.construirQueryEscopada(dataScope);
+  async listar(dataScope: DataScope, filtros: { desde?: string; hasta?: string; antroId?: string }): Promise<Asistencia[]> {
+    const query = this.construirQueryEscopada(dataScope, filtros.antroId);
     this.aplicarFiltrosFecha(query, filtros);
     return query.orderBy('asistencia.fecha', 'DESC').getMany();
   }
 
   /** Fuente de datos de la plantilla "personal.export_asistencia": una fila por empleado, totales del periodo. */
-  async resumenPorEmpleado(dataScope: DataScope, filtros: { desde?: string; hasta?: string }): Promise<Record<string, unknown>[]> {
-    const query = this.construirQueryEscopada(dataScope)
+  async resumenPorEmpleado(
+    dataScope: DataScope,
+    filtros: { desde?: string; hasta?: string; antroId?: string },
+  ): Promise<Record<string, unknown>[]> {
+    const query = this.construirQueryEscopada(dataScope, filtros.antroId)
       .select('empleado.id', 'empleadoId')
       .addSelect('empleado.nombre', 'empleado')
       .addSelect('empleado.puesto', 'puesto')
@@ -59,7 +62,7 @@ export class AsistenciaService {
     return query.getRawMany();
   }
 
-  private construirQueryEscopada(dataScope: DataScope): SelectQueryBuilder<Asistencia> {
+  private construirQueryEscopada(dataScope: DataScope, antroIdFiltro?: string): SelectQueryBuilder<Asistencia> {
     const query = this.asistenciaRepo
       .createQueryBuilder('asistencia')
       .leftJoin('asistencia.empleado', 'empleado')
@@ -67,6 +70,9 @@ export class AsistenciaService {
 
     if (dataScope.alcance === PermissionScope.CORPORATIVO) {
       query.andWhere('antro.corporativoId = :corporativoId', { corporativoId: dataScope.corporativoId });
+      if (antroIdFiltro) {
+        query.andWhere('empleado.antroId = :antroIdFiltro', { antroIdFiltro });
+      }
     } else {
       const antroIds = dataScope.antroIds?.length ? dataScope.antroIds : [null];
       query.andWhere('empleado.antroId IN (:...antroIds)', { antroIds });

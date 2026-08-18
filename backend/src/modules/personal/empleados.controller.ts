@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query, UseGuards } from '@nestjs/common';
 import { EmpleadosService } from './empleados.service';
 import { CrearEmpleadoDto } from './dto/crear-empleado.dto';
 import { PermissionGuard } from '../../core/rbac/permission.guard';
@@ -19,7 +19,7 @@ export class EmpleadosController {
 
   @Get()
   @RequirePermission('personal.ver')
-  listar(@CurrentDataScope() dataScope: DataScope) {
-    return this.empleadosService.listar(dataScope);
+  listar(@CurrentDataScope() dataScope: DataScope, @Query('antroId') antroId?: string) {
+    return this.empleadosService.listar(dataScope, antroId);
   }
 }

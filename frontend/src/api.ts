@@ -80,6 +80,13 @@ export async function login(email: string, password: string): Promise<string> {
   return accessToken;
 }
 
+export function cambiarPassword(passwordActual: string, passwordNuevo: string): Promise<void> {
+  return apiRequest<void>('/auth/password', {
+    method: 'PATCH',
+    body: JSON.stringify({ passwordActual, passwordNuevo }),
+  });
+}
+
 export async function exportarReporte(plantillaCodigo: string, filtros: Record<string, unknown> = {}): Promise<void> {
   const token = getToken();
   const res = await fetch(`${API_URL}/reportes/exportar`, {
