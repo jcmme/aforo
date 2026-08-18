@@ -1,4 +1,6 @@
-const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:3000';
+// Quita cualquier "/" final — si VITE_API_URL trae uno, evita el doble
+// slash al concatenar con cada ruta (ej. ".../ //auth/login").
+const API_URL = (import.meta.env.VITE_API_URL ?? 'http://localhost:3000').replace(/\/+$/, '');
 const TOKEN_KEY = 'aforo_token';
 const USER_KEY = 'aforo_user';
 
