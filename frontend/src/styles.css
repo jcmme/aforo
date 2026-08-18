@@ -97,6 +97,30 @@ textarea {
   color: var(--text);
 }
 
+.password-row {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.password-row input {
+  flex: 1;
+  min-width: 0;
+}
+
+.btn-toggle-password {
+  background: var(--surface-2);
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  padding: 0 0.7rem;
+  font-size: 0.8rem;
+  white-space: nowrap;
+}
+
+.btn-toggle-password:hover {
+  background: var(--border);
+}
+
 .field input:focus,
 .field select:focus,
 button:focus-visible {

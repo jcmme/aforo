@@ -4,6 +4,7 @@ import { login, guardarSesion, ApiError } from '../api';
 export default function Login({ onLogin }: { onLogin: (email: string) => void }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [mostrarPassword, setMostrarPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [cargando, setCargando] = useState(false);
 
@@ -39,7 +40,18 @@ export default function Login({ onLogin }: { onLogin: (email: string) => void })
 
         <div className="field">
           <label htmlFor="password">Contraseña</label>
-          <input id="password" type="password" required value={password} onChange={(e) => setPassword(e.target.value)} />
+          <div className="password-row">
+            <input
+              id="password"
+              type={mostrarPassword ? 'text' : 'password'}
+              required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+            <button type="button" className="btn-toggle-password" onClick={() => setMostrarPassword((v) => !v)}>
+              {mostrarPassword ? 'Ocultar' : 'Mostrar'}
+            </button>
+          </div>
         </div>
 
         <button className="btn" type="submit" disabled={cargando}>
