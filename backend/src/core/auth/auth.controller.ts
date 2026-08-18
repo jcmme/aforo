@@ -1,7 +1,9 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Get, Post } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { Public } from './public.decorator';
+import { CurrentUser } from './current-user.decorator';
+import { UsuarioAutenticado } from './jwt-payload.interface';
 
 @Controller('auth')
 export class AuthController {
@@ -11,5 +13,12 @@ export class AuthController {
   @Post('login')
   login(@Body() dto: LoginDto) {
     return this.authService.login(dto.email, dto.password);
+  }
+
+  /** Con qué secciones arma el frontend el menú lateral de este usuario. */
+  @Get('me')
+  async me(@CurrentUser() usuario: UsuarioAutenticado) {
+    const secciones = await this.authService.obtenerSecciones(usuario);
+    return { email: usuario.email, secciones };
   }
 }

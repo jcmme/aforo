@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { apiRequest } from '../api';
 import ReservasPanel from './panels/ReservasPanel';
 import RequisicionesPanel from './panels/RequisicionesPanel';
 import PersonalPanel from './panels/PersonalPanel';
@@ -18,14 +19,24 @@ const SECCIONES = [
 type SeccionId = (typeof SECCIONES)[number]['id'];
 
 export default function Dashboard({ email, onLogout }: { email: string; onLogout: () => void }) {
-  const [seccion, setSeccion] = useState<SeccionId>('metricas');
+  const [secciones, setSecciones] = useState<SeccionId[] | null>(null);
+  const [seccion, setSeccion] = useState<SeccionId | null>(null);
+
+  useEffect(() => {
+    apiRequest<{ email: string; secciones: SeccionId[] }>('/auth/me').then((perfil) => {
+      setSecciones(perfil.secciones);
+      setSeccion(perfil.secciones[0] ?? null);
+    });
+  }, []);
+
+  const seccionesVisibles = SECCIONES.filter((s) => secciones?.includes(s.id));
 
   return (
     <div className="app-shell">
       <aside className="sidebar">
         <div className="brand">Aforo</div>
         <nav>
-          {SECCIONES.map((s) => (
+          {seccionesVisibles.map((s) => (
             <button key={s.id} className={s.id === seccion ? 'active' : ''} onClick={() => setSeccion(s.id)}>
               {s.label}
             </button>
@@ -40,6 +51,8 @@ export default function Dashboard({ email, onLogout }: { email: string; onLogout
       </aside>
 
       <main className="main">
+        {secciones === null && <p className="hint">Cargando…</p>}
+        {secciones?.length === 0 && <p className="hint">Tu usuario no tiene acceso a ninguna sección todavía.</p>}
         {seccion === 'metricas' && <MetricasPanel />}
         {seccion === 'reservas' && <ReservasPanel />}
         {seccion === 'requisiciones' && <RequisicionesPanel />}
