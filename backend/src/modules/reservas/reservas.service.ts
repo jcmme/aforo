@@ -1,4 +1,4 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, SelectQueryBuilder } from 'typeorm';
 import { Reserva } from './entities/reserva.entity';
@@ -6,6 +6,7 @@ import { CrearReservaDto } from './dto/crear-reserva.dto';
 import { DataScope } from '../../core/rbac/data-scope';
 import { PermissionScope } from '../../core/rbac/permission-scope.enum';
 import { AuditoriaService } from '../../core/auditoria/auditoria.service';
+import { AntroGuardService } from '../../core/rbac/antro-guard.service';
 
 @Injectable()
 export class ReservasService {
@@ -13,10 +14,11 @@ export class ReservasService {
     @InjectRepository(Reserva)
     private readonly reservaRepo: Repository<Reserva>,
     private readonly auditoria: AuditoriaService,
+    private readonly antroGuard: AntroGuardService,
   ) {}
 
   async crear(dto: CrearReservaDto, dataScope: DataScope): Promise<Reserva> {
-    this.verificarAccesoAntro(dto.antroId, dataScope);
+    await this.antroGuard.verificarAcceso(dto.antroId, dataScope);
 
     const reserva = this.reservaRepo.create({
       antroId: dto.antroId,
@@ -100,13 +102,6 @@ export class ReservasService {
 
     if (dataScope.alcance === PermissionScope.PROPIO) {
       query.andWhere('reserva.rpUsuarioId = :usuarioId', { usuarioId: dataScope.usuarioId });
-    }
-  }
-
-  private verificarAccesoAntro(antroId: string, dataScope: DataScope): void {
-    if (dataScope.alcance === PermissionScope.CORPORATIVO) return;
-    if (!dataScope.antroIds?.includes(antroId)) {
-      throw new ForbiddenException('No tienes acceso a ese antro.');
     }
   }
 }

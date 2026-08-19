@@ -1,4 +1,4 @@
-import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { NominaPeriodo } from './entities/nomina-periodo.entity';
@@ -9,6 +9,7 @@ import { RegistrarNominaDetalleDto } from './dto/registrar-nomina-detalle.dto';
 import { DataScope } from '../../core/rbac/data-scope';
 import { PermissionScope } from '../../core/rbac/permission-scope.enum';
 import { AuditoriaService } from '../../core/auditoria/auditoria.service';
+import { AntroGuardService } from '../../core/rbac/antro-guard.service';
 
 @Injectable()
 export class NominaService {
@@ -20,12 +21,11 @@ export class NominaService {
     @InjectRepository(Empleado)
     private readonly empleadoRepo: Repository<Empleado>,
     private readonly auditoria: AuditoriaService,
+    private readonly antroGuard: AntroGuardService,
   ) {}
 
   async crearPeriodo(dto: CrearNominaPeriodoDto, dataScope: DataScope): Promise<NominaPeriodo> {
-    if (dataScope.alcance !== PermissionScope.CORPORATIVO && !dataScope.antroIds?.includes(dto.antroId)) {
-      throw new ForbiddenException('No tienes acceso a ese antro.');
-    }
+    await this.antroGuard.verificarAcceso(dto.antroId, dataScope);
 
     const periodo = await this.periodoRepo.save(
       this.periodoRepo.create({
@@ -66,9 +66,7 @@ export class NominaService {
   async registrarDetalle(periodoId: string, dto: RegistrarNominaDetalleDto, dataScope: DataScope): Promise<NominaDetalle> {
     const periodo = await this.periodoRepo.findOne({ where: { id: periodoId } });
     if (!periodo) throw new NotFoundException('Periodo de nómina no encontrado.');
-    if (dataScope.alcance !== PermissionScope.CORPORATIVO && !dataScope.antroIds?.includes(periodo.antroId)) {
-      throw new ForbiddenException('No tienes acceso a ese periodo.');
-    }
+    await this.antroGuard.verificarAcceso(periodo.antroId, dataScope);
 
     const empleado = await this.empleadoRepo.findOne({ where: { id: dto.empleadoId } });
     if (!empleado || empleado.antroId !== periodo.antroId) {
@@ -107,9 +105,7 @@ export class NominaService {
   async listarDetalle(periodoId: string, dataScope: DataScope): Promise<NominaDetalle[]> {
     const periodo = await this.periodoRepo.findOne({ where: { id: periodoId } });
     if (!periodo) throw new NotFoundException('Periodo de nómina no encontrado.');
-    if (dataScope.alcance !== PermissionScope.CORPORATIVO && !dataScope.antroIds?.includes(periodo.antroId)) {
-      throw new ForbiddenException('No tienes acceso a ese periodo.');
-    }
+    await this.antroGuard.verificarAcceso(periodo.antroId, dataScope);
 
     return this.detalleRepo.find({ where: { nominaPeriodoId: periodoId }, relations: ['empleado'] });
   }

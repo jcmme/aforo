@@ -2,22 +2,30 @@ import { ForbiddenException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Compra } from './entities/compra.entity';
+import { Proveedor } from './entities/proveedor.entity';
 import { CrearCompraDto } from './dto/crear-compra.dto';
 import { DataScope } from '../../core/rbac/data-scope';
 import { PermissionScope } from '../../core/rbac/permission-scope.enum';
 import { AuditoriaService } from '../../core/auditoria/auditoria.service';
+import { AntroGuardService } from '../../core/rbac/antro-guard.service';
 
 @Injectable()
 export class ComprasService {
   constructor(
     @InjectRepository(Compra)
     private readonly compraRepo: Repository<Compra>,
+    @InjectRepository(Proveedor)
+    private readonly proveedorRepo: Repository<Proveedor>,
     private readonly auditoria: AuditoriaService,
+    private readonly antroGuard: AntroGuardService,
   ) {}
 
   async crear(dto: CrearCompraDto, dataScope: DataScope): Promise<Compra> {
-    if (dataScope.alcance !== PermissionScope.CORPORATIVO && !dataScope.antroIds?.includes(dto.antroId)) {
-      throw new ForbiddenException('No tienes acceso a ese antro.');
+    await this.antroGuard.verificarAcceso(dto.antroId, dataScope);
+
+    const proveedor = await this.proveedorRepo.findOne({ where: { id: dto.proveedorId } });
+    if (!proveedor || proveedor.corporativoId !== dataScope.corporativoId) {
+      throw new ForbiddenException('Ese proveedor no pertenece a tu corporativo.');
     }
 
     const compra = await this.compraRepo.save(

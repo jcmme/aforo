@@ -7,6 +7,7 @@ import { ResolverRequisicionDto, ResolucionRequisicion } from './dto/resolver-re
 import { DataScope } from '../../core/rbac/data-scope';
 import { PermissionScope } from '../../core/rbac/permission-scope.enum';
 import { AuditoriaService } from '../../core/auditoria/auditoria.service';
+import { AntroGuardService } from '../../core/rbac/antro-guard.service';
 
 const MAPA_RESOLUCION: Record<ResolucionRequisicion, RequisicionEstado> = {
   [ResolucionRequisicion.APROBADA]: RequisicionEstado.APROBADA,
@@ -20,12 +21,11 @@ export class RequisicionesService {
     @InjectRepository(Requisicion)
     private readonly requisicionRepo: Repository<Requisicion>,
     private readonly auditoria: AuditoriaService,
+    private readonly antroGuard: AntroGuardService,
   ) {}
 
   async crear(dto: CrearRequisicionDto, dataScope: DataScope): Promise<Requisicion> {
-    if (dataScope.alcance !== PermissionScope.CORPORATIVO && !dataScope.antroIds?.includes(dto.antroId)) {
-      throw new ForbiddenException('No tienes acceso a ese antro.');
-    }
+    await this.antroGuard.verificarAcceso(dto.antroId, dataScope);
 
     const requisicion = this.requisicionRepo.create({
       antroId: dto.antroId,

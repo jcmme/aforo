@@ -1,4 +1,4 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, SelectQueryBuilder } from 'typeorm';
 import { Empleado } from './entities/empleado.entity';
@@ -6,6 +6,7 @@ import { CrearEmpleadoDto } from './dto/crear-empleado.dto';
 import { DataScope } from '../../core/rbac/data-scope';
 import { PermissionScope } from '../../core/rbac/permission-scope.enum';
 import { AuditoriaService } from '../../core/auditoria/auditoria.service';
+import { AntroGuardService } from '../../core/rbac/antro-guard.service';
 
 @Injectable()
 export class EmpleadosService {
@@ -13,12 +14,11 @@ export class EmpleadosService {
     @InjectRepository(Empleado)
     private readonly empleadoRepo: Repository<Empleado>,
     private readonly auditoria: AuditoriaService,
+    private readonly antroGuard: AntroGuardService,
   ) {}
 
   async crear(dto: CrearEmpleadoDto, dataScope: DataScope): Promise<Empleado> {
-    if (dataScope.alcance !== PermissionScope.CORPORATIVO && !dataScope.antroIds?.includes(dto.antroId)) {
-      throw new ForbiddenException('No tienes acceso a ese antro.');
-    }
+    await this.antroGuard.verificarAcceso(dto.antroId, dataScope);
 
     const empleado = await this.empleadoRepo.save(
       this.empleadoRepo.create({

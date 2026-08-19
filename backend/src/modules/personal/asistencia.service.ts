@@ -1,4 +1,4 @@
-import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, SelectQueryBuilder } from 'typeorm';
 import { Asistencia } from './entities/asistencia.entity';
@@ -7,6 +7,7 @@ import { RegistrarAsistenciaDto } from './dto/registrar-asistencia.dto';
 import { DataScope } from '../../core/rbac/data-scope';
 import { PermissionScope } from '../../core/rbac/permission-scope.enum';
 import { AuditoriaService } from '../../core/auditoria/auditoria.service';
+import { AntroGuardService } from '../../core/rbac/antro-guard.service';
 
 @Injectable()
 export class AsistenciaService {
@@ -16,6 +17,7 @@ export class AsistenciaService {
     @InjectRepository(Empleado)
     private readonly empleadoRepo: Repository<Empleado>,
     private readonly auditoria: AuditoriaService,
+    private readonly antroGuard: AntroGuardService,
   ) {}
 
   async registrar(dto: RegistrarAsistenciaDto, dataScope: DataScope): Promise<Asistencia> {
@@ -23,9 +25,7 @@ export class AsistenciaService {
     if (!empleado) {
       throw new NotFoundException('Empleado no encontrado.');
     }
-    if (dataScope.alcance !== PermissionScope.CORPORATIVO && !dataScope.antroIds?.includes(empleado.antroId)) {
-      throw new ForbiddenException('No tienes acceso a ese empleado.');
-    }
+    await this.antroGuard.verificarAcceso(empleado.antroId, dataScope);
 
     const registro = await this.asistenciaRepo.save(
       this.asistenciaRepo.create({
