@@ -9,6 +9,7 @@ import NominaPanel from './panels/NominaPanel';
 import MetricasPanel from './panels/MetricasPanel';
 import ProveedoresPanel from './panels/ProveedoresPanel';
 import UsuariosPanel from './panels/UsuariosPanel';
+import CuentasPanel from './panels/CuentasPanel';
 import AuditoriaPanel from './panels/AuditoriaPanel';
 import ConfiguracionPanel from './panels/ConfiguracionPanel';
 
@@ -20,6 +21,7 @@ const SECCIONES = [
   { id: 'nomina', label: 'Nómina' },
   { id: 'proveedores', label: 'Proveedores' },
   { id: 'usuarios', label: 'Usuarios' },
+  { id: 'cuentas', label: 'Cuentas' },
   { id: 'auditoria', label: 'Auditoría' },
 ] as const;
 
@@ -112,6 +114,7 @@ export default function Dashboard({ email, onLogout }: { email: string; onLogout
               {seccion === 'nomina' && <NominaPanel />}
               {seccion === 'proveedores' && <ProveedoresPanel />}
               {seccion === 'usuarios' && <UsuariosPanel />}
+              {seccion === 'cuentas' && <CuentasPanel />}
               {seccion === 'auditoria' && <AuditoriaPanel />}
             </>
           )}

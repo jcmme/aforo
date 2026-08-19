@@ -17,6 +17,7 @@ export interface CuentaSecundaria {
   email: string;
   estado: UsuarioEstado;
   rol: string;
+  antroId: string | null;
   antro: string | null;
 }
 
@@ -113,6 +114,7 @@ export class UsuariosService {
       email: ua.usuario.email,
       estado: ua.usuario.estado,
       rol: ua.rol.nombre,
+      antroId: ua.antroId,
       antro: ua.antro?.nombre ?? null,
     }));
   }

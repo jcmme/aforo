@@ -21,6 +21,7 @@ const SECCION_POR_PERMISO: Record<string, string> = {
   nomina: 'nomina.ver',
   proveedores: 'proveedores.ver',
   usuarios: 'usuarios.gestionar',
+  cuentas: 'cuentas.ver_todas',
   auditoria: 'auditoria.ver',
 };
 
