@@ -22,6 +22,7 @@ const SECCION_POR_PERMISO: Record<string, string> = {
   proveedores: 'proveedores.ver',
   usuarios: 'usuarios.gestionar',
   cuentas: 'cuentas.ver_todas',
+  clientes: 'onboarding.crear_cliente',
   auditoria: 'auditoria.ver',
 };
 
