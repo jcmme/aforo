@@ -42,7 +42,7 @@ export class ExportService {
     }
 
     const filas = await plantilla.dataProvider({ dataScope, filtros });
-    const buffer = await this.pdfRenderer.renderTablaHorizontal(plantilla.titulo, plantilla.columnas, filas);
+    const buffer = await this.pdfRenderer.renderTablaHorizontal(plantilla.titulo, plantilla.columnas, filas, plantilla.columnaChecklist);
 
     const nombreArchivo = `${plantilla.codigo}-${Date.now()}.pdf`;
     const archivoUrl = await this.guardarArchivo(nombreArchivo, buffer);

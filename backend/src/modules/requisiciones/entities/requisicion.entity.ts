@@ -38,6 +38,9 @@ export class Requisicion {
   @Column({ length: 255 })
   destino: string;
 
+  @Column({ type: 'text', nullable: true })
+  nota: string | null;
+
   @Column({ name: 'fecha_gasto_programada', type: 'date' })
   fechaGastoProgramada: string;
 

@@ -23,6 +23,7 @@ export function crearDefinicionModuloRequisiciones(requisicionesService: Requisi
         columnas: [
           { campo: 'antro', etiqueta: 'Antro' },
           { campo: 'destino', etiqueta: 'Destino' },
+          { campo: 'nota', etiqueta: 'Nota' },
           { campo: 'montoSolicitado', etiqueta: 'Monto solicitado' },
           { campo: 'montoResuelto', etiqueta: 'Monto resuelto' },
           { campo: 'estado', etiqueta: 'Estado' },

@@ -354,7 +354,8 @@ table.data-table th {
 .pill-rechazada,
 .pill-no_show,
 .pill-falta,
-.pill-baja {
+.pill-baja,
+.pill-inactivo {
   background: var(--critical-soft);
   color: var(--critical);
 }

@@ -6,6 +6,7 @@ import * as bcrypt from 'bcrypt';
 import { Usuario, UsuarioEstado } from '../identidad/entities/usuario.entity';
 import { JwtPayload, UsuarioAutenticado } from './jwt-payload.interface';
 import { RbacService } from '../rbac/rbac.service';
+import { AuditoriaService } from '../auditoria/auditoria.service';
 
 /**
  * Qué permiso "ver" habilita cada sección del menú. Vive aquí porque solo
@@ -19,6 +20,8 @@ const SECCION_POR_PERMISO: Record<string, string> = {
   personal: 'personal.ver',
   nomina: 'nomina.ver',
   proveedores: 'proveedores.ver',
+  usuarios: 'usuarios.gestionar',
+  auditoria: 'auditoria.ver',
 };
 
 @Injectable()
@@ -28,6 +31,7 @@ export class AuthService {
     private readonly usuarioRepo: Repository<Usuario>,
     private readonly jwtService: JwtService,
     private readonly rbacService: RbacService,
+    private readonly auditoria: AuditoriaService,
   ) {}
 
   async login(email: string, password: string): Promise<{ accessToken: string }> {
@@ -49,11 +53,11 @@ export class AuthService {
     return { accessToken: this.jwtService.sign(payload) };
   }
 
-  async cambiarPassword(usuarioId: string, passwordActual: string, passwordNuevo: string): Promise<void> {
-    const usuario = await this.usuarioRepo.findOne({ where: { id: usuarioId } });
-    if (!usuario) throw new UnauthorizedException();
+  async cambiarPassword(usuario: UsuarioAutenticado, passwordActual: string, passwordNuevo: string): Promise<void> {
+    const registro = await this.usuarioRepo.findOne({ where: { id: usuario.id } });
+    if (!registro) throw new UnauthorizedException();
 
-    const passwordValido = await bcrypt.compare(passwordActual, usuario.passwordHash);
+    const passwordValido = await bcrypt.compare(passwordActual, registro.passwordHash);
     if (!passwordValido) {
       throw new BadRequestException('La contraseña actual no es correcta.');
     }
@@ -61,8 +65,16 @@ export class AuthService {
       throw new BadRequestException('La contraseña nueva debe ser distinta de la actual.');
     }
 
-    usuario.passwordHash = await bcrypt.hash(passwordNuevo, 10);
-    await this.usuarioRepo.save(usuario);
+    registro.passwordHash = await bcrypt.hash(passwordNuevo, 10);
+    await this.usuarioRepo.save(registro);
+
+    await this.auditoria.registrar({
+      corporativoId: usuario.corporativoId,
+      actorUsuarioId: usuario.id,
+      accion: 'usuario.password_cambiada',
+      entidad: 'usuario',
+      entidadId: usuario.id,
+    });
   }
 
   /** Secciones del menú que este usuario puede ver, según lo que ya resuelve el RBAC. */

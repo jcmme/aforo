@@ -6,6 +6,7 @@ import { CrearRequisicionDto } from './dto/crear-requisicion.dto';
 import { ResolverRequisicionDto, ResolucionRequisicion } from './dto/resolver-requisicion.dto';
 import { DataScope } from '../../core/rbac/data-scope';
 import { PermissionScope } from '../../core/rbac/permission-scope.enum';
+import { AuditoriaService } from '../../core/auditoria/auditoria.service';
 
 const MAPA_RESOLUCION: Record<ResolucionRequisicion, RequisicionEstado> = {
   [ResolucionRequisicion.APROBADA]: RequisicionEstado.APROBADA,
@@ -18,6 +19,7 @@ export class RequisicionesService {
   constructor(
     @InjectRepository(Requisicion)
     private readonly requisicionRepo: Repository<Requisicion>,
+    private readonly auditoria: AuditoriaService,
   ) {}
 
   async crear(dto: CrearRequisicionDto, dataScope: DataScope): Promise<Requisicion> {
@@ -30,10 +32,22 @@ export class RequisicionesService {
       solicitanteUsuarioId: dataScope.usuarioId,
       montoSolicitado: dto.montoSolicitado.toFixed(2),
       destino: dto.destino,
+      nota: dto.nota ?? null,
       fechaGastoProgramada: dto.fechaGastoProgramada,
     });
 
-    return this.requisicionRepo.save(requisicion);
+    const guardada = await this.requisicionRepo.save(requisicion);
+
+    await this.auditoria.registrar({
+      corporativoId: dataScope.corporativoId,
+      actorUsuarioId: dataScope.usuarioId,
+      accion: 'requisicion.crear',
+      entidad: 'requisicion',
+      entidadId: guardada.id,
+      detalle: { antroId: dto.antroId, destino: dto.destino, montoSolicitado: dto.montoSolicitado },
+    });
+
+    return guardada;
   }
 
   async listar(dataScope: DataScope, antroIdFiltro?: string): Promise<Requisicion[]> {
@@ -67,7 +81,18 @@ export class RequisicionesService {
     requisicion.fechaResolucion = new Date();
     requisicion.notaResolucion = dto.notaResolucion ?? null;
 
-    return this.requisicionRepo.save(requisicion);
+    const guardada = await this.requisicionRepo.save(requisicion);
+
+    await this.auditoria.registrar({
+      corporativoId: dataScope.corporativoId,
+      actorUsuarioId: dataScope.usuarioId,
+      accion: 'requisicion.resolver',
+      entidad: 'requisicion',
+      entidadId: guardada.id,
+      detalle: { estado: dto.estado, montoResuelto: guardada.montoResuelto },
+    });
+
+    return guardada;
   }
 
   /** Fuente de datos de la plantilla "requisiciones.export" (ver requisiciones.module-definition.ts). */
@@ -76,6 +101,7 @@ export class RequisicionesService {
     return requisiciones.map((r) => ({
       antro: r.antro.nombre,
       destino: r.destino,
+      nota: r.nota,
       montoSolicitado: r.montoSolicitado,
       montoResuelto: r.montoResuelto,
       estado: r.estado,

@@ -4,16 +4,29 @@ import { Repository } from 'typeorm';
 import { Proveedor } from './entities/proveedor.entity';
 import { CrearProveedorDto } from './dto/crear-proveedor.dto';
 import { DataScope } from '../../core/rbac/data-scope';
+import { AuditoriaService } from '../../core/auditoria/auditoria.service';
 
 @Injectable()
 export class ProveedoresService {
   constructor(
     @InjectRepository(Proveedor)
     private readonly proveedorRepo: Repository<Proveedor>,
+    private readonly auditoria: AuditoriaService,
   ) {}
 
-  crear(dto: CrearProveedorDto, dataScope: DataScope): Promise<Proveedor> {
-    return this.proveedorRepo.save(this.proveedorRepo.create({ ...dto, corporativoId: dataScope.corporativoId }));
+  async crear(dto: CrearProveedorDto, dataScope: DataScope): Promise<Proveedor> {
+    const proveedor = await this.proveedorRepo.save(this.proveedorRepo.create({ ...dto, corporativoId: dataScope.corporativoId }));
+
+    await this.auditoria.registrar({
+      corporativoId: dataScope.corporativoId,
+      actorUsuarioId: dataScope.usuarioId,
+      accion: 'proveedor.crear',
+      entidad: 'proveedor',
+      entidadId: proveedor.id,
+      detalle: { nombre: dto.nombre, categoria: dto.categoria },
+    });
+
+    return proveedor;
   }
 
   /**

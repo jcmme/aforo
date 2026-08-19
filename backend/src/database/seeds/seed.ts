@@ -38,6 +38,7 @@ async function seed(): Promise<void> {
     { nombre: 'Gerente General', alcanceTipo: RolAlcanceTipo.CORPORATIVO },
     { nombre: 'Gerente de Antro', alcanceTipo: RolAlcanceTipo.ANTRO },
     { nombre: 'RP', alcanceTipo: RolAlcanceTipo.ANTRO },
+    { nombre: 'Hostess', alcanceTipo: RolAlcanceTipo.ANTRO },
   ];
 
   const roles: Record<string, Rol> = {};
@@ -99,6 +100,18 @@ async function seed(): Promise<void> {
     { rol: 'Gerente General', permisoCodigo: 'compras.ver', alcance: PermissionScope.CORPORATIVO },
     { rol: 'Dueño', permisoCodigo: 'proveedores.ver', alcance: PermissionScope.CORPORATIVO },
     { rol: 'Dueño', permisoCodigo: 'compras.ver', alcance: PermissionScope.CORPORATIVO },
+
+    // "Cuenta general del antro": el Gerente de Antro puede dar de alta y
+    // administrar sus propias cuentas secundarias (Gerente de Antro, RP,
+    // Hostess) dentro de su antro; Dueño/Gerente General lo mismo pero para
+    // cualquier antro de su corporativo. Dar de alta un ANTRO nuevo sigue
+    // siendo exclusivo de Super Admin (no pasa por este permiso).
+    { rol: 'Gerente de Antro', permisoCodigo: 'usuarios.gestionar', alcance: PermissionScope.ANTRO },
+    { rol: 'Dueño', permisoCodigo: 'usuarios.gestionar', alcance: PermissionScope.CORPORATIVO },
+    { rol: 'Gerente General', permisoCodigo: 'usuarios.gestionar', alcance: PermissionScope.CORPORATIVO },
+
+    // Hostess: solo ve las reservas de su antro (control de acceso en la puerta), no crea ni modifica nada.
+    { rol: 'Hostess', permisoCodigo: 'reservas.ver', alcance: PermissionScope.ANTRO },
   ];
 
   for (const asignacion of asignacionesPermiso) {

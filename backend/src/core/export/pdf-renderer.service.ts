@@ -15,7 +15,12 @@ export class PdfRendererService {
    * periodo. Es el mismo renderer para el export de RPs y el de nómina —
    * ningún módulo dibuja su propio PDF, solo declara columnas + filas.
    */
-  renderTablaHorizontal(titulo: string, columnas: ReportColumn[], filas: Record<string, unknown>[]): Promise<Buffer> {
+  renderTablaHorizontal(
+    titulo: string,
+    columnas: ReportColumn[],
+    filas: Record<string, unknown>[],
+    columnaChecklist?: string,
+  ): Promise<Buffer> {
     return new Promise((resolve, reject) => {
       const doc = new PDFDocument({ size: 'A4', layout: 'landscape', margin: 40 });
       const chunks: Buffer[] = [];
@@ -32,7 +37,8 @@ export class PdfRendererService {
       doc.moveDown(1);
 
       const anchoDisponible = doc.page.width - doc.page.margins.left - doc.page.margins.right;
-      const anchoColumna = anchoDisponible / columnas.length;
+      const totalColumnas = columnas.length + (columnaChecklist ? 1 : 0);
+      const anchoColumna = anchoDisponible / totalColumnas;
 
       const dibujarEncabezado = () => {
         const x0 = doc.page.margins.left;
@@ -42,6 +48,9 @@ export class PdfRendererService {
         columnas.forEach((columna, i) => {
           doc.text(columna.etiqueta, x0 + i * anchoColumna + 6, y0 + 6, { width: anchoColumna - 12 });
         });
+        if (columnaChecklist) {
+          doc.text(columnaChecklist, x0 + columnas.length * anchoColumna + 6, y0 + 6, { width: anchoColumna - 12 });
+        }
         doc.y = y0 + ALTO_FILA;
       };
 
@@ -63,6 +72,13 @@ export class PdfRendererService {
           const texto = valor === null || valor === undefined ? '—' : String(valor);
           doc.text(texto, x0 + i * anchoColumna + 6, y0 + 6, { width: anchoColumna - 12 });
         });
+
+        if (columnaChecklist) {
+          const ladoCasilla = Math.min(ALTO_FILA - 8, anchoColumna - 12);
+          const xCasilla = x0 + columnas.length * anchoColumna + 6;
+          const yCasilla = y0 + (ALTO_FILA - ladoCasilla) / 2;
+          doc.rect(xCasilla, yCasilla, ladoCasilla, ladoCasilla).strokeColor(COLOR_TEXTO_TENUE).stroke();
+        }
 
         doc
           .moveTo(x0, y0 + ALTO_FILA)

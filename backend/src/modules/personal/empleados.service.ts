@@ -5,12 +5,14 @@ import { Empleado } from './entities/empleado.entity';
 import { CrearEmpleadoDto } from './dto/crear-empleado.dto';
 import { DataScope } from '../../core/rbac/data-scope';
 import { PermissionScope } from '../../core/rbac/permission-scope.enum';
+import { AuditoriaService } from '../../core/auditoria/auditoria.service';
 
 @Injectable()
 export class EmpleadosService {
   constructor(
     @InjectRepository(Empleado)
     private readonly empleadoRepo: Repository<Empleado>,
+    private readonly auditoria: AuditoriaService,
   ) {}
 
   async crear(dto: CrearEmpleadoDto, dataScope: DataScope): Promise<Empleado> {
@@ -18,7 +20,7 @@ export class EmpleadosService {
       throw new ForbiddenException('No tienes acceso a ese antro.');
     }
 
-    return this.empleadoRepo.save(
+    const empleado = await this.empleadoRepo.save(
       this.empleadoRepo.create({
         antroId: dto.antroId,
         nombre: dto.nombre,
@@ -27,6 +29,17 @@ export class EmpleadosService {
         salarioBase: dto.salarioBase != null ? dto.salarioBase.toFixed(2) : null,
       }),
     );
+
+    await this.auditoria.registrar({
+      corporativoId: dataScope.corporativoId,
+      actorUsuarioId: dataScope.usuarioId,
+      accion: 'empleado.crear',
+      entidad: 'empleado',
+      entidadId: empleado.id,
+      detalle: { antroId: dto.antroId, nombre: dto.nombre, puesto: dto.puesto },
+    });
+
+    return empleado;
   }
 
   async listar(dataScope: DataScope, antroIdFiltro?: string): Promise<Empleado[]> {

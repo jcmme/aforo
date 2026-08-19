@@ -30,6 +30,8 @@ export interface ReportTemplateDefinition {
   columnas: ReportColumn[];
   /** Permiso que se evalúa (con su alcance) antes de generar este reporte. */
   permisoRequerido: string;
+  /** Si se declara, el PDF agrega una última columna con un recuadro vacío por fila (para marcar a mano, ej. asistencia). */
+  columnaChecklist?: string;
   dataProvider: (ctx: ExportContext) => Promise<Record<string, unknown>[]>;
 }
 

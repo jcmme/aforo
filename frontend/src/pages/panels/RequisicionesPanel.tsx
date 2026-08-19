@@ -3,11 +3,14 @@ import { apiRequest, exportarReporte, listarAntros, Antro, ApiError } from '../.
 import AccessDenied from '../../components/AccessDenied';
 import Pill from '../../components/Pill';
 import FiltroAntro from '../../components/FiltroAntro';
+import MoneyInput from '../../components/MoneyInput';
 import { useAlcance } from '../../scope-context';
+import { formatMonto } from '../../format';
 
 interface Requisicion {
   id: string;
   destino: string;
+  nota: string | null;
   montoSolicitado: string;
   montoResuelto: string | null;
   fechaGastoProgramada: string;
@@ -23,7 +26,7 @@ export default function RequisicionesPanel() {
   const [error, setError] = useState<string | null>(null);
   const [enviando, setEnviando] = useState(false);
 
-  const [form, setForm] = useState({ antroId: '', montoSolicitado: '', destino: '', fechaGastoProgramada: '' });
+  const [form, setForm] = useState({ antroId: '', montoSolicitado: '', destino: '', nota: '', fechaGastoProgramada: '' });
 
   async function cargar() {
     setDenegado(null);
@@ -51,9 +54,9 @@ export default function RequisicionesPanel() {
     try {
       await apiRequest('/requisiciones', {
         method: 'POST',
-        body: JSON.stringify({ ...form, montoSolicitado: Number(form.montoSolicitado) }),
+        body: JSON.stringify({ ...form, montoSolicitado: Number(form.montoSolicitado), nota: form.nota || undefined }),
       });
-      setForm((f) => ({ ...f, montoSolicitado: '', destino: '', fechaGastoProgramada: '' }));
+      setForm((f) => ({ ...f, montoSolicitado: '', destino: '', nota: '', fechaGastoProgramada: '' }));
       await cargar();
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'No se pudo crear la requisición.');
@@ -106,14 +109,11 @@ export default function RequisicionesPanel() {
           </div>
           <div className="field">
             <label>Monto solicitado</label>
-            <input
-              type="number"
-              min={0}
-              step="0.01"
-              value={form.montoSolicitado}
-              onChange={(e) => setForm({ ...form, montoSolicitado: e.target.value })}
-              required
-            />
+            <MoneyInput value={form.montoSolicitado} onChange={(v) => setForm({ ...form, montoSolicitado: v })} required />
+          </div>
+          <div className="field">
+            <label>Nota (opcional)</label>
+            <input value={form.nota} onChange={(e) => setForm({ ...form, nota: e.target.value })} placeholder="Detalles de la requisición" />
           </div>
           <div className="field">
             <label>Fecha programada</label>
@@ -145,6 +145,7 @@ export default function RequisicionesPanel() {
               <tr>
                 <th>Antro</th>
                 <th>Destino</th>
+                <th>Nota</th>
                 <th>Solicitado</th>
                 <th>Resuelto</th>
                 <th>Fecha</th>
@@ -157,8 +158,9 @@ export default function RequisicionesPanel() {
                 <tr key={r.id}>
                   <td>{r.antro?.nombre}</td>
                   <td>{r.destino}</td>
-                  <td>${r.montoSolicitado}</td>
-                  <td>{r.montoResuelto ? `$${r.montoResuelto}` : '—'}</td>
+                  <td>{r.nota ?? '—'}</td>
+                  <td>${formatMonto(r.montoSolicitado)}</td>
+                  <td>{r.montoResuelto ? `$${formatMonto(r.montoResuelto)}` : '—'}</td>
                   <td>{r.fechaGastoProgramada}</td>
                   <td>
                     <Pill valor={r.estado} />
@@ -184,7 +186,7 @@ export default function RequisicionesPanel() {
               ))}
               {requisiciones?.length === 0 && (
                 <tr>
-                  <td colSpan={7} className="hint">
+                  <td colSpan={8} className="hint">
                     Sin requisiciones todavía.
                   </td>
                 </tr>

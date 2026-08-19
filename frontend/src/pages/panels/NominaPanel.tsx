@@ -2,7 +2,9 @@ import { FormEvent, useEffect, useState } from 'react';
 import { apiRequest, exportarReporte, listarAntros, Antro, ApiError } from '../../api';
 import AccessDenied from '../../components/AccessDenied';
 import FiltroAntro from '../../components/FiltroAntro';
+import MoneyInput from '../../components/MoneyInput';
 import { useAlcance } from '../../scope-context';
+import { formatMonto } from '../../format';
 
 interface Periodo {
   id: string;
@@ -190,11 +192,11 @@ export default function NominaPanel() {
             </div>
             <div className="field">
               <label>Percepciones</label>
-              <input type="number" min={0} step="0.01" value={formDetalle.percepciones} onChange={(e) => setFormDetalle({ ...formDetalle, percepciones: e.target.value })} required />
+              <MoneyInput value={formDetalle.percepciones} onChange={(v) => setFormDetalle({ ...formDetalle, percepciones: v })} required />
             </div>
             <div className="field">
               <label>Deducciones</label>
-              <input type="number" min={0} step="0.01" value={formDetalle.deducciones} onChange={(e) => setFormDetalle({ ...formDetalle, deducciones: e.target.value })} />
+              <MoneyInput value={formDetalle.deducciones} onChange={(v) => setFormDetalle({ ...formDetalle, deducciones: v })} />
             </div>
             <button className="btn" type="submit">
               Guardar detalle
@@ -220,9 +222,9 @@ export default function NominaPanel() {
                   <td>{d.empleado?.nombre}</td>
                   <td>{d.horasTrabajadas}</td>
                   <td>{d.faltas}</td>
-                  <td>${d.percepciones}</td>
-                  <td>${d.deducciones}</td>
-                  <td>${d.totalPagar}</td>
+                  <td>${formatMonto(d.percepciones)}</td>
+                  <td>${formatMonto(d.deducciones)}</td>
+                  <td>${formatMonto(d.totalPagar)}</td>
                 </tr>
               ))}
               {periodoSeleccionado && detalle.length === 0 && (

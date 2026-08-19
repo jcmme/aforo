@@ -2,7 +2,9 @@ import { FormEvent, useEffect, useState } from 'react';
 import { apiRequest, exportarReporte, listarAntros, Antro, ApiError } from '../../api';
 import AccessDenied from '../../components/AccessDenied';
 import FiltroAntro from '../../components/FiltroAntro';
+import MoneyInput from '../../components/MoneyInput';
 import { useAlcance } from '../../scope-context';
+import { formatMonto } from '../../format';
 
 interface Proveedor {
   id: string;
@@ -188,7 +190,7 @@ export default function ProveedoresPanel() {
             </div>
             <div className="field">
               <label>Monto</label>
-              <input type="number" min={0} step="0.01" value={formCompra.monto} onChange={(e) => setFormCompra({ ...formCompra, monto: e.target.value })} required />
+              <MoneyInput value={formCompra.monto} onChange={(v) => setFormCompra({ ...formCompra, monto: v })} required />
             </div>
             <div className="field">
               <label>Fecha</label>
@@ -223,7 +225,7 @@ export default function ProveedoresPanel() {
                     <td>{c.proveedor?.nombre}</td>
                     <td>{c.antro?.nombre}</td>
                     <td>{c.descripcion}</td>
-                    <td>${c.monto}</td>
+                    <td>${formatMonto(c.monto)}</td>
                     <td>{c.fecha}</td>
                   </tr>
                 ))}

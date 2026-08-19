@@ -5,12 +5,14 @@ import { Compra } from './entities/compra.entity';
 import { CrearCompraDto } from './dto/crear-compra.dto';
 import { DataScope } from '../../core/rbac/data-scope';
 import { PermissionScope } from '../../core/rbac/permission-scope.enum';
+import { AuditoriaService } from '../../core/auditoria/auditoria.service';
 
 @Injectable()
 export class ComprasService {
   constructor(
     @InjectRepository(Compra)
     private readonly compraRepo: Repository<Compra>,
+    private readonly auditoria: AuditoriaService,
   ) {}
 
   async crear(dto: CrearCompraDto, dataScope: DataScope): Promise<Compra> {
@@ -18,7 +20,7 @@ export class ComprasService {
       throw new ForbiddenException('No tienes acceso a ese antro.');
     }
 
-    return this.compraRepo.save(
+    const compra = await this.compraRepo.save(
       this.compraRepo.create({
         antroId: dto.antroId,
         proveedorId: dto.proveedorId,
@@ -28,6 +30,17 @@ export class ComprasService {
         fecha: dto.fecha,
       }),
     );
+
+    await this.auditoria.registrar({
+      corporativoId: dataScope.corporativoId,
+      actorUsuarioId: dataScope.usuarioId,
+      accion: 'compra.registrar',
+      entidad: 'compra',
+      entidadId: compra.id,
+      detalle: { antroId: dto.antroId, proveedorId: dto.proveedorId, monto: dto.monto },
+    });
+
+    return compra;
   }
 
   async listar(dataScope: DataScope, antroIdFiltro?: string): Promise<Compra[]> {

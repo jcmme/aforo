@@ -24,6 +24,7 @@ export default function ReservasPanel() {
   const [enviando, setEnviando] = useState(false);
 
   const [form, setForm] = useState({ antroId: '', clienteNombre: '', clienteTelefono: '', fechaEvento: '', numPersonas: 2 });
+  const [fechaImprimir, setFechaImprimir] = useState('');
 
   async function cargar() {
     setDenegado(null);
@@ -117,9 +118,23 @@ export default function ReservasPanel() {
         <div className="toolbar">
           <h3>Historial</h3>
           <FiltroAntro />
-          <button className="btn btn-secondary" onClick={() => exportarReporte('reservas.export_rp')}>
-            Exportar PDF (por RP)
-          </button>
+          <div className="toolbar-controls">
+            <input type="date" value={fechaImprimir} onChange={(e) => setFechaImprimir(e.target.value)} title="Fecha a imprimir (opcional)" />
+            <button
+              className="btn btn-secondary"
+              onClick={() =>
+                exportarReporte('reservas.export_lista', {
+                  ...(antroFiltro ? { antroId: antroFiltro } : {}),
+                  ...(fechaImprimir ? { fecha: fechaImprimir } : {}),
+                })
+              }
+            >
+              Imprimir lista (control de acceso)
+            </button>
+            <button className="btn btn-secondary" onClick={() => exportarReporte('reservas.export_rp')}>
+              Exportar PDF (por RP)
+            </button>
+          </div>
         </div>
         <div className="table-wrap">
           <table className="data-table">

@@ -8,6 +8,7 @@ import { CrearNominaPeriodoDto } from './dto/crear-nomina-periodo.dto';
 import { RegistrarNominaDetalleDto } from './dto/registrar-nomina-detalle.dto';
 import { DataScope } from '../../core/rbac/data-scope';
 import { PermissionScope } from '../../core/rbac/permission-scope.enum';
+import { AuditoriaService } from '../../core/auditoria/auditoria.service';
 
 @Injectable()
 export class NominaService {
@@ -18,6 +19,7 @@ export class NominaService {
     private readonly detalleRepo: Repository<NominaDetalle>,
     @InjectRepository(Empleado)
     private readonly empleadoRepo: Repository<Empleado>,
+    private readonly auditoria: AuditoriaService,
   ) {}
 
   async crearPeriodo(dto: CrearNominaPeriodoDto, dataScope: DataScope): Promise<NominaPeriodo> {
@@ -25,13 +27,24 @@ export class NominaService {
       throw new ForbiddenException('No tienes acceso a ese antro.');
     }
 
-    return this.periodoRepo.save(
+    const periodo = await this.periodoRepo.save(
       this.periodoRepo.create({
         antroId: dto.antroId,
         periodoInicio: dto.periodoInicio,
         periodoFin: dto.periodoFin,
       }),
     );
+
+    await this.auditoria.registrar({
+      corporativoId: dataScope.corporativoId,
+      actorUsuarioId: dataScope.usuarioId,
+      accion: 'nomina.periodo_crear',
+      entidad: 'nomina_periodo',
+      entidadId: periodo.id,
+      detalle: { antroId: dto.antroId, periodoInicio: dto.periodoInicio, periodoFin: dto.periodoFin },
+    });
+
+    return periodo;
   }
 
   async listarPeriodos(dataScope: DataScope, antroIdFiltro?: string): Promise<NominaPeriodo[]> {
@@ -77,7 +90,18 @@ export class NominaService {
     detalle.deducciones = deducciones.toFixed(2);
     detalle.totalPagar = totalPagar.toFixed(2);
 
-    return this.detalleRepo.save(detalle);
+    const guardado = await this.detalleRepo.save(detalle);
+
+    await this.auditoria.registrar({
+      corporativoId: dataScope.corporativoId,
+      actorUsuarioId: dataScope.usuarioId,
+      accion: 'nomina.detalle_registrar',
+      entidad: 'nomina_detalle',
+      entidadId: guardado.id,
+      detalle: { empleadoId: dto.empleadoId, periodoId, totalPagar: guardado.totalPagar },
+    });
+
+    return guardado;
   }
 
   async listarDetalle(periodoId: string, dataScope: DataScope): Promise<NominaDetalle[]> {

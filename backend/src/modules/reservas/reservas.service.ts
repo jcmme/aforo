@@ -5,12 +5,14 @@ import { Reserva } from './entities/reserva.entity';
 import { CrearReservaDto } from './dto/crear-reserva.dto';
 import { DataScope } from '../../core/rbac/data-scope';
 import { PermissionScope } from '../../core/rbac/permission-scope.enum';
+import { AuditoriaService } from '../../core/auditoria/auditoria.service';
 
 @Injectable()
 export class ReservasService {
   constructor(
     @InjectRepository(Reserva)
     private readonly reservaRepo: Repository<Reserva>,
+    private readonly auditoria: AuditoriaService,
   ) {}
 
   async crear(dto: CrearReservaDto, dataScope: DataScope): Promise<Reserva> {
@@ -26,7 +28,18 @@ export class ReservasService {
       notas: dto.notas ?? null,
     });
 
-    return this.reservaRepo.save(reserva);
+    const guardada = await this.reservaRepo.save(reserva);
+
+    await this.auditoria.registrar({
+      corporativoId: dataScope.corporativoId,
+      actorUsuarioId: dataScope.usuarioId,
+      accion: 'reserva.crear',
+      entidad: 'reserva',
+      entidadId: guardada.id,
+      detalle: { antroId: dto.antroId, clienteNombre: dto.clienteNombre, fechaEvento: dto.fechaEvento },
+    });
+
+    return guardada;
   }
 
   async listar(dataScope: DataScope, antroIdFiltro?: string): Promise<Reserva[]> {
@@ -51,6 +64,27 @@ export class ReservasService {
 
     this.aplicarAlcance(query, dataScope);
     return query.getRawMany();
+  }
+
+  /** Fuente de datos de la plantilla "reservas.export_lista" (ver reservas.module-definition.ts): una fila por reserva, para imprimir en la puerta. */
+  async listarParaExport(dataScope: DataScope, filtros: { antroId?: string; fecha?: string }): Promise<Record<string, unknown>[]> {
+    const query = this.reservaRepo
+      .createQueryBuilder('reserva')
+      .leftJoin('reserva.antro', 'antro')
+      .leftJoin('reserva.rpUsuario', 'rp')
+      .select('antro.nombre', 'antro')
+      .addSelect('reserva.clienteNombre', 'cliente')
+      .addSelect('reserva.clienteTelefono', 'telefono')
+      .addSelect('reserva.numPersonas', 'personas')
+      .addSelect('reserva.fechaEvento', 'fecha')
+      .addSelect('rp.nombre', 'rp');
+
+    this.aplicarAlcance(query, dataScope, filtros.antroId);
+    if (filtros.fecha) {
+      query.andWhere('reserva.fechaEvento = :fecha', { fecha: filtros.fecha });
+    }
+
+    return query.orderBy('reserva.fechaEvento', 'ASC').addOrderBy('reserva.clienteNombre', 'ASC').getRawMany();
   }
 
   private aplicarAlcance(query: SelectQueryBuilder<Reserva>, dataScope: DataScope, antroIdFiltro?: string): void {

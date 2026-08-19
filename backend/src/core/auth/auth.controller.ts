@@ -26,6 +26,6 @@ export class AuthController {
   @Patch('password')
   @HttpCode(204)
   async cambiarPassword(@Body() dto: CambiarPasswordDto, @CurrentUser() usuario: UsuarioAutenticado) {
-    await this.authService.cambiarPassword(usuario.id, dto.passwordActual, dto.passwordNuevo);
+    await this.authService.cambiarPassword(usuario, dto.passwordActual, dto.passwordNuevo);
   }
 }

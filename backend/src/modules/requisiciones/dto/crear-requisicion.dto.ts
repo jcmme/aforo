@@ -1,4 +1,4 @@
-import { IsDateString, IsNumber, IsPositive, IsString, IsUUID, MinLength } from 'class-validator';
+import { IsDateString, IsNumber, IsOptional, IsPositive, IsString, IsUUID, MinLength } from 'class-validator';
 
 export class CrearRequisicionDto {
   @IsUUID()
@@ -11,6 +11,10 @@ export class CrearRequisicionDto {
   @IsString()
   @MinLength(1)
   destino: string;
+
+  @IsOptional()
+  @IsString()
+  nota?: string;
 
   @IsDateString()
   fechaGastoProgramada: string;
