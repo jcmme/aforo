@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
-import { apiRequest, listarAntros, Antro } from '../api';
+import { apiRequest, listarAntros, obtenerFeaturesActivas, Antro } from '../api';
 import { AlcanceContext, Alcance } from '../scope-context';
+import { FeatureFlagsContext } from '../feature-flags-context';
 import ScopeChip from '../components/ScopeChip';
 import ReservasPanel from './panels/ReservasPanel';
 import RequisicionesPanel from './panels/RequisicionesPanel';
@@ -11,6 +12,7 @@ import ProveedoresPanel from './panels/ProveedoresPanel';
 import UsuariosPanel from './panels/UsuariosPanel';
 import CuentasPanel from './panels/CuentasPanel';
 import ClientesPanel from './panels/ClientesPanel';
+import FeatureFlagsPanel from './panels/FeatureFlagsPanel';
 import AuditoriaPanel from './panels/AuditoriaPanel';
 import ConfiguracionPanel from './panels/ConfiguracionPanel';
 
@@ -24,6 +26,7 @@ const SECCIONES = [
   { id: 'usuarios', label: 'Usuarios' },
   { id: 'cuentas', label: 'Cuentas' },
   { id: 'clientes', label: 'Clientes' },
+  { id: 'flags', label: 'Features' },
   { id: 'auditoria', label: 'Auditoría' },
 ] as const;
 
@@ -40,6 +43,7 @@ export default function Dashboard({ email, onLogout }: { email: string; onLogout
   const [antroFiltro, setAntroFiltro] = useState<string | null>(null);
   const [pendientes, setPendientes] = useState<number | null>(null);
   const [mostrarConfiguracion, setMostrarConfiguracion] = useState(false);
+  const [featuresPorAntro, setFeaturesPorAntro] = useState<Record<string, string[]>>({});
 
   useEffect(() => {
     apiRequest<{ email: string; secciones: SeccionId[] }>('/auth/me').then((perfil) => {
@@ -47,6 +51,13 @@ export default function Dashboard({ email, onLogout }: { email: string; onLogout
       setSeccion(perfil.secciones[0] ?? null);
     });
     listarAntros().then(setAntros);
+    obtenerFeaturesActivas()
+      .then((lista) => {
+        const mapa: Record<string, string[]> = {};
+        for (const item of lista) mapa[item.antroId] = item.features;
+        setFeaturesPorAntro(mapa);
+      })
+      .catch(() => setFeaturesPorAntro({}));
   }, []);
 
   useEffect(() => {
@@ -62,67 +73,70 @@ export default function Dashboard({ email, onLogout }: { email: string; onLogout
 
   return (
     <AlcanceContext.Provider value={{ antros, alcance, antroFiltro, setAntroFiltro }}>
-      <div className="app-shell">
-        <header className="mobile-topbar">
-          <span className="brand">Aforo</span>
-          <ScopeChip />
-          <button className="mobile-topbar__gear" onClick={() => setMostrarConfiguracion(true)} aria-label="Configuración">
-            ⚙
-          </button>
-        </header>
+      <FeatureFlagsContext.Provider value={{ featuresPorAntro }}>
+        <div className="app-shell">
+          <header className="mobile-topbar">
+            <span className="brand">Aforo</span>
+            <ScopeChip />
+            <button className="mobile-topbar__gear" onClick={() => setMostrarConfiguracion(true)} aria-label="Configuración">
+              ⚙
+            </button>
+          </header>
 
-        <aside className="sidebar">
-          <div className="brand">Aforo</div>
-          <ScopeChip />
-          <nav>
-            {seccionesVisibles.map((s) => (
-              <button
-                key={s.id}
-                className={s.id === seccion && !mostrarConfiguracion ? 'active' : ''}
-                onClick={() => {
-                  setSeccion(s.id);
-                  setMostrarConfiguracion(false);
-                }}
-              >
-                {s.label}
-                {s.id === 'requisiciones' && !!pendientes && <span className="nav-badge">{pendientes}</span>}
-              </button>
-            ))}
-          </nav>
-          <div className="user-box">
-            <span>{email}</span>
-            <div className="user-box-actions">
-              <button className="btn-icon" onClick={() => setMostrarConfiguracion(true)} aria-label="Configuración">
-                ⚙
-              </button>
-              <button className="btn btn-secondary" onClick={onLogout}>
-                Cerrar sesión
-              </button>
+          <aside className="sidebar">
+            <div className="brand">Aforo</div>
+            <ScopeChip />
+            <nav>
+              {seccionesVisibles.map((s) => (
+                <button
+                  key={s.id}
+                  className={s.id === seccion && !mostrarConfiguracion ? 'active' : ''}
+                  onClick={() => {
+                    setSeccion(s.id);
+                    setMostrarConfiguracion(false);
+                  }}
+                >
+                  {s.label}
+                  {s.id === 'requisiciones' && !!pendientes && <span className="nav-badge">{pendientes}</span>}
+                </button>
+              ))}
+            </nav>
+            <div className="user-box">
+              <span>{email}</span>
+              <div className="user-box-actions">
+                <button className="btn-icon" onClick={() => setMostrarConfiguracion(true)} aria-label="Configuración">
+                  ⚙
+                </button>
+                <button className="btn btn-secondary" onClick={onLogout}>
+                  Cerrar sesión
+                </button>
+              </div>
             </div>
-          </div>
-        </aside>
+          </aside>
 
-        <main className="main">
-          {secciones === null && <p className="hint">Cargando…</p>}
-          {secciones?.length === 0 && !mostrarConfiguracion && <p className="hint">Tu usuario no tiene acceso a ninguna sección todavía.</p>}
-          {mostrarConfiguracion ? (
-            <ConfiguracionPanel email={email} onLogout={onLogout} />
-          ) : (
-            <>
-              {seccion === 'metricas' && <MetricasPanel />}
-              {seccion === 'reservas' && <ReservasPanel />}
-              {seccion === 'requisiciones' && <RequisicionesPanel />}
-              {seccion === 'personal' && <PersonalPanel />}
-              {seccion === 'nomina' && <NominaPanel />}
-              {seccion === 'proveedores' && <ProveedoresPanel />}
-              {seccion === 'usuarios' && <UsuariosPanel />}
-              {seccion === 'cuentas' && <CuentasPanel />}
-              {seccion === 'clientes' && <ClientesPanel />}
-              {seccion === 'auditoria' && <AuditoriaPanel />}
-            </>
-          )}
-        </main>
-      </div>
+          <main className="main">
+            {secciones === null && <p className="hint">Cargando…</p>}
+            {secciones?.length === 0 && !mostrarConfiguracion && <p className="hint">Tu usuario no tiene acceso a ninguna sección todavía.</p>}
+            {mostrarConfiguracion ? (
+              <ConfiguracionPanel email={email} onLogout={onLogout} />
+            ) : (
+              <>
+                {seccion === 'metricas' && <MetricasPanel />}
+                {seccion === 'reservas' && <ReservasPanel />}
+                {seccion === 'requisiciones' && <RequisicionesPanel />}
+                {seccion === 'personal' && <PersonalPanel />}
+                {seccion === 'nomina' && <NominaPanel />}
+                {seccion === 'proveedores' && <ProveedoresPanel />}
+                {seccion === 'usuarios' && <UsuariosPanel />}
+                {seccion === 'cuentas' && <CuentasPanel />}
+                {seccion === 'clientes' && <ClientesPanel />}
+                {seccion === 'flags' && <FeatureFlagsPanel />}
+                {seccion === 'auditoria' && <AuditoriaPanel />}
+              </>
+            )}
+          </main>
+        </div>
+      </FeatureFlagsContext.Provider>
     </AlcanceContext.Provider>
   );
 }

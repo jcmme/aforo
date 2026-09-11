@@ -8,6 +8,7 @@ import { ModuleRegistryModule } from './core/module-registry/module-registry.mod
 import { ExportModule } from './core/export/export.module';
 import { AuditoriaModule } from './core/auditoria/auditoria.module';
 import { OnboardingModule } from './core/onboarding/onboarding.module';
+import { FeatureFlagsModule } from './core/feature-flags/feature-flags.module';
 import { AuthModule } from './core/auth/auth.module';
 import { ReservasModule } from './modules/reservas/reservas.module';
 import { RequisicionesModule } from './modules/requisiciones/requisiciones.module';
@@ -34,6 +35,7 @@ import { ProveedoresModule } from './modules/proveedores/proveedores.module';
     RbacModule,
     AuditoriaModule,
     OnboardingModule,
+    FeatureFlagsModule,
     AuthModule,
     ExportModule,
     ReservasModule,

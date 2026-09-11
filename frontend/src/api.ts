@@ -59,8 +59,8 @@ export async function apiRequest<T>(path: string, options: RequestInit = {}): Pr
   });
 
   if (!res.ok) await manejarError(res);
-  if (res.status === 204) return undefined as T;
-  return res.json();
+  const texto = await res.text();
+  return texto ? JSON.parse(texto) : (undefined as T);
 }
 
 export interface Antro {
@@ -70,6 +70,61 @@ export interface Antro {
 
 export function listarAntros(): Promise<Antro[]> {
   return apiRequest<Antro[]>('/antros');
+}
+
+export interface FeatureCatalogo {
+  id: string;
+  codigo: string;
+  nombre: string;
+  descripcion: string | null;
+}
+
+export interface AntroAdmin {
+  id: string;
+  nombre: string;
+  corporativoId: string;
+  corporativoNombre: string;
+}
+
+export interface CorporativoAdmin {
+  id: string;
+  nombreComercial: string;
+}
+
+export interface FeaturesActivasPorAntro {
+  antroId: string;
+  features: string[];
+}
+
+export function obtenerFeaturesActivas(): Promise<FeaturesActivasPorAntro[]> {
+  return apiRequest<FeaturesActivasPorAntro[]>('/feature-flags/activas');
+}
+
+export function listarCatalogoFeatures(): Promise<FeatureCatalogo[]> {
+  return apiRequest<FeatureCatalogo[]>('/feature-flags/catalogo');
+}
+
+export function listarCorporativosAdmin(): Promise<CorporativoAdmin[]> {
+  return apiRequest<CorporativoAdmin[]>('/feature-flags/admin/corporativos');
+}
+
+export function listarAntrosAdmin(): Promise<AntroAdmin[]> {
+  return apiRequest<AntroAdmin[]>('/feature-flags/admin/antros');
+}
+
+export function obtenerEstadoFeaturesAntro(antroId: string): Promise<Record<string, boolean>> {
+  return apiRequest<Record<string, boolean>>(`/feature-flags/admin/estado/${antroId}`);
+}
+
+export function actualizarFeatureAntro(antroId: string, featureCodigo: string, activo: boolean): Promise<void> {
+  return apiRequest('/feature-flags/admin/antro', { method: 'PATCH', body: JSON.stringify({ antroId, featureCodigo, activo }) });
+}
+
+export function actualizarFeatureCorporativo(corporativoId: string, featureCodigo: string, activo: boolean): Promise<void> {
+  return apiRequest('/feature-flags/admin/corporativo', {
+    method: 'PATCH',
+    body: JSON.stringify({ corporativoId, featureCodigo, activo }),
+  });
 }
 
 export async function login(email: string, password: string): Promise<string> {

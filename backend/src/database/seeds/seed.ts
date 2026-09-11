@@ -14,6 +14,7 @@ import { Corporativo, CorporativoEstado } from '../../core/identidad/entities/co
 import { Antro, AntroEstadoOperativo } from '../../core/identidad/entities/antro.entity';
 import { Usuario, UsuarioEstado } from '../../core/identidad/entities/usuario.entity';
 import { UsuarioAntro, AsignacionEstado } from '../../core/rbac/entities/usuario-antro.entity';
+import { Feature } from '../../core/feature-flags/entities/feature.entity';
 
 const PASSWORD_DEMO = 'cambia-esta-password';
 
@@ -31,6 +32,7 @@ async function seed(): Promise<void> {
   const antroRepo = dataSource.getRepository(Antro);
   const usuarioRepo = dataSource.getRepository(Usuario);
   const usuarioAntroRepo = dataSource.getRepository(UsuarioAntro);
+  const featureRepo = dataSource.getRepository(Feature);
 
   console.log('Sembrando roles base...');
   const rolesBase: { nombre: string; alcanceTipo: RolAlcanceTipo }[] = [
@@ -183,6 +185,21 @@ async function seed(): Promise<void> {
       );
     }
     console.log(`  ${datos.email} / ${PASSWORD_DEMO}  (${datos.rol})`);
+  }
+
+  console.log('Sembrando catálogo de features de ejemplo...');
+  const featuresCatalogo: { codigo: string; nombre: string; descripcion: string }[] = [
+    {
+      codigo: 'demo_widget',
+      nombre: 'Widget de ejemplo',
+      descripcion: 'Fila de prueba para verificar el sistema de feature flags — bórrala cuando actives features reales.',
+    },
+  ];
+  for (const datos of featuresCatalogo) {
+    const existente = await featureRepo.findOne({ where: { codigo: datos.codigo } });
+    if (!existente) {
+      await featureRepo.save(featureRepo.create(datos));
+    }
   }
 
   console.log('Listo. Datos de desarrollo sembrados.');

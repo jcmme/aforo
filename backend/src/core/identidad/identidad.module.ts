@@ -16,7 +16,7 @@ import { crearDefinicionModuloIdentidad } from './identidad.module-definition';
   imports: [TypeOrmModule.forFeature([Corporativo, Antro, Usuario, UsuarioAntro, Rol])],
   controllers: [AntrosController, UsuariosController],
   providers: [AntrosService, UsuariosService],
-  exports: [TypeOrmModule],
+  exports: [TypeOrmModule, AntrosService],
 })
 export class IdentidadModule implements OnModuleInit {
   constructor(private readonly moduleRegistry: ModuleRegistryService) {}

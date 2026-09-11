@@ -24,6 +24,7 @@ const SECCION_POR_PERMISO: Record<string, string> = {
   cuentas: 'cuentas.ver_todas',
   clientes: 'onboarding.crear_cliente',
   auditoria: 'auditoria.ver',
+  flags: 'feature_flags.gestionar_todas',
 };
 
 @Injectable()
