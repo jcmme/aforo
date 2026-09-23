@@ -22,13 +22,22 @@ import { ProveedoresModule } from './modules/proveedores/proveedores.module';
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: (config: ConfigService) => ({
-        type: 'postgres' as const,
-        url: config.get<string>('DATABASE_URL'),
-        entities: [join(__dirname, '**', '*.entity.{ts,js}')],
-        synchronize: false,
-        migrationsRun: false,
-      }),
+      useFactory: (config: ConfigService) => {
+        // Supabase exige SSL y, en serverless, hay que mantener el pool
+        // chico (cada invocación puede ser un proceso nuevo) — se activan
+        // los dos juntos con DATABASE_SSL=true. En local (sin esa var) se
+        // queda igual que siempre.
+        const ssl = config.get<string>('DATABASE_SSL') === 'true';
+        return {
+          type: 'postgres' as const,
+          url: config.get<string>('DATABASE_URL'),
+          entities: [join(__dirname, '**', '*.entity.{ts,js}')],
+          synchronize: false,
+          migrationsRun: false,
+          ssl: ssl ? { rejectUnauthorized: false } : false,
+          extra: ssl ? { max: 1 } : undefined,
+        };
+      },
     }),
     ModuleRegistryModule,
     IdentidadModule,
