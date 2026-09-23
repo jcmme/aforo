@@ -1,55 +1,23 @@
-# Publicar Aforo en Supabase + Vercel
+# Publicar Aforo en Neon + Vercel
 
 Guía paso a paso para tener un link real. Son ~30-40 minutos, casi todo dando
 clic en interfaces web.
 
 ## 0. Qué vas a crear
 
-Un proyecto en **Supabase** (la base de datos Postgres) y **dos** proyectos
-en **Vercel** (el backend/API y el frontend), apuntando ambos al mismo repo
-`jcmme/aforo` — cada uno con su propio "Root Directory" (`backend` y
-`frontend`), igual que antes eran dos servicios separados en Railway.
+**Dos** proyectos en **Vercel** (el backend/API y el frontend), apuntando
+ambos al mismo repo `jcmme/aforo` — cada uno con su propio "Root Directory"
+(`backend` y `frontend`), igual que antes eran dos servicios separados en
+Railway. La base de datos (**Neon**, Postgres) se crea *desde dentro* del
+proyecto del backend en Vercel — no hace falta entrar a neon.com aparte,
+Vercel la aprovisiona y conecta sola.
 
 Diferencia de fondo con Railway: Vercel no corre un proceso que queda
 prendido — corre **funciones serverless** que se despiertan por request.
 Por eso las migraciones y el seed ya no corren solos en cada deploy: se
-corren a mano, una vez, desde tu máquina, apuntando a Supabase (paso 2).
+corren a mano, una vez, desde tu máquina (paso 3).
 
-## 1. Supabase — base de datos
-
-1. Cuenta en [supabase.com](https://supabase.com), **New Project** (elige
-   una región cercana, ej. `us-east-1`). Te va a pedir una contraseña para
-   Postgres — guárdala, la necesitas para armar las URLs de conexión.
-2. Ve a **Project Settings → Database → Connection string** y copia dos
-   variantes (las vas a necesitar en pasos distintos):
-   - **Direct connection** (puerto **5432**) — la usas tú, desde tu
-     computadora, solo para correr migraciones y el seed.
-   - **Transaction pooler** (puerto **6543**, a veces etiquetada
-     "Supavisor") — esta es la que usa el backend ya desplegado en Vercel.
-
-   Ambas se ven parecido a
-   `postgresql://postgres.xxxxx:TU-PASSWORD@aws-0-region.pooler.supabase.com:5432/postgres`
-   (cambia el puerto según cuál copiaste). Sustituye `TU-PASSWORD` por la
-   contraseña del paso 1.
-
-## 2. Correr migraciones y el seed (una sola vez, desde tu máquina)
-
-1. En `backend/`, crea un archivo `.env` (es local, no se sube a git —
-   bórralo cuando termines si quieres) con:
-   ```
-   DATABASE_URL=<la conexión DIRECTA de Supabase, puerto 5432>
-   DATABASE_SSL=true
-   ```
-2. `cd backend && npm run migration:run` — crea todas las tablas.
-3. `npm run seed` — crea los roles y el Super Admin
-   (`jcmme18@gmail.com` / `cambia-esta-password`).
-4. Guarda ese `.env` en algún lugar seguro (o bórralo) — lo vuelves a
-   necesitar cada vez que agregues una migración nueva en el futuro:
-   repite este paso (solo `migration:run`, no hace falta repetir el seed)
-   antes de que el código que depende de esa tabla/columna llegue a
-   producción.
-
-## 3. Vercel — backend
+## 1. Vercel — backend
 
 1. Cuenta en [vercel.com](https://vercel.com) con tu GitHub.
 2. **Add New → Project** → importa `jcmme/aforo`.
@@ -57,14 +25,58 @@ corren a mano, una vez, desde tu máquina, apuntando a Supabase (paso 2).
    respetar el `vercel.json` que ya está en `backend/` para el build y las
    rutas).
 4. **Environment Variables**, antes de desplegar:
-   - `DATABASE_URL` → la conexión del **pooler** de Supabase (puerto 6543)
-   - `DATABASE_SSL` → `true`
    - `JWT_SECRET` → un valor largo y aleatorio (corre `openssl rand -hex 32`
      en tu terminal y pega el resultado)
    - `JWT_EXPIRES_IN` → `8h`
    - `CORS_ORIGIN` → déjala vacía por ahora, la completas en el paso 5
-5. **Deploy**. Cuando termine, copia la URL que te da (ej.
-   `https://aforo-backend.vercel.app`) — la necesitas en el paso 4.
+   - (`DATABASE_URL` y `DATABASE_SSL` los agregas en el paso 2, todavía no)
+5. **Deploy**. Va a fallar al conectar a la base (todavía no existe) —
+   normal, lo arreglamos ahora. Copia la URL que te dio (ej.
+   `https://aforo-backend.vercel.app`), la necesitas en el paso 4.
+
+## 2. Crear la base de datos (Neon, desde Vercel)
+
+1. Dentro del proyecto del backend en Vercel → pestaña **Storage**.
+2. **Create Database** → **Neon** (aparece como "Neon Postgres" en el
+   marketplace de integraciones) → sigue el asistente, elige la región más
+   cercana.
+3. Al conectarla, Vercel agrega solo las variables de entorno con la
+   conexión a tu proyecto del backend — no las escribes tú. Ve a
+   **Settings → Environment Variables** y busca cuáles quedaron: debería
+   haber una que apunte a Postgres (normalmente `DATABASE_URL`) y otra sin
+   pooling para trabajo administrativo (algo como `DATABASE_URL_UNPOOLED`
+   o `..._NO_SSL` / `..._UNPOOLED` — el nombre exacto lo confirmas ahí).
+   Si ninguna se llama literalmente `DATABASE_URL`, renombra o duplica la
+   que sí es Postgres a ese nombre — el código la busca así.
+4. Agrega manualmente (Neon ya exige SSL en la URL, pero esta variable
+   también controla el tamaño del pool de conexiones, así que ponla igual):
+   - `DATABASE_SSL` → `true`
+5. **Redeploy** el backend (Deployments → los tres puntos del último →
+   Redeploy) para que tome las variables nuevas.
+
+## 3. Correr migraciones y el seed (una sola vez, desde tu máquina)
+
+La forma más segura de tener exactamente las mismas variables que usa
+Vercel (sin copiarlas a mano y arriesgarte a un typo) es traerlas con su
+propio CLI:
+
+1. `cd backend && npx vercel login` (una vez).
+2. `npx vercel link` → selecciona el proyecto del backend que ya creaste.
+3. `npx vercel env pull .env.vercel` → descarga un archivo con las
+   variables reales de Vercel (incluida la conexión de Neon).
+4. Abre `.env.vercel`, copia el valor de la variable de conexión **sin
+   pooling** (la del paso 2.3, ej. `DATABASE_URL_UNPOOLED`) y pégalo como
+   `DATABASE_URL` en un `backend/.env` nuevo — junto con `DATABASE_SSL=true`.
+   Las migraciones (DDL) necesitan la conexión directa, no la que usa
+   pooler.
+5. `npm run migration:run` — crea todas las tablas.
+6. `npm run seed` — crea los roles y el Super Admin
+   (`jcmme18@gmail.com` / `cambia-esta-password`).
+7. Borra `.env.vercel` y `backend/.env` cuando termines (ya están en
+   `.gitignore`, pero mejor no dejarlos sueltos). Repites este paso (solo
+   `migration:run`, sin el seed) cada vez que agregues una migración nueva
+   en el futuro, antes de que el código que depende de esa tabla/columna
+   llegue a producción.
 
 ## 4. Vercel — frontend
 
@@ -72,7 +84,7 @@ corren a mano, una vez, desde tu máquina, apuntando a Supabase (paso 2).
 2. **Root Directory** → `frontend`. Vercel debería detectar "Vite" solo
    como framework preset.
 3. **Environment Variables** → `VITE_API_URL` → la URL del backend del
-   paso 3.
+   paso 1.
 4. **Deploy**. Esta URL es tu link final, la que vas a compartir.
 
 ## 5. Cerrar el círculo: restringir CORS
@@ -96,21 +108,19 @@ nadie más.
 ## Si algo no arranca
 
 - **Backend responde 500 o timeout en cada request**: revisa **Logs** del
-  proyecto backend en Vercel — casi siempre es `DATABASE_URL` mal puesta
-  (recuerda: la del **pooler**, puerto 6543, no la directa) o
-  `DATABASE_SSL` sin poner en `true`.
-- **"too many connections" / "remaining connection slots are reserved"**:
-  confirma que `DATABASE_SSL=true` esté puesta — sin ella, el pool no se
-  achica a `1` por invocación y agota las conexiones de Supabase rápido.
+  proyecto backend en Vercel — casi siempre es que la variable de conexión
+  de Neon no se llama exactamente `DATABASE_URL`, o falta `DATABASE_SSL=true`.
+- **"too many connections"**: confirma que `DATABASE_SSL=true` esté
+  puesta — sin ella, el pool no se achica a `1` por invocación.
 - **Frontend carga pero no trae datos / CORS error en la consola del
   navegador**: `CORS_ORIGIN` en el backend no coincide exactamente con la
   URL del frontend (revisa que no le falte o sobre una `/` al final), o
   todavía no hiciste el redeploy del paso 5.
-- **Login funciona pero todo da 403**: seguro el seed (paso 2) no corrió —
-  vuelve a correrlo apuntando a la conexión directa de Supabase.
+- **Login funciona pero todo da 403**: seguro el seed (paso 3) no corrió —
+  vuelve a correrlo.
 - **Agregaste una migración nueva y el deploy "no la ve"**: es esperado —
   a diferencia de Railway, aquí las migraciones no se corren solas.
-  Repite el paso 2 (solo `migration:run`) contra Supabase.
+  Repite el paso 3 (solo `migration:run`).
 
 ## Después
 
