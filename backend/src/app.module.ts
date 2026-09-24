@@ -15,6 +15,7 @@ import { RequisicionesModule } from './modules/requisiciones/requisiciones.modul
 import { PersonalModule } from './modules/personal/personal.module';
 import { MetricasModule } from './modules/metricas/metricas.module';
 import { ProveedoresModule } from './modules/proveedores/proveedores.module';
+import { limpiarUrlConexion } from './database/database-url.util';
 
 @Module({
   imports: [
@@ -30,7 +31,7 @@ import { ProveedoresModule } from './modules/proveedores/proveedores.module';
         const ssl = config.get<string>('DATABASE_SSL') === 'true';
         return {
           type: 'postgres' as const,
-          url: config.get<string>('DATABASE_URL'),
+          url: limpiarUrlConexion(config.get<string>('DATABASE_URL')),
           entities: [join(__dirname, '**', '*.entity.{ts,js}')],
           synchronize: false,
           migrationsRun: false,
