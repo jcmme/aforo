@@ -5,3 +5,5 @@ storage/
 *.log
 *.tsbuildinfo
 .vercel
+.env*
+!.env.example
