@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { apiRequest, listarAntros, obtenerFeaturesActivas, Antro } from '../api';
+import { apiRequest, listarAntros, obtenerFeaturesActivas, Antro, ApiError } from '../api';
 import { AlcanceContext, Alcance } from '../scope-context';
 import { FeatureFlagsContext } from '../feature-flags-context';
 import ScopeChip from '../components/ScopeChip';
@@ -44,12 +44,20 @@ export default function Dashboard({ email, onLogout }: { email: string; onLogout
   const [pendientes, setPendientes] = useState<number | null>(null);
   const [mostrarConfiguracion, setMostrarConfiguracion] = useState(false);
   const [featuresPorAntro, setFeaturesPorAntro] = useState<Record<string, string[]>>({});
+  const [errorCarga, setErrorCarga] = useState<string | null>(null);
 
   useEffect(() => {
-    apiRequest<{ email: string; secciones: SeccionId[] }>('/auth/me').then((perfil) => {
-      setSecciones(perfil.secciones);
-      setSeccion(perfil.secciones[0] ?? null);
-    });
+    apiRequest<{ email: string; secciones: SeccionId[] }>('/auth/me')
+      .then((perfil) => {
+        setSecciones(perfil.secciones);
+        setSeccion(perfil.secciones[0] ?? null);
+      })
+      .catch((err) => {
+        // Token vencido (dura JWT_EXPIRES_IN) o inválido: de vuelta al login
+        // en vez de quedarse en "Cargando…" para siempre.
+        if (err instanceof ApiError && err.status === 401) onLogout();
+        else setErrorCarga(err instanceof Error ? err.message : 'Error desconocido');
+      });
     listarAntros().then(setAntros);
     obtenerFeaturesActivas()
       .then((lista) => {
@@ -115,7 +123,8 @@ export default function Dashboard({ email, onLogout }: { email: string; onLogout
           </aside>
 
           <main className="main">
-            {secciones === null && <p className="hint">Cargando…</p>}
+            {secciones === null && !errorCarga && <p className="hint">Cargando…</p>}
+            {errorCarga && <p className="hint">No se pudo cargar tu perfil: {errorCarga}. Recarga la página.</p>}
             {secciones?.length === 0 && !mostrarConfiguracion && <p className="hint">Tu usuario no tiene acceso a ninguna sección todavía.</p>}
             {mostrarConfiguracion ? (
               <ConfiguracionPanel email={email} onLogout={onLogout} />
