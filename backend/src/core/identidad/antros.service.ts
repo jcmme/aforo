@@ -19,9 +19,19 @@ export class AntrosService {
    * No pasa por el motor de permisos (no es una acción de negocio, es
    * "en qué antros opero"), pero sí respeta la misma cascada: un rol de
    * alcance corporativo ve todos los antros del corporativo, uno de
-   * alcance antro solo ve los suyos.
+   * alcance antro solo ve los suyos. El Súper Admin opera antros solo
+   * cuando "entró como" un cliente; en su vista propia no tiene ninguno.
    */
   async listarAccesibles(usuario: UsuarioAutenticado): Promise<Antro[]> {
+    if (usuario.esSuperAdmin) {
+      const verComo = usuario.viendoComo;
+      if (!verComo) return [];
+      return this.antroRepo.find({
+        where: verComo.antroId ? { id: verComo.antroId } : { corporativoId: verComo.corporativoId },
+        order: { nombre: 'ASC' },
+      });
+    }
+
     const asignaciones = await this.usuarioAntroRepo.find({
       where: { usuarioId: usuario.id, estado: AsignacionEstado.ACTIVO },
       relations: ['rol', 'antro'],

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { apiRequest, listarAntros, obtenerFeaturesActivas, Antro, ApiError } from '../api';
+import { apiRequest, listarAntros, obtenerFeaturesActivas, Antro, ApiError, VerComo, entrarComo, salirDeVerComo, hayVerComo } from '../api';
 import { AlcanceContext, Alcance } from '../scope-context';
 import { FeatureFlagsContext } from '../feature-flags-context';
 import ScopeChip from '../components/ScopeChip';
@@ -15,6 +15,7 @@ import ClientesPanel from './panels/ClientesPanel';
 import FeatureFlagsPanel from './panels/FeatureFlagsPanel';
 import AuditoriaPanel from './panels/AuditoriaPanel';
 import ConfiguracionPanel from './panels/ConfiguracionPanel';
+import EntrarPanel from './panels/EntrarPanel';
 
 const SECCIONES = [
   { id: 'metricas', label: 'Métricas' },
@@ -28,15 +29,32 @@ const SECCIONES = [
   { id: 'clientes', label: 'Clientes' },
   { id: 'flags', label: 'Features' },
   { id: 'auditoria', label: 'Auditoría' },
+  { id: 'entrar', label: 'Entrar a un cliente' },
 ] as const;
 
 type SeccionId = (typeof SECCIONES)[number]['id'];
+
+interface Perfil {
+  email: string;
+  secciones: SeccionId[];
+  esSuperAdmin: boolean;
+  viendoComo: { corporativoNombre: string; antroNombre: string | null } | null;
+}
 
 interface Requisicion {
   estado: string;
 }
 
-export default function Dashboard({ email, onLogout }: { email: string; onLogout: () => void }) {
+export default function Dashboard({
+  email,
+  onLogout,
+  onCambiarVista,
+}: {
+  email: string;
+  onLogout: () => void;
+  /** Remonta el Dashboard para que todo se vuelva a pedir con la vista nueva. */
+  onCambiarVista: () => void;
+}) {
   const [secciones, setSecciones] = useState<SeccionId[] | null>(null);
   const [seccion, setSeccion] = useState<SeccionId | null>(null);
   const [antros, setAntros] = useState<Antro[]>([]);
@@ -45,17 +63,22 @@ export default function Dashboard({ email, onLogout }: { email: string; onLogout
   const [mostrarConfiguracion, setMostrarConfiguracion] = useState(false);
   const [featuresPorAntro, setFeaturesPorAntro] = useState<Record<string, string[]>>({});
   const [errorCarga, setErrorCarga] = useState<string | null>(null);
+  const [viendoComo, setViendoComo] = useState<Perfil['viendoComo']>(null);
 
   useEffect(() => {
-    apiRequest<{ email: string; secciones: SeccionId[] }>('/auth/me')
+    apiRequest<Perfil>('/auth/me')
       .then((perfil) => {
         setSecciones(perfil.secciones);
         setSeccion(perfil.secciones[0] ?? null);
+        setViendoComo(perfil.viendoComo);
       })
       .catch((err) => {
         // Token vencido (dura JWT_EXPIRES_IN) o inválido: de vuelta al login
         // en vez de quedarse en "Cargando…" para siempre.
         if (err instanceof ApiError && err.status === 401) onLogout();
+        // El cliente al que se había entrado ya no existe (o ya no eres
+        // Súper Admin): se sale de esa vista en vez de quedar atorado.
+        else if (hayVerComo()) salir();
         else setErrorCarga(err instanceof Error ? err.message : 'Error desconocido');
       });
     listarAntros().then(setAntros);
@@ -75,6 +98,16 @@ export default function Dashboard({ email, onLogout }: { email: string; onLogout
         .catch(() => setPendientes(null));
     }
   }, [secciones]);
+
+  function entrar(verComo: VerComo) {
+    entrarComo(verComo);
+    onCambiarVista();
+  }
+
+  function salir() {
+    salirDeVerComo();
+    onCambiarVista();
+  }
 
   const alcance: Alcance = antros.length > 1 ? 'corporativo' : antros.length === 1 ? 'antro' : 'rp';
   const seccionesVisibles = SECCIONES.filter((s) => secciones?.includes(s.id));
@@ -123,6 +156,17 @@ export default function Dashboard({ email, onLogout }: { email: string; onLogout
           </aside>
 
           <main className="main">
+            {viendoComo && (
+              <div className="ver-como-banner">
+                <span>
+                  Estás viendo Aforo como <strong>{viendoComo.antroNombre ?? viendoComo.corporativoNombre}</strong>
+                  {viendoComo.antroNombre && <> · {viendoComo.corporativoNombre}</>}
+                </span>
+                <button className="btn btn-secondary" onClick={salir}>
+                  Salir
+                </button>
+              </div>
+            )}
             {secciones === null && !errorCarga && <p className="hint">Cargando…</p>}
             {errorCarga && <p className="hint">No se pudo cargar tu perfil: {errorCarga}. Recarga la página.</p>}
             {secciones?.length === 0 && !mostrarConfiguracion && <p className="hint">Tu usuario no tiene acceso a ninguna sección todavía.</p>}
@@ -141,6 +185,7 @@ export default function Dashboard({ email, onLogout }: { email: string; onLogout
                 {seccion === 'clientes' && <ClientesPanel />}
                 {seccion === 'flags' && <FeatureFlagsPanel />}
                 {seccion === 'auditoria' && <AuditoriaPanel />}
+                {seccion === 'entrar' && <EntrarPanel onEntrar={entrar} />}
               </>
             )}
           </main>

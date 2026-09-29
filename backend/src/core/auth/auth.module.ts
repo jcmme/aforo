@@ -5,6 +5,8 @@ import { PassportModule } from '@nestjs/passport';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { APP_GUARD } from '@nestjs/core';
 import { Usuario } from '../identidad/entities/usuario.entity';
+import { Corporativo } from '../identidad/entities/corporativo.entity';
+import { Antro } from '../identidad/entities/antro.entity';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { JwtStrategy } from './jwt.strategy';
@@ -12,7 +14,7 @@ import { JwtAuthGuard } from './jwt-auth.guard';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Usuario]),
+    TypeOrmModule.forFeature([Usuario, Corporativo, Antro]),
     PassportModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],

@@ -25,6 +25,49 @@ export function guardarSesion(token: string, email: string): void {
 export function cerrarSesion(): void {
   localStorage.removeItem(TOKEN_KEY);
   localStorage.removeItem(USER_KEY);
+  salirDeVerComo();
+}
+
+/**
+ * "Entrar como" un cliente (solo Súper Admin). Vive en sessionStorage: es por
+ * pestaña y se olvida al cerrarla, para no quedarse atorado viendo como un
+ * cliente sin darse cuenta. El backend lo vuelve a validar en cada request.
+ */
+const VER_COMO_KEY = 'aforo_ver_como';
+
+export interface VerComo {
+  tipo: 'corporativo' | 'antro';
+  id: string;
+}
+
+function leerVerComo(): VerComo | null {
+  try {
+    const raw = sessionStorage.getItem(VER_COMO_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
+
+export function entrarComo(verComo: VerComo): void {
+  sessionStorage.setItem(VER_COMO_KEY, JSON.stringify(verComo));
+}
+
+export function salirDeVerComo(): void {
+  sessionStorage.removeItem(VER_COMO_KEY);
+}
+
+export function hayVerComo(): boolean {
+  return leerVerComo() !== null;
+}
+
+function headersDeSesion(): Record<string, string> {
+  const token = getToken();
+  const verComo = leerVerComo();
+  return {
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    ...(verComo ? { [verComo.tipo === 'antro' ? 'X-Ver-Como-Antro' : 'X-Ver-Como-Corporativo']: verComo.id } : {}),
+  };
 }
 
 export class ApiError extends Error {
@@ -48,12 +91,11 @@ async function manejarError(res: Response): Promise<never> {
 }
 
 export async function apiRequest<T>(path: string, options: RequestInit = {}): Promise<T> {
-  const token = getToken();
   const res = await fetch(`${API_URL}${path}`, {
     ...options,
     headers: {
       'Content-Type': 'application/json',
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      ...headersDeSesion(),
       ...options.headers,
     },
   });
@@ -143,10 +185,9 @@ export function cambiarPassword(passwordActual: string, passwordNuevo: string): 
 }
 
 export async function exportarReporte(plantillaCodigo: string, filtros: Record<string, unknown> = {}): Promise<void> {
-  const token = getToken();
   const res = await fetch(`${API_URL}/reportes/exportar`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+    headers: { 'Content-Type': 'application/json', ...headersDeSesion() },
     body: JSON.stringify({ plantillaCodigo, filtros }),
   });
 

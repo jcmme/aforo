@@ -20,7 +20,8 @@ export class AuthController {
   @Get('me')
   async me(@CurrentUser() usuario: UsuarioAutenticado) {
     const secciones = await this.authService.obtenerSecciones(usuario);
-    return { email: usuario.email, secciones };
+    const viendoComo = await this.authService.describirVerComo(usuario);
+    return { email: usuario.email, esSuperAdmin: usuario.esSuperAdmin, viendoComo, secciones };
   }
 
   @Patch('password')

@@ -4,6 +4,8 @@ import { JwtService } from '@nestjs/jwt';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { Usuario, UsuarioEstado } from '../identidad/entities/usuario.entity';
+import { Corporativo } from '../identidad/entities/corporativo.entity';
+import { Antro } from '../identidad/entities/antro.entity';
 import { JwtPayload, UsuarioAutenticado } from './jwt-payload.interface';
 import { RbacService } from '../rbac/rbac.service';
 import { AuditoriaService } from '../auditoria/auditoria.service';
@@ -25,6 +27,7 @@ const SECCION_POR_PERMISO: Record<string, string> = {
   clientes: 'onboarding.crear_cliente',
   auditoria: 'auditoria.ver',
   flags: 'feature_flags.gestionar_todas',
+  entrar: 'onboarding.crear_cliente',
 };
 
 @Injectable()
@@ -32,6 +35,10 @@ export class AuthService {
   constructor(
     @InjectRepository(Usuario)
     private readonly usuarioRepo: Repository<Usuario>,
+    @InjectRepository(Corporativo)
+    private readonly corporativoRepo: Repository<Corporativo>,
+    @InjectRepository(Antro)
+    private readonly antroRepo: Repository<Antro>,
     private readonly jwtService: JwtService,
     private readonly rbacService: RbacService,
     private readonly auditoria: AuditoriaService,
@@ -84,9 +91,17 @@ export class AuthService {
   async obtenerSecciones(usuario: UsuarioAutenticado): Promise<string[]> {
     const secciones: string[] = [];
     for (const [seccion, permiso] of Object.entries(SECCION_POR_PERMISO)) {
-      const scope = await this.rbacService.resolveDataScope(usuario.id, usuario.corporativoId, permiso);
+      const scope = await this.rbacService.resolveDataScope(usuario, permiso);
       if (scope) secciones.push(seccion);
     }
     return secciones;
+  }
+
+  /** Nombres del cliente al que entró el Súper Admin, para el aviso de "estás viendo como…". */
+  async describirVerComo(usuario: UsuarioAutenticado): Promise<{ corporativoNombre: string; antroNombre: string | null } | null> {
+    if (!usuario.viendoComo) return null;
+    const corporativo = await this.corporativoRepo.findOne({ where: { id: usuario.viendoComo.corporativoId } });
+    const antro = usuario.viendoComo.antroId ? await this.antroRepo.findOne({ where: { id: usuario.viendoComo.antroId } }) : null;
+    return { corporativoNombre: corporativo?.nombreComercial ?? '', antroNombre: antro?.nombre ?? null };
   }
 }

@@ -15,6 +15,7 @@ import { Antro, AntroEstadoOperativo } from '../../core/identidad/entities/antro
 import { Usuario, UsuarioEstado } from '../../core/identidad/entities/usuario.entity';
 import { UsuarioAntro, AsignacionEstado } from '../../core/rbac/entities/usuario-antro.entity';
 import { Feature } from '../../core/feature-flags/entities/feature.entity';
+import { AntroFeature } from '../../core/feature-flags/entities/antro-feature.entity';
 
 const PASSWORD_DEMO = 'cambia-esta-password';
 
@@ -33,6 +34,7 @@ async function seed(): Promise<void> {
   const usuarioRepo = dataSource.getRepository(Usuario);
   const usuarioAntroRepo = dataSource.getRepository(UsuarioAntro);
   const featureRepo = dataSource.getRepository(Feature);
+  const antroFeatureRepo = dataSource.getRepository(AntroFeature);
 
   console.log('Sembrando roles base...');
   const rolesBase: { nombre: string; alcanceTipo: RolAlcanceTipo }[] = [
@@ -199,6 +201,17 @@ async function seed(): Promise<void> {
     const existente = await featureRepo.findOne({ where: { codigo: datos.codigo } });
     if (!existente) {
       await featureRepo.save(featureRepo.create(datos));
+    }
+  }
+
+  // Los módulos (modulo.*) los da de alta la migración 009, pero el antro
+  // demo se crea aquí, después — sin esto arrancaría con todo apagado.
+  console.log('Prendiendo todos los módulos para el antro demo...');
+  const modulos = await featureRepo.createQueryBuilder('f').where("f.codigo LIKE 'modulo.%'").getMany();
+  for (const modulo of modulos) {
+    const existente = await antroFeatureRepo.findOne({ where: { antroId: antro.id, featureId: modulo.id } });
+    if (!existente) {
+      await antroFeatureRepo.save(antroFeatureRepo.create({ antroId: antro.id, featureId: modulo.id, activo: true }));
     }
   }
 

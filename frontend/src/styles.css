@@ -657,3 +657,18 @@ table.data-table th {
     display: flex;
   }
 }
+
+/* ---------- Súper Admin viendo como un cliente ---------- */
+.ver-como-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.5rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--accent);
+  border-radius: 10px;
+  background: var(--accent-soft);
+  color: var(--text);
+}

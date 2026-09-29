@@ -5,6 +5,7 @@ import { Permiso } from './entities/permiso.entity';
 import { RolPermiso } from './entities/rol-permiso.entity';
 import { UsuarioAntro } from './entities/usuario-antro.entity';
 import { Antro } from '../identidad/entities/antro.entity';
+import { AntroFeature } from '../feature-flags/entities/antro-feature.entity';
 import { RbacService } from './rbac.service';
 import { PermissionGuard } from './permission.guard';
 import { AntroGuardService } from './antro-guard.service';
@@ -16,7 +17,7 @@ import { AntroGuardService } from './antro-guard.service';
 // distintos no está garantizado, el de controlador-tras-global sí.
 @Global()
 @Module({
-  imports: [TypeOrmModule.forFeature([Rol, Permiso, RolPermiso, UsuarioAntro, Antro])],
+  imports: [TypeOrmModule.forFeature([Rol, Permiso, RolPermiso, UsuarioAntro, Antro, AntroFeature])],
   providers: [RbacService, PermissionGuard, AntroGuardService],
   exports: [RbacService, PermissionGuard, AntroGuardService, TypeOrmModule],
 })

@@ -26,7 +26,7 @@ export class PermissionGuard implements CanActivate {
       throw new UnauthorizedException('Se requiere iniciar sesión.');
     }
 
-    const dataScope = await this.rbacService.resolveDataScope(usuario.id, usuario.corporativoId, permisoCodigo);
+    const dataScope = await this.rbacService.resolveDataScope(usuario, permisoCodigo);
     if (!dataScope) {
       throw new ForbiddenException(`No tienes el permiso requerido: ${permisoCodigo}`);
     }

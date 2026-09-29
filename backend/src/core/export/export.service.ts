@@ -36,7 +36,7 @@ export class ExportService {
       throw new NotFoundException(`No existe la plantilla de reporte "${plantillaCodigo}".`);
     }
 
-    const dataScope = await this.rbacService.resolveDataScope(usuario.id, usuario.corporativoId, plantilla.permisoRequerido);
+    const dataScope = await this.rbacService.resolveDataScope(usuario, plantilla.permisoRequerido);
     if (!dataScope) {
       throw new ForbiddenException(`No tienes permiso para generar el reporte "${plantillaCodigo}".`);
     }
