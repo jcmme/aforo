@@ -60,7 +60,11 @@ export class RbacService {
     const esPlataforma = PERMISOS_PLATAFORMA.has(permisoCodigo);
 
     if (!usuario.viendoComo) {
-      return esPlataforma ? { ...base, alcance: PermissionScope.CORPORATIVO, antroIds: null } : null;
+      // "Cuentas" reusa el mismo endpoint (/usuarios) que la sección
+      // "Usuarios" de un cliente — se concede también sin haber "entrado
+      // como" nadie, acotado al propio corporativo del Súper Admin.
+      const concedido = esPlataforma || permisoCodigo === 'usuarios.gestionar';
+      return concedido ? { ...base, alcance: PermissionScope.CORPORATIVO, antroIds: null } : null;
     }
     if (esPlataforma) return null;
 

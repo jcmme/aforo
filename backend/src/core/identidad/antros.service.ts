@@ -24,10 +24,13 @@ export class AntrosService {
    */
   async listarAccesibles(usuario: UsuarioAutenticado): Promise<Antro[]> {
     if (usuario.esSuperAdmin) {
+      // Sin "entrar como" nadie: opera los antros de su propio corporativo
+      // (donde vive "Cuentas", para dar de alta al Gerente de Antro/RP/
+      // Hostess de la demo). "Entrando como" un cliente, los de ese cliente.
       const verComo = usuario.viendoComo;
-      if (!verComo) return [];
+      const corporativoId = verComo?.corporativoId ?? usuario.corporativoId;
       return this.antroRepo.find({
-        where: verComo.antroId ? { id: verComo.antroId } : { corporativoId: verComo.corporativoId },
+        where: verComo?.antroId ? { id: verComo.antroId } : { corporativoId },
         order: { nombre: 'ASC' },
       });
     }
