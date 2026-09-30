@@ -1,7 +1,16 @@
 import { FormEvent, useEffect, useState } from 'react';
-import { apiRequest, ApiError } from '../../api';
+import { apiRequest, ApiError, UsoCliente, listarUsoClientes } from '../../api';
 import AccessDenied from '../../components/AccessDenied';
 import Pill from '../../components/Pill';
+
+const PERIODOS = [
+  { dias: 7, etiqueta: '7 días' },
+  { dias: 30, etiqueta: '30 días' },
+  { dias: 365, etiqueta: 'Año' },
+];
+
+/** Un color por fila, para distinguir las barras de un vistazo. */
+const COLORES_BARRA = ['var(--accent)', 'var(--purple)', 'var(--good)', 'var(--indigo)', 'var(--teal)', 'var(--warn)'];
 
 interface Cliente {
   id: string;
@@ -23,6 +32,8 @@ export default function ClientesPanel() {
   const [enviando, setEnviando] = useState(false);
   const [creado, setCreado] = useState<ClienteCreado | null>(null);
   const [passwordEntregada, setPasswordEntregada] = useState('');
+  const [uso, setUso] = useState<UsoCliente[] | null>(null);
+  const [dias, setDias] = useState(30);
 
   const [form, setForm] = useState({
     nombreComercial: '',
@@ -48,6 +59,14 @@ export default function ClientesPanel() {
     cargar();
   }, []);
 
+  function cargarUso() {
+    listarUsoClientes(dias)
+      .then(setUso)
+      .catch(() => setUso(null));
+  }
+
+  useEffect(cargarUso, [dias]);
+
   async function crear(e: FormEvent) {
     e.preventDefault();
     setEnviando(true);
@@ -59,6 +78,7 @@ export default function ClientesPanel() {
       setPasswordEntregada(form.duenoPasswordInicial);
       setForm({ nombreComercial: '', antroNombre: '', antroCiudad: '', duenoNombre: '', duenoEmail: '', duenoPasswordInicial: '' });
       await cargar();
+      cargarUso();
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'No se pudo dar de alta el cliente.');
     } finally {
@@ -159,6 +179,92 @@ export default function ClientesPanel() {
           </table>
         </div>
       </div>
+
+      <WidgetUso uso={uso} dias={dias} onCambiarDias={setDias} />
     </>
+  );
+}
+
+function WidgetUso({ uso, dias, onCambiarDias }: { uso: UsoCliente[] | null; dias: number; onCambiarDias: (dias: number) => void }) {
+  const tope = Math.max(1, ...(uso ?? []).map((u) => u.acciones));
+
+  return (
+    <div className="panel-card">
+      <div className="widget-head">
+        <div>
+          <h3>Uso de los clientes</h3>
+          <p className="hint">Quién está usando Aforo de verdad, según lo que queda registrado en la auditoría.</p>
+        </div>
+        <div className="segmented">
+          {PERIODOS.map((p) => (
+            <button key={p.dias} type="button" className={p.dias === dias ? 'sel' : ''} onClick={() => onCambiarDias(p.dias)}>
+              {p.etiqueta}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {uso === null && <p className="hint">Cargando uso…</p>}
+      {uso?.length === 0 && <p className="hint">Todavía no hay clientes que medir.</p>}
+
+      {uso && uso.length > 0 && (
+        <>
+          <div className="stats">
+            <div className="stat">
+              <span className="n">{uso.filter((u) => u.acciones > 0).length}</span>
+              <span className="l">Clientes con actividad</span>
+            </div>
+            <div className="stat">
+              <span className="n">{uso.reduce((t, u) => t + u.antros, 0)}</span>
+              <span className="l">Antros dados de alta</span>
+            </div>
+            <div className="stat">
+              <span className="n">{uso.reduce((t, u) => t + u.usuariosActivos, 0)}</span>
+              <span className="l">Usuarios activos</span>
+            </div>
+            <div className="stat">
+              <span className="n">{uso.reduce((t, u) => t + u.acciones, 0).toLocaleString('es-MX')}</span>
+              <span className="l">Acciones registradas</span>
+            </div>
+          </div>
+
+          <div>
+            {uso.map((u, i) => (
+              <div className="uso-row" key={u.corporativoId}>
+                <div className="uso-nombre">
+                  <strong>{u.nombreComercial}</strong>
+                  <span>
+                    {u.antros} {u.antros === 1 ? 'antro' : 'antros'} · {u.modulosActivos}{' '}
+                    {u.modulosActivos === 1 ? 'módulo prendido' : 'módulos prendidos'}
+                  </span>
+                </div>
+                <div className="barra">
+                  <div
+                    style={{
+                      width: `${Math.max(u.acciones > 0 ? 3 : 0, Math.round((u.acciones / tope) * 100))}%`,
+                      background: COLORES_BARRA[i % COLORES_BARRA.length],
+                    }}
+                  />
+                </div>
+                <div className="uso-cifras">
+                  {u.acciones === 0 ? (
+                    <span className="sin-uso">Sin actividad</span>
+                  ) : (
+                    <>
+                      <span>
+                        <b>{u.acciones.toLocaleString('es-MX')}</b> <small>acciones</small>
+                      </span>
+                      <span>
+                        <b>{u.usuariosActivos}</b> <small>usuarios</small>
+                      </span>
+                    </>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
+    </div>
   );
 }

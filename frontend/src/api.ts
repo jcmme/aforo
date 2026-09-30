@@ -154,6 +154,20 @@ export function listarAntrosAdmin(): Promise<AntroAdmin[]> {
   return apiRequest<AntroAdmin[]>('/feature-flags/admin/antros');
 }
 
+export interface UsoCliente {
+  corporativoId: string;
+  nombreComercial: string;
+  antros: number;
+  modulosActivos: number;
+  acciones: number;
+  usuariosActivos: number;
+  ultimaActividad: string | null;
+}
+
+export function listarUsoClientes(dias: number): Promise<UsoCliente[]> {
+  return apiRequest<UsoCliente[]>(`/onboarding/uso?dias=${dias}`);
+}
+
 export function obtenerEstadoFeaturesAntro(antroId: string): Promise<Record<string, boolean>> {
   return apiRequest<Record<string, boolean>>(`/feature-flags/admin/estado/${antroId}`);
 }

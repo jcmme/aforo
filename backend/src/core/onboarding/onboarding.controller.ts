@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query, UseGuards } from '@nestjs/common';
 import { OnboardingService } from './onboarding.service';
 import { CrearClienteDto } from './dto/crear-cliente.dto';
 import { PermissionGuard } from '../rbac/permission.guard';
@@ -21,5 +21,12 @@ export class OnboardingController {
   @RequirePermission('onboarding.crear_cliente')
   listarClientes() {
     return this.onboardingService.listarClientes();
+  }
+
+  @Get('uso')
+  @RequirePermission('onboarding.crear_cliente')
+  resumirUso(@Query('dias') dias?: string) {
+    const pedidos = Number(dias);
+    return this.onboardingService.resumirUso(Number.isFinite(pedidos) && pedidos > 0 ? Math.min(pedidos, 366) : 30);
   }
 }

@@ -9,6 +9,19 @@ import { UsuarioAntro, AsignacionEstado } from '../rbac/entities/usuario-antro.e
 import { Rol } from '../rbac/entities/rol.entity';
 import { CrearClienteDto } from './dto/crear-cliente.dto';
 import { AuditoriaService } from '../auditoria/auditoria.service';
+import { Auditoria } from '../auditoria/entities/auditoria.entity';
+import { AntroFeature } from '../feature-flags/entities/antro-feature.entity';
+
+/** Una fila del widget "Uso de los clientes" (vista de plataforma). */
+export interface UsoCliente {
+  corporativoId: string;
+  nombreComercial: string;
+  antros: number;
+  modulosActivos: number;
+  acciones: number;
+  usuariosActivos: number;
+  ultimaActividad: string | null;
+}
 
 @Injectable()
 export class OnboardingService {
@@ -23,6 +36,10 @@ export class OnboardingService {
     private readonly usuarioAntroRepo: Repository<UsuarioAntro>,
     @InjectRepository(Rol)
     private readonly rolRepo: Repository<Rol>,
+    @InjectRepository(Auditoria)
+    private readonly auditoriaRepo: Repository<Auditoria>,
+    @InjectRepository(AntroFeature)
+    private readonly antroFeatureRepo: Repository<AntroFeature>,
     private readonly auditoria: AuditoriaService,
   ) {}
 
@@ -93,5 +110,63 @@ export class OnboardingService {
 
   listarClientes(): Promise<Corporativo[]> {
     return this.corporativoRepo.find({ order: { createdAt: 'DESC' } });
+  }
+
+  /**
+   * Qué tanto usa cada cliente la app, para el widget de la vista de
+   * plataforma. La actividad sale de la auditoría, que es lo único que ya
+   * registra "alguien hizo algo" de forma pareja en todos los módulos.
+   */
+  async resumirUso(dias = 30): Promise<UsoCliente[]> {
+    const desde = new Date(Date.now() - dias * 24 * 60 * 60 * 1000);
+
+    const [corporativos, antros, modulos, actividad] = await Promise.all([
+      this.corporativoRepo.find(),
+      this.antroRepo
+        .createQueryBuilder('a')
+        .select('a.corporativoId', 'corporativoId')
+        .addSelect('COUNT(*)', 'total')
+        .groupBy('a.corporativoId')
+        .getRawMany<{ corporativoId: string; total: string }>(),
+      this.antroFeatureRepo
+        .createQueryBuilder('af')
+        .innerJoin('af.antro', 'a')
+        .innerJoin('af.feature', 'f')
+        .select('a.corporativoId', 'corporativoId')
+        .addSelect('COUNT(DISTINCT f.codigo)', 'total')
+        .where('af.activo = true')
+        .andWhere("f.codigo LIKE 'modulo.%'")
+        .groupBy('a.corporativoId')
+        .getRawMany<{ corporativoId: string; total: string }>(),
+      this.auditoriaRepo
+        .createQueryBuilder('au')
+        .select('au.corporativoId', 'corporativoId')
+        .addSelect('COUNT(*)', 'acciones')
+        .addSelect('COUNT(DISTINCT au.actorUsuarioId)', 'usuarios')
+        .addSelect('MAX(au.createdAt)', 'ultima')
+        .where('au.createdAt >= :desde', { desde })
+        .groupBy('au.corporativoId')
+        .getRawMany<{ corporativoId: string; acciones: string; usuarios: string; ultima: Date }>(),
+    ]);
+
+    const porCorporativo = <T extends { corporativoId: string }>(filas: T[]) => new Map(filas.map((f) => [f.corporativoId, f]));
+    const antrosPor = porCorporativo(antros);
+    const modulosPor = porCorporativo(modulos);
+    const actividadPor = porCorporativo(actividad);
+
+    return corporativos
+      .map((c) => {
+        const uso = actividadPor.get(c.id);
+        return {
+          corporativoId: c.id,
+          nombreComercial: c.nombreComercial,
+          antros: Number(antrosPor.get(c.id)?.total ?? 0),
+          modulosActivos: Number(modulosPor.get(c.id)?.total ?? 0),
+          acciones: Number(uso?.acciones ?? 0),
+          usuariosActivos: Number(uso?.usuarios ?? 0),
+          ultimaActividad: uso?.ultima ? new Date(uso.ultima).toISOString() : null,
+        };
+      })
+      .sort((a, b) => b.acciones - a.acciones || a.nombreComercial.localeCompare(b.nombreComercial));
   }
 }
